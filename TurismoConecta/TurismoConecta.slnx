@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="TurismoConecta.api/TurismoConecta.api.csproj" />
+  <Project Path="TurismoConecta.web/TurismoConecta.web.Client/TurismoConecta.web.Client.csproj" />
+  <Project Path="TurismoConecta.web/TurismoConecta.web/TurismoConecta.web.csproj" />
+</Solution>
