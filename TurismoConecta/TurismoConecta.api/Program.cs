@@ -52,7 +52,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSignalR();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
-
+builder.Services.AddScoped<IEtiquetaService, EtiquetaService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("BlazorPolicy", policy =>
