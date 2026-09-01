@@ -1,0 +1,130 @@
+﻿@page "/login"
+@layout EmptyLayout
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@using TurismoConecta.web.Client.Models
+@inject HttpClient Http
+
+<div class="page-background">
+    <div class="premium-card">
+        
+        <!-- Mitad Izquierda: Formulario -->
+        <div class="form-section">
+            <div class="form-wrapper">
+                
+                <div class="brand">
+                    <i class="ph-fill ph-compass"></i>
+                    <span>TurismoConecta</span>
+                </div>
+
+                <div class="header-text">
+                    <h1>¡Bienvenido de Nuevo!</h1>
+                    <p>Por favor, ingresa tus datos para continuar.</p>
+                </div>
+
+                <EditForm Model="@modelo" OnValidSubmit="HacerLogin">
+                    <div class="input-group">
+                        <label>Correo Electrónico</label>
+                        <div class="input-container">
+                            <i class="ph ph-envelope-simple"></i>
+                            <InputText class="premium-input" @bind-Value="modelo.Email" placeholder="ejemplo@correo.com" />
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Contraseña</label>
+                        <div class="input-container">
+                            <i class="ph ph-lock-key"></i>
+                            <InputText type="password" class="premium-input" @bind-Value="modelo.Password" placeholder="••••••••" />
+                        </div>
+                    </div>
+
+                    <div class="forgot-password">
+                        <a href="/recuperar-password">¿Olvidaste tu contraseña?</a>
+                    </div>
+
+                    <button type="submit" class="submit-btn" disabled="@cargando">
+                        @if (cargando)
+                        {
+                            <div class="spinner"></div>
+                            <span>Verificando...</span>
+                        }
+                        else
+                        {
+                            <span>Iniciar Sesión</span>
+                            <i class="ph-bold ph-arrow-right"></i>
+                        }
+                    </button>
+                </EditForm>
+
+                @if (!string.IsNullOrEmpty(mensajeError))
+                {
+                    <div class="alert error-alert">
+                        <i class="ph-fill ph-warning-circle"></i>
+                        <span>@mensajeError</span>
+                    </div>
+                }
+
+                @if (respuesta is not null)
+                {
+                    <div class="alert success-alert">
+                        <i class="ph-fill ph-check-circle"></i>
+                        <span>¡Bienvenido, @respuesta.NombreCompleto! (Rol: @respuesta.Rol)</span>
+                    </div>
+                }
+
+                <div class="register-link">
+                    ¿No tienes cuenta? <a href="/register">Regístrate ahora</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mitad Derecha: Imagen inmersiva -->
+        <div class="image-section">
+            <img src="images/LagunaNegraLogin.jpg" alt="Laguna Negra, Boyacá" />
+            <div class="image-overlay"></div>
+            <div class="image-content">
+                <div class="glass-card">
+                    <h2>Descubre los tesoros de Boyacá</h2>
+                    <p>Tu próximo viaje comienza aquí. Conecta con la naturaleza, la cultura y la magia de nuestra tierra.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    private LoginRequest modelo = new();
+    private AuthResponse? respuesta;
+    private string mensajeError = string.Empty;
+    private bool cargando = false;
+
+    private async Task HacerLogin()
+    {
+        mensajeError = string.Empty;
+        respuesta = null;
+        cargando = true;
+
+        try
+        {
+            var resultadoHttp = await Http.PostAsJsonAsync("api/auth/login", modelo);
+
+            if (resultadoHttp.IsSuccessStatusCode)
+            {
+                respuesta = await resultadoHttp.Content.ReadFromJsonAsync<AuthResponse>();
+            }
+            else
+            {
+                mensajeError = "Correo o contraseña incorrectos.";
+            }
+        }
+        catch (Exception)
+        {
+            mensajeError = "No se pudo conectar con el servidor.";
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+}
