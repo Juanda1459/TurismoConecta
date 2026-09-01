@@ -3,6 +3,13 @@ using TurismoConecta.web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddScoped(sp => new HttpClient
+{
+    BaseAddress = new Uri("https://localhost:7078") // Cambia esto según la URL de tu API
+
+});
+
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();

@@ -11,8 +11,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -52,6 +55,9 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSignalR();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+
+
 builder.Services.AddScoped<IEtiquetaService, EtiquetaService>();
 builder.Services.AddCors(options =>
 {
@@ -61,7 +67,8 @@ builder.Services.AddCors(options =>
             .WithOrigins(
                 "https://localhost:7001",
                 "https://localhost:5001",
-                "https://turismoconecta.azurewebsites.net"
+                "https://turismoconecta.azurewebsites.net",
+                "https://localhost:7248"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
@@ -73,6 +80,13 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
     app.MapOpenApi();
+app.MapScalarApiReference(); // esto nos permite hacer pruebas desde la interfaz de scalar -- tener instalado el Nuget
+                             // scalar.AspNetCore; 
+
+
+               
+
+
 
 app.UseHttpsRedirection();
 app.UseCors("BlazorPolicy");
