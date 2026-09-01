@@ -1,0 +1,55 @@
+﻿@page "/login"
+@rendermode InteractiveWebAssembly
+@using TurismoConecta.web.Client.Models
+@inject HttpClient Http
+
+<h3>Iniciar sesión</h3>
+
+<EditForm Model="@modelo" OnValidSubmit="HacerLogin">
+    <div>
+        <label>Email:</label>
+        <InputText @bind-Value="modelo.Email" />
+    </div>
+    <div>
+        <label>Contraseña:</label>
+        <InputText type="password" @bind-Value="modelo.Password" />
+    </div>
+    <button type="submit">Entrar</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(mensaje))
+{
+    <p>@mensaje</p>
+}
+
+@if (respuesta is not null)
+{
+    <div>
+        <p><strong>Token:</strong> @respuesta.Token.Substring(0, 40)...</p>
+        <p><strong>Rol:</strong> @respuesta.Rol</p>
+        <p><strong>Expira:</strong> @respuesta.Expira</p>
+    </div>
+}
+
+@code {
+    private LoginRequest modelo = new();
+    private AuthResponse? respuesta;
+    private string mensaje = string.Empty;
+
+    private async Task HacerLogin()
+    {
+        mensaje = string.Empty;
+        respuesta = null;
+
+        var resultadoHttp = await Http.PostAsJsonAsync("api/auth/login", modelo);
+
+        if (resultadoHttp.IsSuccessStatusCode)
+        {
+            respuesta = await resultadoHttp.Content.ReadFromJsonAsync<AuthResponse>();
+        }
+        else
+        {
+            mensaje = "Correo o contraseña incorrectos.";
+        }
+    }
+}
