@@ -10,6 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.11" />
   </ItemGroup>
 

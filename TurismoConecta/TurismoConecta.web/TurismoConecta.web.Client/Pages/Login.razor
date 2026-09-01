@@ -1,55 +1,96 @@
 ﻿@page "/login"
-@rendermode InteractiveWebAssembly
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @using TurismoConecta.web.Client.Models
 @inject HttpClient Http
 
-<h3>Iniciar sesión</h3>
+<div class="split-container">
+    <div class="form-side">
+        <div class="brand">
+            <span class="brand-icon">🧭</span>
+            <span class="brand-name">TurismoConecta</span>
+        </div>
 
-<EditForm Model="@modelo" OnValidSubmit="HacerLogin">
-    <div>
-        <label>Email:</label>
-        <InputText @bind-Value="modelo.Email" />
-    </div>
-    <div>
-        <label>Contraseña:</label>
-        <InputText type="password" @bind-Value="modelo.Password" />
-    </div>
-    <button type="submit">Entrar</button>
-</EditForm>
+        <h2>¡Bienvenido de Nuevo!</h2>
+        <p class="subtitle">Por favor, ingresa tus datos de acceso</p>
 
-@if (!string.IsNullOrEmpty(mensaje))
-{
-    <p>@mensaje</p>
-}
+        <EditForm Model="@modelo" OnValidSubmit="HacerLogin">
+            <div class="form-group">
+                <label>Correo Electrónico</label>
+                <InputText class="form-control" @bind-Value="modelo.Email" placeholder="Ingresa tu correo" />
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <InputText type="password" class="form-control" @bind-Value="modelo.Password" placeholder="Ingresa tu contraseña" />
+            </div>
 
-@if (respuesta is not null)
-{
-    <div>
-        <p><strong>Token:</strong> @respuesta.Token.Substring(0, 40)...</p>
-        <p><strong>Rol:</strong> @respuesta.Rol</p>
-        <p><strong>Expira:</strong> @respuesta.Expira</p>
+            <div class="forgot-link">
+                <a href="/recuperar-password">¿Olvidaste tu contraseña?</a>
+            </div>
+
+            <button type="submit" class="btn-primary" disabled="@cargando">
+                @if (cargando)
+                {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                }
+                Iniciar Sesión
+            </button>
+        </EditForm>
+
+        @if (!string.IsNullOrEmpty(mensajeError))
+        {
+            <div class="alert-error">@mensajeError</div>
+        }
+
+        @if (respuesta is not null)
+        {
+            <div class="alert-success">
+                ¡Bienvenido, @respuesta.NombreCompleto! (Rol: @respuesta.Rol)
+            </div>
+        }
+
+        <p class="signup-link">¿No tienes cuenta? <a href="/register">Regístrate</a></p>
     </div>
-}
+
+    <div class="image-side">
+        <img src="images/LagunaNegraLogin.jpg" alt="Boyacá" />
+        <div class="image-caption">
+            Descubre los tesoros escondidos de Boyacá, tu próximo viaje comienza aquí...
+        </div>
+    </div>
+</div>
 
 @code {
     private LoginRequest modelo = new();
     private AuthResponse? respuesta;
-    private string mensaje = string.Empty;
+    private string mensajeError = string.Empty;
+    private bool cargando = false;
 
     private async Task HacerLogin()
     {
-        mensaje = string.Empty;
+        mensajeError = string.Empty;
         respuesta = null;
+        cargando = true;
 
-        var resultadoHttp = await Http.PostAsJsonAsync("api/auth/login", modelo);
-
-        if (resultadoHttp.IsSuccessStatusCode)
+        try
         {
-            respuesta = await resultadoHttp.Content.ReadFromJsonAsync<AuthResponse>();
+            var resultadoHttp = await Http.PostAsJsonAsync("api/auth/login", modelo);
+
+            if (resultadoHttp.IsSuccessStatusCode)
+            {
+                respuesta = await resultadoHttp.Content.ReadFromJsonAsync<AuthResponse>();
+            }
+            else
+            {
+                mensajeError = "Correo o contraseña incorrectos.";
+            }
         }
-        else
+        catch (Exception)
         {
-            mensaje = "Correo o contraseña incorrectos.";
+            mensajeError = "No se pudo conectar con el servidor.";
+        }
+        finally
+        {
+            cargando = false;
         }
     }
 }
