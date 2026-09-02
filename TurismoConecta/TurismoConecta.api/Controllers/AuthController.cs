@@ -44,4 +44,27 @@ public class AuthController : ControllerBase
             return Unauthorized(new { mensaje = ex.Message });
         }
     }
+
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordRequestDto dto)
+    {
+        await _authService.ForgotPasswordAsync(dto);
+        return Ok("Si el correo existe en nuestro sistema, recibirás un enlace de recuperación.");
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword(ResetPasswordRequestDto dto)
+    {
+        try
+        {
+            await _authService.ResetPasswordAsync(dto);
+            return Ok("Contraseña actualizada correctamente.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+
 }

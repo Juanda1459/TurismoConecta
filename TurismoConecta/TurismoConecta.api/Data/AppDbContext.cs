@@ -90,6 +90,9 @@ public partial class AppDbContext : DbContext
             entity.HasKey(e => e.IdEtiqueta);
 
             entity.Property(e => e.IdEtiqueta).HasColumnName("idEtiqueta");
+            entity.Property(e => e.Activo)
+                .HasDefaultValue(true)
+                .HasColumnName("activo");
             entity.Property(e => e.Descripcion)
                 .HasMaxLength(300)
                 .HasColumnName("descripcion");
@@ -261,7 +264,7 @@ public partial class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_MunicipioEtiqueta_Etiqueta");
 
-            entity.HasOne(d => d.IdMunicipioNavigation).WithMany(p => p.MunicipioEtiqueta)
+            entity.HasOne(d => d.IdMunicipioNavigation).WithMany(p => p.MunicipioEtiqueta )
                 .HasForeignKey(d => d.IdMunicipio)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_MunicipioEtiqueta_Municipio");
@@ -472,6 +475,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.PasswordHash)
                 .HasMaxLength(300)
                 .HasColumnName("passwordHash");
+            entity.Property(e => e.PasswordResetToken).HasMaxLength(256);
             entity.Property(e => e.Telefono)
                 .HasMaxLength(30)
                 .HasColumnName("telefono");
