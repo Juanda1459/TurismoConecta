@@ -44,4 +44,6 @@ public partial class Usuario
     public virtual ICollection<Notificacion> Notificacions { get; set; } = new List<Notificacion>();
 
     public virtual ICollection<Reseña> Reseñas { get; set; } = new List<Reseña>();
+    public string? FotoUrl { get; set; }
+
 }
