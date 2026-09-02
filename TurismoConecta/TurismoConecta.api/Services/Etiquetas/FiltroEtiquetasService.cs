@@ -1,6 +1,6 @@
 ﻿using TurismoConecta.api.Data;
-using TurismoConecta.api.DTOs;
 using Microsoft.EntityFrameworkCore;
+using TurismoConecta.api.DTOs.Etiquetas;
 public interface IFiltroEtiquetasService
 {
     Task<List<MunicipioFiltradoDto>> FiltrarMunicipiosAsync(List<int>? idsEtiquetas);

@@ -2,8 +2,9 @@
 using TurismoConecta.api.DTOs;
 using TurismoConecta.api.Models;
 using Microsoft.EntityFrameworkCore;
+using TurismoConecta.api.DTOs.Etiquetas;
 
-namespace TurismoConecta.api.Services;
+namespace TurismoConecta.api.Services.Etiquetas;
 
 public interface IMunicipioEtiquetaService
 {

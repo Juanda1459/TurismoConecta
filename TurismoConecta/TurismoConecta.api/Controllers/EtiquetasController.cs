@@ -1,8 +1,9 @@
 ﻿namespace TurismoConecta.api.Controllers;
+
 using Microsoft.AspNetCore.Mvc;
-using TurismoConecta.api.Services;
-using TurismoConecta.api.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using TurismoConecta.api.DTOs.Etiquetas;
+using TurismoConecta.api.Services.Etiquetas;
 
 [ApiController]
 [Route("api/[controller]")]

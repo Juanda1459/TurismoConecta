@@ -1,8 +1,9 @@
-﻿namespace TurismoConecta.api.Services;
-using TurismoConecta.api.Data;  
-using TurismoConecta.api.DTOs;
+﻿namespace TurismoConecta.api.Services.Etiquetas;
+
+using TurismoConecta.api.Data;
 using Microsoft.EntityFrameworkCore;
 using TurismoConecta.api.Models;
+using TurismoConecta.api.DTOs.Etiquetas;
 
 public interface IEtiquetaService
 {

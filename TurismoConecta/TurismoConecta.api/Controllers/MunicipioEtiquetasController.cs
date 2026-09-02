@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using TurismoConecta.api.DTOs;
-using TurismoConecta.api.Services;
+using TurismoConecta.api.DTOs.Etiquetas;
+using TurismoConecta.api.Services.Etiquetas;
 
 namespace TurismoConecta.api.Controllers;
 [ApiController]

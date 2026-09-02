@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TurismoConecta.api.DTOs;
+namespace TurismoConecta.api.DTOs.Etiquetas;
 
 public class MunicipioEtiquetasDto
 {

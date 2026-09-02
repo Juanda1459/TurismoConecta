@@ -1,4 +1,4 @@
-﻿namespace TurismoConecta.api.DTOs;
+﻿namespace TurismoConecta.api.DTOs.Etiquetas;
 
 public class MunicipioFiltradoDto
 {
