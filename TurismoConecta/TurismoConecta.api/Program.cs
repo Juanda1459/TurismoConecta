@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Scalar.AspNetCore;
+using TurismoConecta.api.Services.Etiquetas;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,7 +35,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey         = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
         };
-
+        
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
@@ -58,6 +59,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 
 
+builder.Services.AddScoped<IEtiquetaService, EtiquetaService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("BlazorPolicy", policy =>
