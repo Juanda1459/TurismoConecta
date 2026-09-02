@@ -10,6 +10,7 @@ public partial class Etiqueta
     public string Nombre { get; set; } = null!;
 
     public string? Descripcion { get; set; }
+    public bool Activo { get; set; }
 
     public virtual ICollection<MunicipioEtiqueta> MunicipioEtiqueta { get; set; } = new List<MunicipioEtiqueta>();
 
