@@ -19,7 +19,7 @@ public class AuthService : IAuthService
     {
         _db = db;
         _jwt = jwt;
-    }
+    } 
 
     public async Task<AuthResponseDto> RegistrarAsync(RegisterRequestDto dto)
     {
