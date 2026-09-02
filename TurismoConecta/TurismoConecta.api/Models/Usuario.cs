@@ -27,6 +27,10 @@ public partial class Usuario
 
     public bool Activo { get; set; }
 
+    public string? PasswordResetToken { get; set; }
+
+    public DateTime? PasswordResetExpira { get; set; }
+
     public virtual ICollection<Favorito> Favoritos { get; set; } = new List<Favorito>();
 
     public virtual Rol IdRolNavigation { get; set; } = null!;

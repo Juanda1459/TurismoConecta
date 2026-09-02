@@ -12,11 +12,11 @@ public partial class AppDbContext : DbContext
     {
     }
 
-    public virtual DbSet<Categoria> Categoria { get; set; }
+    public virtual DbSet<Categorium> Categoria { get; set; }
 
     public virtual DbSet<Departamento> Departamentos { get; set; }
 
-    public virtual DbSet<Etiqueta> Etiqueta { get; set; }
+    public virtual DbSet<Etiquetum> Etiqueta { get; set; }
 
     public virtual DbSet<Favorito> Favoritos { get; set; }
 
@@ -28,11 +28,11 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Municipio> Municipios { get; set; }
 
-    public virtual DbSet<MunicipioEtiqueta> MunicipioEtiqueta { get; set; }
+    public virtual DbSet<MunicipioEtiquetum> MunicipioEtiqueta { get; set; }
 
     public virtual DbSet<Negocio> Negocios { get; set; }
 
-    public virtual DbSet<NegocioEtiqueta> NegocioEtiqueta { get; set; }
+    public virtual DbSet<NegocioEtiquetum> NegocioEtiqueta { get; set; }
 
     public virtual DbSet<Notificacion> Notificacions { get; set; }
 
@@ -48,7 +48,7 @@ public partial class AppDbContext : DbContext
     {
         modelBuilder.UseCollation("Modern_Spanish_CI_AS");
 
-        modelBuilder.Entity<Categoria>(entity =>
+        modelBuilder.Entity<Categorium>(entity =>
         {
             entity.HasKey(e => e.IdCategoria).HasName("PK__Categori__8A3D240C145FC97D");
 
@@ -85,11 +85,14 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("pais");
         });
 
-        modelBuilder.Entity<Etiqueta>(entity =>
+        modelBuilder.Entity<Etiquetum>(entity =>
         {
             entity.HasKey(e => e.IdEtiqueta);
 
             entity.Property(e => e.IdEtiqueta).HasColumnName("idEtiqueta");
+            entity.Property(e => e.Activo)
+                .HasDefaultValue(true)
+                .HasColumnName("activo");
             entity.Property(e => e.Descripcion)
                 .HasMaxLength(300)
                 .HasColumnName("descripcion");
@@ -248,7 +251,7 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("FK_Municipios_Departamentos");
         });
 
-        modelBuilder.Entity<MunicipioEtiqueta>(entity =>
+        modelBuilder.Entity<MunicipioEtiquetum>(entity =>
         {
             entity.HasKey(e => e.IdMunicipioEtiqueta);
 
@@ -326,7 +329,7 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("FK_Negocio_Usuario");
         });
 
-        modelBuilder.Entity<NegocioEtiqueta>(entity =>
+        modelBuilder.Entity<NegocioEtiquetum>(entity =>
         {
             entity.HasKey(e => e.IdNegocioEtiqueta);
 
@@ -472,6 +475,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.PasswordHash)
                 .HasMaxLength(300)
                 .HasColumnName("passwordHash");
+            entity.Property(e => e.PasswordResetToken).HasMaxLength(256);
             entity.Property(e => e.Telefono)
                 .HasMaxLength(30)
                 .HasColumnName("telefono");
