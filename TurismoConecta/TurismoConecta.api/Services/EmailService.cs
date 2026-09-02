@@ -16,11 +16,11 @@ namespace TurismoConecta.api.Services
 
         public async Task EnviarCorreoAsync(string destinatario, string asunto, string cuerpoHtml)
         {
-            var host = _configuration["Smtp:Host"];
-            var port = int.Parse(_configuration["Smtp:Port"] ?? "587");
-            var usuario = _configuration["Smtp:User"];
-            var password = _configuration["Smtp:Password"];
-            var enableSsl = bool.Parse(_configuration["Smtp:EnableSsl"] ?? "true");
+            var host = _configuration["EmailSettings:SmtpServer"];
+            var port = int.Parse(_configuration["EmailSettings:Port"] ?? "587");
+            var usuario = _configuration["EmailSettings:SenderEmail"];
+            var nombreRemitente = _configuration["EmailSettings:SenderName"] ?? "TurismoConecta";
+            var password = _configuration["EmailSettings:Password"];
 
             using var mensaje = new MailMessage
             {
@@ -34,7 +34,7 @@ namespace TurismoConecta.api.Services
             using var cliente = new SmtpClient(host, port)
             {
                 Credentials = new NetworkCredential(usuario, password),
-                EnableSsl = enableSsl
+                EnableSsl = true
             };
 
             await cliente.SendMailAsync(mensaje);

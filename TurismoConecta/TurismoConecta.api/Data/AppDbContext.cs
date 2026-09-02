@@ -12,11 +12,11 @@ public partial class AppDbContext : DbContext
     {
     }
 
-    public virtual DbSet<Categorium> Categoria { get; set; }
+    public virtual DbSet<Categoria> Categoria { get; set; }
 
     public virtual DbSet<Departamento> Departamentos { get; set; }
 
-    public virtual DbSet<Etiquetum> Etiqueta { get; set; }
+    public virtual DbSet<Etiqueta> Etiqueta { get; set; }
 
     public virtual DbSet<Favorito> Favoritos { get; set; }
 
@@ -28,11 +28,11 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Municipio> Municipios { get; set; }
 
-    public virtual DbSet<MunicipioEtiquetum> MunicipioEtiqueta { get; set; }
+    public virtual DbSet<MunicipioEtiqueta> MunicipioEtiqueta { get; set; }
 
     public virtual DbSet<Negocio> Negocios { get; set; }
 
-    public virtual DbSet<NegocioEtiquetum> NegocioEtiqueta { get; set; }
+    public virtual DbSet<NegocioEtiqueta> NegocioEtiqueta { get; set; }
 
     public virtual DbSet<Notificacion> Notificacions { get; set; }
 
@@ -48,7 +48,7 @@ public partial class AppDbContext : DbContext
     {
         modelBuilder.UseCollation("Modern_Spanish_CI_AS");
 
-        modelBuilder.Entity<Categorium>(entity =>
+        modelBuilder.Entity<Categoria>(entity =>
         {
             entity.HasKey(e => e.IdCategoria).HasName("PK__Categori__8A3D240C145FC97D");
 
@@ -85,7 +85,7 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("pais");
         });
 
-        modelBuilder.Entity<Etiquetum>(entity =>
+        modelBuilder.Entity<Etiqueta>(entity =>
         {
             entity.HasKey(e => e.IdEtiqueta);
 
@@ -251,7 +251,7 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("FK_Municipios_Departamentos");
         });
 
-        modelBuilder.Entity<MunicipioEtiquetum>(entity =>
+        modelBuilder.Entity<MunicipioEtiqueta>(entity =>
         {
             entity.HasKey(e => e.IdMunicipioEtiqueta);
 
@@ -264,7 +264,7 @@ public partial class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_MunicipioEtiqueta_Etiqueta");
 
-            entity.HasOne(d => d.IdMunicipioNavigation).WithMany(p => p.MunicipioEtiqueta)
+            entity.HasOne(d => d.IdMunicipioNavigation).WithMany(p => p.MunicipioEtiqueta )
                 .HasForeignKey(d => d.IdMunicipio)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_MunicipioEtiqueta_Municipio");
@@ -329,7 +329,7 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("FK_Negocio_Usuario");
         });
 
-        modelBuilder.Entity<NegocioEtiquetum>(entity =>
+        modelBuilder.Entity<NegocioEtiqueta>(entity =>
         {
             entity.HasKey(e => e.IdNegocioEtiqueta);
 

@@ -35,7 +35,7 @@ public partial class Municipio
 
     public virtual ICollection<ItinerarioDetalle> ItinerarioDetalles { get; set; } = new List<ItinerarioDetalle>();
 
-    public virtual ICollection<MunicipioEtiquetum> MunicipioEtiqueta { get; set; } = new List<MunicipioEtiquetum>();
+    public virtual ICollection<MunicipioEtiqueta> MunicipioEtiqueta { get; set; } = new List<MunicipioEtiqueta>();
 
     public virtual ICollection<Negocio> Negocios { get; set; } = new List<Negocio>();
 

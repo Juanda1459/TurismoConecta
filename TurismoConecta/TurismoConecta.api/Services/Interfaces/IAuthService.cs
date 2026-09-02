@@ -8,6 +8,6 @@ public interface IAuthService
 {
     Task<AuthResponseDto> RegistrarAsync(RegisterRequestDto dto);
     Task<AuthResponseDto> LoginAsync(LoginRequestDto dto);
-    Task<bool> ForgotPasswordAsync(ForgotPasswordRequestDto dto);
-    Task<bool> ResetPasswordAsync(ResetPasswordRequestDto dto);
+    Task ForgotPasswordAsync(ForgotPasswordRequestDto dto);
+    Task ResetPasswordAsync(ResetPasswordRequestDto dto);
 }

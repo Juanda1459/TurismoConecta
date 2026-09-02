@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
 using TurismoConecta.api.Data;
 using TurismoConecta.api.DTOs.Auth;
 using TurismoConecta.api.Models;
 using TurismoConecta.api.Services.Interfaces;
-using System.Threading.Tasks;
-using System;
+ 
 
 namespace TurismoConecta.api.Services;
 
@@ -14,12 +16,14 @@ public class AuthService : IAuthService
 {
     private readonly AppDbContext _db;
     private readonly JwtService _jwt;
+    private readonly IEmailService _emailService;
     private readonly PasswordHasher<Usuario> _hasher = new();
 
-    public AuthService(AppDbContext db, JwtService jwt)
+    public AuthService(AppDbContext db, JwtService jwt, IEmailService emailService)
     {
         _db = db;
         _jwt = jwt;
+        _emailService = emailService;
     } 
 
     public async Task<AuthResponseDto> RegistrarAsync(RegisterRequestDto dto)
@@ -56,10 +60,49 @@ public class AuthService : IAuthService
             Token         = token,
             Expira        = expira,
             IdUsuario     = nuevoUsuario.IdUsuario,
-            NombreCompleto = $"_{nuevoUsuario.Nombre} {nuevoUsuario.Apellido}",
+            NombreCompleto = $"{nuevoUsuario.Nombre} {nuevoUsuario.Apellido}",
             Email         = nuevoUsuario.Email,
             Rol           = rolUsuario.Nombre
         };
+    }
+
+    public async Task ForgotPasswordAsync(ForgotPasswordRequestDto dto)
+    {
+        var usuario = await _db.Usuarios.FirstOrDefaultAsync(u => u.Email == dto.Email);
+
+        if (usuario == null)
+            return;
+
+        var tokenBytes = RandomNumberGenerator.GetBytes(32);
+        var token = Convert.ToBase64String(tokenBytes)
+            .Replace("+", "-").Replace("/", "_").Replace("=", "");
+
+        usuario.PasswordResetToken = token;
+        usuario.PasswordResetExpira = DateTime.UtcNow.AddMinutes(30);
+        await _db.SaveChangesAsync();
+
+        var enlace = $"https://localhost:7248/reset-password?email={Uri.EscapeDataString(dto.Email)}&token={token}";
+        var cuerpo = $@"
+        <h3>Recuperación de contraseña - TurismoConecta</h3>
+        <p>Haz clic en el siguiente enlace para restablecer tu contraseña. Este enlace expira en 30 minutos.</p>
+        <p><a href='{enlace}'>Restablecer contraseña</a></p>";
+
+        await _emailService.EnviarCorreoAsync(dto.Email, "Recupera tu contraseña", cuerpo);
+    }
+
+    public async Task ResetPasswordAsync(ResetPasswordRequestDto dto)
+    {
+        var usuario = await _db.Usuarios
+            .FirstOrDefaultAsync(u => u.Email == dto.Email && u.PasswordResetToken == dto.Token);
+
+        if (usuario == null || usuario.PasswordResetExpira == null || usuario.PasswordResetExpira < DateTime.UtcNow)
+            throw new InvalidOperationException("El enlace de recuperación no es válido o ya expiró.");
+
+        usuario.PasswordHash = _hasher.HashPassword(usuario, dto.NuevaPassword);
+        usuario.PasswordResetToken = null;
+        usuario.PasswordResetExpira = null;
+
+        await _db.SaveChangesAsync();
     }
 
     public async Task<AuthResponseDto> LoginAsync(LoginRequestDto dto)
@@ -76,7 +119,7 @@ public class AuthService : IAuthService
             Token          = token,
             Expira         = expira,
             IdUsuario      = usuario.IdUsuario,
-            NombreCompleto = $"_{usuario.Nombre} {usuario.Apellido}",
+            NombreCompleto = $"{usuario.Nombre} {usuario.Apellido}",
             Email          = usuario.Email,
             Rol            = usuario.IdRolNavigation.Nombre
         };

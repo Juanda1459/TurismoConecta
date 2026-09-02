@@ -41,13 +41,13 @@ public partial class Negocio
 
     public virtual ICollection<GaleriaNegocio> GaleriaNegocios { get; set; } = new List<GaleriaNegocio>();
 
-    public virtual Categorium IdCategoriaNavigation { get; set; } = null!;
+    public virtual Categoria IdCategoriaNavigation { get; set; } = null!;
 
     public virtual Municipio IdMunicipioNavigation { get; set; } = null!;
 
     public virtual Usuario? IdUsuarioNavigation { get; set; }
 
-    public virtual ICollection<NegocioEtiquetum> NegocioEtiqueta { get; set; } = new List<NegocioEtiquetum>();
+    public virtual ICollection<NegocioEtiqueta> NegocioEtiqueta { get; set; } = new List<NegocioEtiqueta>();
 
     public virtual ICollection<Reseña> Reseñas { get; set; } = new List<Reseña>();
 }
