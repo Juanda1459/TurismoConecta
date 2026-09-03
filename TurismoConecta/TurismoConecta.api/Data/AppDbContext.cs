@@ -479,6 +479,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Telefono)
                 .HasMaxLength(30)
                 .HasColumnName("telefono");
+            entity.Property(e => e.FotoUrl)
+              .HasMaxLength(500)
+              .HasColumnName("FotoUrl");
 
             entity.HasOne(d => d.IdRolNavigation).WithMany(p => p.Usuarios)
                 .HasForeignKey(d => d.IdRol)

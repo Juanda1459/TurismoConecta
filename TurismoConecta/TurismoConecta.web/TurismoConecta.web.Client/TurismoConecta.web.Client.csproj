@@ -9,6 +9,10 @@
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
 
+  <ItemGroup>
+    
+  </ItemGroup>
+
  
 
   <ItemGroup>

@@ -1,0 +1,273 @@
+﻿@page "/perfil"
+@layout EmptyLayout
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@using TurismoConecta.web.Client.Models
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager NavManager
+
+<div class="profile-container">
+    <div class="premium-card">
+
+        <!-- ENCABEZADO CON AVATAR CLICKEABLE -->
+        <div class="card-header">
+
+            <div class="avatar-wrapper" @onclick="AbrirSelectorFoto" title="Haz clic para cambiar tu foto">
+                @if (!string.IsNullOrEmpty(fotoPreview))
+                {
+                    <img src="@fotoPreview" class="avatar-img" alt="Foto de perfil" />
+                }
+                else
+                {
+                    <div class="avatar-placeholder">
+                        <i class="ph-fill ph-user"></i>
+                    </div>
+                }
+                <div class="avatar-camera-overlay">
+                    <i class="ph-fill ph-camera"></i>
+                </div>
+            </div>
+
+            <!-- Input de archivo OCULTO -->
+            <InputFile id="inputFoto" OnChange="OnFotoSeleccionada" accept="image/*" style="display:none;" />
+
+            @if (perfilActual != null)
+            {
+                <h2>@perfilActual.Nombre @perfilActual.Apellido</h2>
+                <span class="role-badge">@perfilActual.Rol</span>
+            }
+            else if (cargandoInicial)
+            {
+                <h2>Cargando...</h2>
+            }
+
+            @if (fotoSeleccionadaBase64 != null)
+            {
+                <p class="foto-hint">
+                    <i class="ph ph-check-circle"></i>
+                    Nueva foto lista. Guarda los cambios para aplicarla.
+                </p>
+            }
+        </div>
+
+        <!-- CUERPO -->
+        @if (cargandoInicial)
+        {
+            <div class="loading-state">
+                <div class="spinner-large"></div>
+                <p>Cargando tu información...</p>
+            </div>
+        }
+        else if (perfilActual != null)
+        {
+            <div class="card-body">
+                <EditForm Model="@modeloFormulario" OnValidSubmit="GuardarCambios">
+
+                    <div class="input-group">
+                        <label>Correo Electrónico <span class="label-hint">(No modificable por ahora)</span></label>
+                        <div class="input-container">
+                            <i class="ph ph-envelope-simple"></i>
+                            <input type="email" class="premium-input read-only"
+                                   value="@perfilActual.Email" disabled />
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Nombre</label>
+                            <div class="input-container">
+                                <i class="ph ph-identification-card"></i>
+                                <InputText class="premium-input"
+                                           @bind-Value="modeloFormulario.Nombre"
+                                           placeholder="Tu nombre" required />
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Apellido</label>
+                            <div class="input-container">
+                                <i class="ph ph-identification-card"></i>
+                                <InputText class="premium-input"
+                                           @bind-Value="modeloFormulario.Apellido"
+                                           placeholder="Tu apellido" required />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Teléfono</label>
+                        <div class="input-container">
+                            <i class="ph ph-phone"></i>
+                            <InputText class="premium-input"
+                                       @bind-Value="modeloFormulario.Telefono"
+                                       placeholder="Opcional" />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" disabled="@guardando">
+                        @if (guardando)
+                        {
+                            <div class="spinner"></div>
+                            <span>Guardando...</span>
+                        }
+                        else
+                        {
+                            <span>Guardar Cambios</span>
+                            <i class="ph-bold ph-floppy-disk"></i>
+                        }
+                    </button>
+                </EditForm>
+
+                @if (!string.IsNullOrEmpty(mensajeExito))
+                {
+                    <div class="alert success-alert">
+                        <i class="ph-fill ph-check-circle"></i>
+                        <span>@mensajeExito</span>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(mensajeError))
+                {
+                    <div class="alert error-alert">
+                        <i class="ph-fill ph-warning-circle"></i>
+                        <span>@mensajeError</span>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    // URL base de tu API Backend 
+    private const string ApiBase = "https://localhost:7078";
+
+    private PerfilResponse? perfilActual;
+    private ActualizarPerfilRequest modeloFormulario = new();
+    private string? fotoPreview;
+    private string? fotoSeleccionadaBase64;
+
+    private bool cargandoInicial = true;
+    private bool guardando = false;
+    private string mensajeError = string.Empty;
+    private string mensajeExito = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+    {
+        // 1. Recuperar el token guardado en el navegador
+        var token = await JS.InvokeAsync<string>("obtenerToken");
+        // 2. Si no hay token, redirigir al login
+        if (string.IsNullOrEmpty(token))
+        {
+            NavManager.NavigateTo("/login");
+            return;
+        }
+        // 3. Agregar el token a las peticiones HTTP
+        Http.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        // 4. Ahora sí llamar a la API (ya va con la "llave")
+        perfilActual = await Http.GetFromJsonAsync<PerfilResponse>("api/usuarios/perfil");
+        if (perfilActual != null)
+        {
+            modeloFormulario.Nombre = perfilActual.Nombre;
+            modeloFormulario.Apellido = perfilActual.Apellido;
+            modeloFormulario.Telefono = perfilActual.Telefono;
+            if (!string.IsNullOrEmpty(perfilActual.FotoUrl))
+            {
+                fotoPreview = $"{ApiBase}{perfilActual.FotoUrl}";
+            }
+        }
+    }
+    catch (Exception)
+    {
+        mensajeError = "No se pudo cargar la información del perfil.";
+    }
+    finally
+    {
+        cargandoInicial = false;
+    }
+    }
+
+    // Dispara el clic en el InputFile oculto via JavaScript
+    private async Task AbrirSelectorFoto()
+    {
+        await JS.InvokeVoidAsync("clickElementById", "inputFoto");
+    }
+
+    // Se ejecuta cuando el usuario elige una imagen del explorador
+    private async Task OnFotoSeleccionada(InputFileChangeEventArgs e)
+    {
+        mensajeError = string.Empty;
+        var archivo = e.File;
+
+        // Validar tipo de archivo
+        if (!archivo.ContentType.StartsWith("image/"))
+        {
+            mensajeError = "Por favor selecciona un archivo de imagen válido (JPG, PNG, etc.).";
+            return;
+        }
+
+        // Validar tamaño máximo 5MB
+        if (archivo.Size > 5 * 1024 * 1024)
+        {
+            mensajeError = "La imagen no puede superar los 5 MB.";
+            return;
+        }
+
+        // Leer y convertir a Base64
+        using var stream = archivo.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024);
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms);
+        var bytes = ms.ToArray();
+        fotoSeleccionadaBase64 = Convert.ToBase64String(bytes);
+
+        // Mostrar preview inmediata en pantalla sin esperar a guardar
+        fotoPreview = $"data:{archivo.ContentType};base64,{fotoSeleccionadaBase64}";
+    }
+
+    private async Task GuardarCambios()
+    {
+        mensajeError = string.Empty;
+        mensajeExito = string.Empty;
+        guardando = true;
+
+        try
+        {
+            
+            modeloFormulario.FotoBase64 = fotoSeleccionadaBase64;
+
+            var resultado = await Http.PutAsJsonAsync("api/usuarios/perfil", modeloFormulario);
+
+            if (resultado.IsSuccessStatusCode)
+            {
+                mensajeExito = "¡Tu perfil ha sido actualizado correctamente!";
+
+
+                fotoSeleccionadaBase64 = null;
+                modeloFormulario.FotoBase64 = null;
+
+                
+                if (perfilActual != null)
+                {
+                    perfilActual.Nombre = modeloFormulario.Nombre;
+                    perfilActual.Apellido = modeloFormulario.Apellido;
+                    perfilActual.Telefono = modeloFormulario.Telefono;
+                }
+            }
+            else
+            {
+                mensajeError = "Ocurrió un error al actualizar el perfil.";
+            }
+        }
+        catch (Exception)
+        {
+            mensajeError = "Error de conexión con el servidor.";
+        }
+        finally
+        {
+            guardando = false;
+        }
+    }
+}
