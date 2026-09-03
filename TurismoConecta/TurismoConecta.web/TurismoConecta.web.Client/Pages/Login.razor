@@ -3,6 +3,8 @@
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @using TurismoConecta.web.Client.Models
 @inject HttpClient Http
+@inject NavigationManager NavManager
+@inject IJSRuntime JS
 
 <div class="page-background">
     <div class="premium-card">
@@ -112,6 +114,17 @@
             if (resultadoHttp.IsSuccessStatusCode)
             {
                 respuesta = await resultadoHttp.Content.ReadFromJsonAsync<AuthResponse>();
+
+
+                await JS.InvokeVoidAsync("guardarToken", respuesta.Token);
+
+                
+                // Redirigir al perfil después del login exitoso
+                await Task.Delay(1500); // Pausa breve para que el usuario vea el mensaje de bienvenida
+                NavManager.NavigateTo("/perfil");
+
+
+
             }
             else
             {
