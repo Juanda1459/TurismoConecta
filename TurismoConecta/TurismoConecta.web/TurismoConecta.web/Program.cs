@@ -1,4 +1,5 @@
 using TurismoConecta.web.Client.Pages;
+using TurismoConecta.web.Client.Services;
 using TurismoConecta.web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,13 @@ builder.Services.AddScoped(sp => new HttpClient
 
 });
 
+builder.Services.AddTransient<AuthorizationMessageHandler>();
+
+builder.Services.AddHttpClient<MunicipioApiService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7078");
+})
+.AddHttpMessageHandler<AuthorizationMessageHandler>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

@@ -1,0 +1,148 @@
+﻿@using TurismoConecta.web.Client.Services 
+@page "/municipios"
+@inject MunicipioApiService ApiService
+@inject NavigationManager Nav
+@implements IDisposable
+
+<h3>Explora los municipios de Boyacá</h3>
+
+<input @bind="textoBusqueda" @bind:event="oninput" @onkeyup="OnTeclaBusqueda" placeholder="Buscar por nombre..." />
+
+@if (cargando)
+{
+    <p>Cargando...</p>
+}
+else if (huboError)
+{
+    <p class="mensaje-error">No se pudo cargar la información. Intenta de nuevo.</p>
+    <button @onclick="() => CargarPagina(paginaActual)">Reintentar</button>
+}
+else if (municipios is not null && !municipios.Any())
+{
+    <p>No se encontraron municipios con esos criterios.</p>
+}
+else if (municipios is not null)
+{
+    <div class="grid-municipios">
+        @foreach (var m in municipios)
+        {
+            <div class="card-municipio">
+                @if (!string.IsNullOrEmpty(m.ImagenUrl))
+                {
+                    <img src="@m.ImagenUrl" alt="@m.Nombre" />
+                }
+                <h4>@m.Nombre</h4>
+                <p>@string.Join(", ", m.Etiquetas)</p>
+
+                <input type="checkbox"
+                       checked="@seleccionados.Contains(m.IdMunicipio)"
+                       @onchange="e => ToggleSeleccion(m.IdMunicipio, (bool)e.Value!)" />
+                <label>Agregar al itinerario</label>
+
+                <button @onclick="() => VerFicha(m.IdMunicipio)">Ver más</button>
+            </div>
+        }
+    </div>
+
+    @if (totalPaginas > 1 && string.IsNullOrWhiteSpace(textoBusqueda))
+    {
+        <div class="paginacion">
+            <button disabled="@(paginaActual <= 1)" @onclick="() => CargarPagina(paginaActual - 1)">Anterior</button>
+            <span>Página @paginaActual de @totalPaginas</span>
+            <button disabled="@(paginaActual >= totalPaginas)" @onclick="() => CargarPagina(paginaActual + 1)">Siguiente</button>
+        </div>
+    }
+
+    @if (seleccionados.Any())
+    {
+        <p>@seleccionados.Count municipio(s) seleccionados.</p>
+        <button @onclick="IrACrearItinerario">Crear itinerario con estos</button>
+    }
+}
+
+@code {
+    private List<MunicipioListadoDto>? municipios;
+    private string textoBusqueda = "";
+    private HashSet<int> seleccionados = new();
+    private bool cargando = true;
+    private bool huboError;
+    private int paginaActual = 1;
+    private int totalPaginas = 1;
+
+    // Cancela la búsqueda anterior si el usuario sigue escribiendo antes de que termine —
+    // evita que respuestas "viejas" lleguen tarde y pisen resultados más nuevos.
+    private CancellationTokenSource? _ctsBusqueda;
+    private System.Timers.Timer? _debounceTimer;
+
+    protected override async Task OnInitializedAsync() => await CargarPagina(1);
+
+    private void OnTeclaBusqueda(KeyboardEventArgs e)
+    {
+        _debounceTimer?.Stop();
+        _debounceTimer = new System.Timers.Timer(400) { AutoReset = false }; // espera 400ms de silencio antes de buscar
+        _debounceTimer.Elapsed += async (_, _) => await InvokeAsync(EjecutarBusqueda);
+        _debounceTimer.Start();
+    }
+
+    private async Task EjecutarBusqueda()
+    {
+        _ctsBusqueda?.Cancel();
+        _ctsBusqueda = new CancellationTokenSource();
+
+        if (string.IsNullOrWhiteSpace(textoBusqueda))
+        {
+            await CargarPagina(1);
+            return;
+        }
+
+        cargando = true;
+        huboError = false;
+        StateHasChanged();
+
+        var resultado = await ApiService.BuscarAsync(textoBusqueda, _ctsBusqueda.Token);
+        municipios = resultado;
+        huboError = resultado is null;
+        cargando = false;
+        StateHasChanged();
+    }
+
+    private async Task CargarPagina(int pagina)
+    {
+        cargando = true;
+        huboError = false;
+        var resultado = await ApiService.ListarAsync(pagina, 12);
+
+        if (resultado is null)
+        {
+            huboError = true;
+        }
+        else
+        {
+            municipios = resultado.Items;
+            paginaActual = resultado.Pagina;
+            totalPaginas = Math.Max(1, resultado.TotalPaginas);
+        }
+        cargando = false;
+    }
+
+    private void ToggleSeleccion(int id, bool marcado)
+    {
+        if (marcado) seleccionados.Add(id);
+        else seleccionados.Remove(id);
+    }
+
+    private void VerFicha(int id) => Nav.NavigateTo($"/municipios/{id}");
+
+    private void IrACrearItinerario()
+    {
+        var ids = string.Join(",", seleccionados);
+        Nav.NavigateTo($"/itinerarios/crear?municipios={ids}");
+    }
+
+    public void Dispose()
+    {
+        _debounceTimer?.Dispose();
+        _ctsBusqueda?.Cancel();
+        _ctsBusqueda?.Dispose();
+    }
+}

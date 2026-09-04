@@ -1,0 +1,34 @@
+﻿@using TurismoConecta.web.Client.Services 
+@page "/municipios/{Id:int}"
+@inject MunicipioApiService ApiService
+
+@if (cargando)
+{
+    <p>Cargando...</p>
+}
+else if (ficha is null)
+{
+    <p class="mensaje-error">No se encontró el municipio, o hubo un error de conexión.</p>
+}
+else
+{
+    <h2>@ficha.Nombre</h2>
+    <img src="@ficha.ImagenUrl" alt="@ficha.Nombre" />
+    <p><strong>Clima:</strong> @ficha.Clima</p>
+    <p><strong>Historia:</strong> @ficha.Historia</p>
+    <p><strong>Fechas relevantes:</strong> @ficha.FechasRelevantes</p>
+    <p>@ficha.Descripcion</p>
+    <p><strong>Etiquetas:</strong> @string.Join(", ", ficha.Etiquetas)</p>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private MunicipioFichaDto? ficha;
+    private bool cargando = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ficha = await ApiService.ObtenerFichaAsync(Id);
+        cargando = false;
+    }
+}
