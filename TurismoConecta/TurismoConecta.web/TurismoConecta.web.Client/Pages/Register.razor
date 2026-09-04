@@ -1,0 +1,164 @@
+﻿@page "/register"
+@layout EmptyLayout
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@using TurismoConecta.web.Client.Models
+@inject HttpClient Http
+@inject NavigationManager NavManager
+
+<div class="page-background">
+    <div class="premium-card">
+
+        <!-- Mitad Izquierda: Formulario -->
+        <div class="form-section">
+            <div class="form-wrapper">
+
+                <div class="brand">
+                    <i class="ph-fill ph-compass"></i>
+                    <span>TurismoConecta</span>
+                </div>
+
+                <div class="header-text">
+                    <h1>¡Crea tu Cuenta!</h1>
+                    <p>Regístrate para empezar a planear tu viaje.</p>
+                </div>
+
+                <EditForm Model="@modelo" OnValidSubmit="HacerRegistro">
+
+                    <!-- Fila agrupada para Nombre y Apellido (Ahorra espacio vertical) -->
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Nombre</label>
+                            <div class="input-container">
+                                <i class="ph ph-user"></i>
+                                <InputText class="premium-input" @bind-Value="modelo.Nombre" placeholder="Tu nombre" />
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Apellido</label>
+                            <div class="input-container">
+                                <i class="ph ph-user"></i>
+                                <InputText class="premium-input" @bind-Value="modelo.Apellido" placeholder="Tu apellido" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Correo Electrónico</label>
+                        <div class="input-container">
+                            <i class="ph ph-envelope-simple"></i>
+                            <InputText class="premium-input" @bind-Value="modelo.Email" placeholder="ejemplo@correo.com" />
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Teléfono</label>
+                        <div class="input-container">
+                            <i class="ph ph-phone"></i>
+                            <InputText class="premium-input" @bind-Value="modelo.Telefono" placeholder="Tu número de teléfono" />
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Contraseña</label>
+                        <div class="input-container">
+                            <i class="ph ph-lock-key"></i>
+                            <InputText type="password" class="premium-input" @bind-Value="modelo.Password" placeholder="Crea una contraseña" />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" disabled="@cargando">
+                        @if (cargando)
+                        {
+                            <div class="spinner"></div>
+                            <span>Creando cuenta...</span>
+                        }
+                        else
+                        {
+                            <span>Registrarme</span>
+                            <i class="ph-bold ph-arrow-right"></i>
+                        }
+                    </button>
+                </EditForm>
+
+                @if (!string.IsNullOrEmpty(mensajeError))
+                {
+                    <div class="alert error-alert">
+                        <i class="ph-fill ph-warning-circle"></i>
+                        <span>@mensajeError</span>
+                    </div>
+                }
+
+                @if (registroExitoso)
+                {
+                    <div class="alert success-alert">
+                        <i class="ph-fill ph-check-circle"></i>
+                        <span>¡Cuenta creada con éxito! Redirigiendo a inicio de sesión...</span>
+                    </div>
+                }
+
+                <div class="register-link">
+                    ¿Ya tienes cuenta? <a href="/login">Inicia sesión aquí</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mitad Derecha: Imagen inmersiva -->
+        <div class="image-section">
+            <img src="images/nobsaRegistro.jpg" alt="Nobsa, Boyacá" />
+            <div class="image-overlay"></div>
+            <div class="image-content">
+                <div class="glass-card">
+                    <h2>Únete a la aventura</h2>
+                    <p>Descubre los tesoros escondidos de Boyacá. Crea tu cuenta y da el primer paso hacia tu próximo destino.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    private RegisterRequest modelo = new();
+    private string mensajeError = string.Empty;
+    private bool cargando = false;
+    private bool registroExitoso = false;
+
+    private async Task HacerRegistro()
+    {
+        mensajeError = string.Empty;
+        registroExitoso = false;
+        cargando = true;
+
+        try
+        {
+            var resultadoHttp = await Http.PostAsJsonAsync("api/auth/register", modelo);
+
+            if (resultadoHttp.IsSuccessStatusCode)
+            {
+                registroExitoso = true;
+                await Task.Delay(2000);
+                NavManager.NavigateTo("/login");
+            }
+            else if (resultadoHttp.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                var contenido = await resultadoHttp.Content.ReadAsStringAsync();
+                mensajeError = string.IsNullOrWhiteSpace(contenido)
+                    ? "Ya existe una cuenta registrada con ese correo."
+                    : contenido;
+            }
+            else
+            {
+                mensajeError = "Ocurrió un error al registrar la cuenta. Intenta de nuevo.";
+            }
+        }
+        catch (Exception)
+        {
+            mensajeError = "No se pudo conectar con el servidor.";
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+}

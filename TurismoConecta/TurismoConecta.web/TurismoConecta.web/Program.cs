@@ -6,8 +6,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped(sp => new HttpClient
 {
-    BaseAddress = new Uri("https://localhost:7078") // Cambia esto según la URL de tu API
+    BaseAddress = new Uri("https://localhost:7078")
 
+    
 });
 
 builder.Services.AddTransient<AuthorizationMessageHandler>();
@@ -22,6 +23,8 @@ builder.Services.AddHttpClient<MunicipioApiService>(client =>
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -32,13 +35,16 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
 app.UseAntiforgery();
+
+
+app.UseAuthorization();   // ← NUEVA
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

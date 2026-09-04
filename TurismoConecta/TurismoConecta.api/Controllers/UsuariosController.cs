@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TurismoConecta.api.DTOs.Usuarios;
@@ -17,15 +17,6 @@ namespace TurismoConecta.api.Controllers
             _usuarioService = usuarioService;
         }
 
-        [HttpPut("perfil")]
-        [Authorize]
-        public async Task<IActionResult> ActualizarPerfil([FromBody] ActualizarPerfilDto dto)
-        {
-            var idUsuario = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var actualizado = await _usuarioService.ActualizarPerfilAsync(idUsuario, dto); // aquí sí dice _usuarioService
-            return actualizado is null ? NotFound() : Ok(actualizado);
-        }
-
         [HttpPut("asignar-rol")]
         [Authorize(Roles = "AdminGeneral")]
         public async Task<IActionResult> AsignarRol(AssignRoleRequestDto dto)
@@ -37,6 +28,37 @@ namespace TurismoConecta.api.Controllers
 
             return Ok("Rol asignado correctamente.");
         }
-        
+
+        [HttpGet("perfil")]
+        [Authorize]
+        public async Task<IActionResult> ObtenerPerfil()
+        {
+            var idUsuario = ObtenerIdUsuarioActual();
+            var perfil = await _usuarioService.ObtenerPerfilAsync(idUsuario);
+
+            if (perfil == null)
+                return NotFound("No se encontró el usuario.");
+
+            return Ok(perfil);
+        }
+
+        [HttpPut("perfil")]
+        [Authorize]
+        public async Task<IActionResult> ActualizarPerfil(ActualizarPerfilRequestDto dto)
+        {
+            var idUsuario = ObtenerIdUsuarioActual();
+            var exito = await _usuarioService.ActualizarPerfilAsync(idUsuario, dto);
+
+            if (!exito)
+                return NotFound("No se encontró el usuario.");
+
+            return Ok("Perfil actualizado correctamente.");
+        }
+
+        private int ObtenerIdUsuarioActual()
+        {
+            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return int.Parse(idClaim!);
+        }
     }
 }

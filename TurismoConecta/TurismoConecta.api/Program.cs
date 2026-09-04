@@ -58,6 +58,9 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IMunicipioService, MunicipioService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+
 
 builder.Services.AddScoped<IEtiquetaService, EtiquetaService>();
 builder.Services.AddCors(options =>
@@ -95,5 +98,6 @@ app.UseCors("BlazorPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.UseStaticFiles();
 
 app.Run();
