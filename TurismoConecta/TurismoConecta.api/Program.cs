@@ -1,18 +1,20 @@
-﻿using TurismoConecta.api.Data;
-using TurismoConecta.api.Services;
-using TurismoConecta.api.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 using System.Text;
 using System.Threading.Tasks;
-using Scalar.AspNetCore;
+using TurismoConecta.api.Data;
+using TurismoConecta.api.Hubs;
+using TurismoConecta.api.Services;
 using TurismoConecta.api.Services.Etiquetas;
+using TurismoConecta.api.Services.Interfaces;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,15 +37,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey         = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
         };
-        
+
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
             {
                 var accessToken = context.Request.Query["access_token"];
                 var path = context.HttpContext.Request.Path;
-                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/hubs"))
+                {
                     context.Token = accessToken;
+                }
+
                 return Task.CompletedTask;
             }
         };
@@ -98,6 +105,7 @@ app.UseCors("BlazorPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<NotificacionesHub>("/hubs/notificaciones");
 app.UseStaticFiles();
 
 app.Run();
