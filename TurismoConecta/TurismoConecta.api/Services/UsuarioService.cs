@@ -33,5 +33,24 @@ namespace TurismoConecta.api.Services
 
             return true;
         }
+        public async Task<PerfilDto?> ActualizarPerfilAsync(int idUsuario, ActualizarPerfilDto dto)
+        {
+            var usuario = await _context.Usuarios.FindAsync(idUsuario);  
+            if (usuario is null) return null;
+
+            usuario.Nombre = dto.Nombre;
+            usuario.Apellido = dto.Apellido;
+            usuario.Telefono = dto.Telefono;
+            await _context.SaveChangesAsync();   
+
+            return new PerfilDto
+            {
+                IdUsuario = usuario.IdUsuario,
+                Nombre = usuario.Nombre,
+                Apellido = usuario.Apellido,
+                Email = usuario.Email,
+                Telefono = usuario.Telefono
+            };
+        }
     }
 }
