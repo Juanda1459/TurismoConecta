@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TurismoConecta.api.DTOs.Usuarios;
 using TurismoConecta.api.Services.Interfaces;
-using System.Security.Claims; 
 
 namespace TurismoConecta.api.Controllers
 {
@@ -60,7 +60,5 @@ namespace TurismoConecta.api.Controllers
             var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             return int.Parse(idClaim!);
         }
-
-
     }
 }

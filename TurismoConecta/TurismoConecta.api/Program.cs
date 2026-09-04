@@ -57,6 +57,7 @@ builder.Services.AddSignalR();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IMunicipioService, MunicipioService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
 

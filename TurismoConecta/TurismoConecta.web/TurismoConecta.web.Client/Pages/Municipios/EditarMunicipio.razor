@@ -1,0 +1,78 @@
+﻿@using TurismoConecta.web.Client.Services 
+@using Microsoft.AspNetCore.Authorization
+@page "/municipios/{Id:int}/editar"
+@attribute [Authorize(Roles = "AdminMunicipal")]
+@inject MunicipioApiService ApiService
+
+@if (cargando)
+{
+    <p>Cargando...</p>
+}
+else if (dto is null)
+{
+    <p class="mensaje-error">No se pudo cargar el municipio.</p>
+}
+else
+{
+    <EditForm Model="dto" OnValidSubmit="Guardar">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <label>Nombre</label>
+        <InputText @bind-Value="dto.Nombre" />
+
+        <label>Descripción</label>
+        <InputTextArea @bind-Value="dto.Descripcion" />
+
+        <label>Clima</label>
+        <InputText @bind-Value="dto.Clima" />
+
+        <label>Historia</label>
+        <InputTextArea @bind-Value="dto.Historia" />
+
+        <label>Fechas relevantes</label>
+        <InputText @bind-Value="dto.FechasRelevantes" />
+
+        <button type="submit" disabled="@guardando">@(guardando ? "Guardando..." : "Guardar cambios")</button>
+    </EditForm>
+
+    @if (mensaje is not null)
+    {
+        <p class="@(exito ? "mensaje-exito" : "mensaje-error")">@mensaje</p>
+    }
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private MunicipioEditarDto? dto;
+    private bool cargando = true;
+    private bool guardando;
+    private string? mensaje;
+    private bool exito;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var ficha = await ApiService.ObtenerFichaAsync(Id);
+        if (ficha is not null)
+        {
+            dto = new MunicipioEditarDto
+            {
+                Nombre = ficha.Nombre,
+                Descripcion = ficha.Descripcion,
+                Clima = ficha.Clima,
+                Historia = ficha.Historia,
+                FechasRelevantes = ficha.FechasRelevantes
+            };
+        }
+        cargando = false;
+    }
+
+    private async Task Guardar()
+    {
+        guardando = true;
+        mensaje = null;
+        exito = await ApiService.EditarAsync(Id, dto!);
+        mensaje = exito ? "Guardado correctamente." : "No se pudo guardar los cambios.";
+        guardando = false;
+    }
+}
