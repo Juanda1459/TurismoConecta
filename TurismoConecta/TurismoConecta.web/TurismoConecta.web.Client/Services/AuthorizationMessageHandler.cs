@@ -14,12 +14,24 @@ namespace TurismoConecta.web.Client.Services
         protected override async Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            // Ajusta "authToken" al nombre real de la clave donde tu compañero guarda el JWT
-            // (revisa el AuthService/JwtService que ya tienen — probablemente usan localStorage).
-            var token = await _js.InvokeAsync<string?>("localStorage.getItem", "authToken");
+            string? token = null;
+
+            try
+            {
+                token = await _js.InvokeAsync<string?>("localStorage.getItem", "authToken");
+            }
+            catch (InvalidOperationException)
+            {
+                // Estamos en la fase de prerenderizado (servidor, sin navegador todavía).
+                // No hay token disponible en este momento — la petición sigue sin autenticar.
+                // Cuando WebAssembly termine de cargar, las siguientes peticiones sí van a
+                // encontrar el token normalmente.
+            }
 
             if (!string.IsNullOrEmpty(token))
+            {
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
 
             return await base.SendAsync(request, cancellationToken);
         }

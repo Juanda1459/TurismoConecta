@@ -66,6 +66,8 @@ builder.Services.AddOpenApi();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IMunicipioService, MunicipioService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IMunicipioEtiquetaService, MunicipioEtiquetaService>();
+builder.Services.AddScoped<IFiltroEtiquetasService, FiltroEtiquetasService>();
 
 
 

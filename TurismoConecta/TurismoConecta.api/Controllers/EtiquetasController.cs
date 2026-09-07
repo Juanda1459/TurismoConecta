@@ -30,7 +30,7 @@ public class EtiquetasController : ControllerBase
     // y verifica que tenga el claim de rol "AdminPrincipal". Si no lo tiene, ASP.NET Core
     // responde automáticamente 403 Forbidden ANTES de que tu código del método se ejecute.
     [HttpPost]
-    [Authorize(Roles = "AdminPrincipal")]
+    [Authorize(Roles = "AdminGeneral")]
     public async Task<IActionResult> Create([FromBody] EtiquetaCrearDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState); // valida los [Required]/[MaxLength] del DTO
@@ -42,7 +42,7 @@ public class EtiquetasController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [Authorize(Roles = "AdminPrincipal")]
+    [Authorize(Roles = "AdminGeneral")]
     public async Task<IActionResult> Update(int id, [FromBody] EtiquetaActualizarDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -52,7 +52,7 @@ public class EtiquetasController : ControllerBase
     }
 
     [HttpPatch("{id}/desactivar")]
-    [Authorize(Roles = "AdminPrincipal")]
+    [Authorize(Roles = "AdminGeneral")]
     public async Task<IActionResult> Desactivar(int id)
     {
         var (exito, error) = await _service.DesactivarAsync(id);
@@ -60,7 +60,7 @@ public class EtiquetasController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "AdminPrincipal")]
+    [Authorize(Roles = "AdminGeneral")]
     public async Task<IActionResult> Delete(int id)
     {
         var (exito, error) = await _service.EliminarAsync(id);
