@@ -21,7 +21,7 @@ public class MunicipioEtiquetasController : ControllerBase
     }
 
     [HttpPut]
-    [Authorize(Roles = "AdminMunicipal")]
+    [Authorize(Roles = "AdminMunicipio")]
     public async Task<IActionResult> Asignar(int idMunicipio, [FromBody] AsignarEtiquetasDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);

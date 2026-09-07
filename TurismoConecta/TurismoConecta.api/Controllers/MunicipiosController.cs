@@ -41,7 +41,7 @@ namespace TurismoConecta.api.Controllers
 
         /// <summary>Edita la ficha de un municipio. Solo el AdminMunicipal asignado a ese municipio.</summary>
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "AdminMunicipal")]
+        [Authorize(Roles = "AdminMunicipio")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
