@@ -46,7 +46,7 @@ public partial class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.UseCollation("Modern_Spanish_CI_AS");
+        modelBuilder.UseCollation("Modern_Spanish_CI_AI");
 
         modelBuilder.Entity<Categoria>(entity =>
         {

@@ -1,7 +1,7 @@
 ﻿@using TurismoConecta.web.Client.Services 
 @using Microsoft.AspNetCore.Authorization
 @page "/municipios/{Id:int}/editar"
-@attribute [Authorize(Roles = "AdminMunicipal")]
+@attribute [Authorize(Roles = "AdminMunicipio")]
 @inject MunicipioApiService ApiService
 
 @if (cargando)
