@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using TurismoConecta.web.Client.Services;
 
@@ -16,11 +17,16 @@ builder.Services.AddHttpClient<MunicipioApiService>(client =>
 })
 .AddHttpMessageHandler<AuthorizationMessageHandler>();
 
-// 👇 Registra ItinerarioApiService igual que MunicipioApiService
+// Registra ItinerarioApiService igual que MunicipioApiService
 builder.Services.AddHttpClient<ItinerarioApiService>(client =>
 {
     client.BaseAddress = new Uri("https://localhost:7078");
 })
 .AddHttpMessageHandler<AuthorizationMessageHandler>();
+
+//Servicios clave para que <AuthorizeView> no se congele:
+builder.Services.AddAuthorizationCore();
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
 
 await builder.Build().RunAsync();

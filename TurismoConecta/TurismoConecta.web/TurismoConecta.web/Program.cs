@@ -23,7 +23,10 @@ builder.Services.AddHttpClient<MunicipioApiService>(client =>
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
+
+builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthorization();
+
 
 var app = builder.Build();
 
@@ -44,7 +47,7 @@ app.UseHttpsRedirection();
 app.UseAntiforgery();
 
 
-app.UseAuthorization();   // ← NUEVA
+app.UseAuthorization();  
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

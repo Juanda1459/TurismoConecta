@@ -1,34 +1,128 @@
 ﻿@using TurismoConecta.web.Client.Services 
 @page "/municipios/{Id:int}"
+@layout EmptyLayout
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @inject MunicipioApiService ApiService
+@inject NavigationManager Nav
 
 @if (cargando)
 {
-    <p>Cargando...</p>
+    <div class="loading-spinner">Cargando información...</div>
 }
 else if (ficha is null)
 {
-    <p class="mensaje-error">No se encontró el municipio, o hubo un error de conexión.</p>
+    <div class="alert alert-danger">
+        <p>No se encontró el municipio.</p>
+        <button class="btn btn-secondary" @onclick="Volver">Volver</button>
+    </div>
 }
 else
 {
-    <h2>@ficha.Nombre</h2>
-    <img src="@ficha.ImagenUrl" alt="@ficha.Nombre" />
-    <p><strong>Clima:</strong> @ficha.Clima</p>
-    <p><strong>Historia:</strong> @ficha.Historia</p>
-    <p><strong>Fechas relevantes:</strong> @ficha.FechasRelevantes</p>
-    <p>@ficha.Descripcion</p>
-    <p><strong>Etiquetas:</strong> @string.Join(", ", ficha.Etiquetas)</p>
+    <div class="ficha-container">
+        <div class="ficha-header">
+            <img src="@ObtenerImagenMunicipio(ficha.Nombre, ficha.ImagenUrl)" alt="@ficha.Nombre" class="ficha-imagen" onerror="this.src='https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=1000&auto=format&fit=crop';" />
+            <div class="ficha-overlay">
+                <h2>@ficha.Nombre</h2>
+                <div class="etiquetas-container">
+                    @if (ficha.Etiquetas != null && ficha.Etiquetas.Any())
+                    {
+                        @foreach(var etiqueta in ficha.Etiquetas)
+                        {
+                            <span class="etiqueta-pill">@etiqueta</span>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="ficha-body">
+            <div class="info-section">
+                <h3>Descripción</h3>
+                <p>@ficha.Descripcion</p>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>🌤️ Clima</h4>
+                    <p>@ficha.Clima</p>
+                </div>
+                <div class="info-card">
+                    <h4>📅 Fechas Relevantes</h4>
+                    <p>@ficha.FechasRelevantes</p>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>📖 Historia</h3>
+                <p>@ficha.Historia</p>
+            </div>
+
+            <div class="ficha-actions">
+                <button class="btn btn-secondary" @onclick="Volver">Volver al Listado</button>
+
+                @* Solo AdminGeneral y AdminMunicipio ven el botón de Editar *@
+                <AuthorizeView Roles="AdminGeneral,AdminMunicipio">
+                    <Authorized>
+                        <button class="btn btn-primary" @onclick='() => Nav.NavigateTo($"/municipios/{Id}/editar")'>Editar Municipio</button>
+                    </Authorized>
+                </AuthorizeView>
+
+                @* Solo AdminGeneral ve el botón de Eliminar *@
+                <AuthorizeView Roles="AdminGeneral">
+                    <Authorized>
+                        <button class="btn btn-danger" @onclick="ConfirmarEliminar">Eliminar Municipio</button>
+                    </Authorized>
+                </AuthorizeView>
+            </div>
+        </div>
+    </div>
+
+    @if (mostrarConfirmacion)
+    {
+        <div class="modal-overlay">
+            <div class="modal-card">
+                <h3>¿Estás seguro?</h3>
+                <p>Esta acción eliminará el municipio <strong>@ficha.Nombre</strong> de forma permanente.</p>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" @onclick="() => mostrarConfirmacion = false">Cancelar</button>
+                    <button class="btn btn-danger" @onclick="Eliminar">Sí, eliminar</button>
+                </div>
+            </div>
+        </div>
+    }
 }
 
 @code {
     [Parameter] public int Id { get; set; }
     private MunicipioFichaDto? ficha;
     private bool cargando = true;
+    private bool mostrarConfirmacion = false;
 
     protected override async Task OnInitializedAsync()
     {
         ficha = await ApiService.ObtenerFichaAsync(Id);
         cargando = false;
+    }
+
+    private void Volver() => Nav.NavigateTo("/municipios");
+
+    private void ConfirmarEliminar() => mostrarConfirmacion = true;
+
+    private async Task Eliminar()
+    {
+        // TODO: Cuando tengas el método EliminarAsync en tu ApiService, descomenta:
+        // var eliminado = await ApiService.EliminarAsync(Id);
+        // if (eliminado) Nav.NavigateTo("/municipios");
+        
+        mostrarConfirmacion = false;
+    }
+
+    private string ObtenerImagenMunicipio(string nombre, string? imagenUrl)
+    {
+        if (!string.IsNullOrWhiteSpace(imagenUrl) && imagenUrl.StartsWith("http")) return imagenUrl;
+        if (string.IsNullOrWhiteSpace(nombre)) return "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=1000&auto=format&fit=crop";
+
+        string nombreLimpio = nombre.Replace(" de ", "").Replace("á", "a").Replace("Á", "A").Replace("é", "e").Replace("É", "E").Replace("í", "i").Replace("Í", "I").Replace("ó", "o").Replace("Ó", "O").Replace("ú", "u").Replace("Ú", "U").Replace(" ", "");
+        return $"https://localhost:7078/images/municipios/{nombreLimpio}ImgPerfil.jpg";
     }
 }
