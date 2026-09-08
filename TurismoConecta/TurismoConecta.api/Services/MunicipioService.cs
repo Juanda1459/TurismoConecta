@@ -17,7 +17,10 @@ namespace TurismoConecta.api.Services
             _context = context;
             _logger = logger;
         }
-
+        public async Task<int> CrearAsync(MunicipioCrearDto dto, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
         public async Task<ResultadoPaginado<MunicipioListadoDto>> ListarAsync(int pagina, int tamano, CancellationToken ct = default)
         {
             // Clamp: nunca dejamos que el cliente pida página 0/negativa o un tamaño absurdo (protección básica contra abuso del endpoint)
@@ -85,7 +88,7 @@ namespace TurismoConecta.api.Services
             municipio.Descripcion = dto.Descripcion;
             municipio.Clima = dto.Clima;
             municipio.Historia = dto.Historia;
-            municipio.FechasRelevantes = dto.FechasRelevantes;
+
 
             await _context.SaveChangesAsync(ct);
             _logger.LogInformation("Municipio {IdMunicipio} actualizado por el usuario {IdUsuario}", id, idAdminSolicitante);

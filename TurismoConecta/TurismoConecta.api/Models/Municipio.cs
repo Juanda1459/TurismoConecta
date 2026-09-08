@@ -17,8 +17,6 @@ public partial class Municipio
 
     public string? Clima { get; set; }
 
-    public string? FechasRelevantes { get; set; }
-
     public string? ImagenUrl { get; set; }
 
     public decimal? Latitud { get; set; }
@@ -36,6 +34,8 @@ public partial class Municipio
     public virtual ICollection<ItinerarioDetalle> ItinerarioDetalles { get; set; } = new List<ItinerarioDetalle>();
 
     public virtual ICollection<MunicipioEtiqueta> MunicipioEtiqueta { get; set; } = new List<MunicipioEtiqueta>();
+
+    public virtual ICollection<MunicipioFechaRelevante> MunicipioFechaRelevantes { get; set; } = new List<MunicipioFechaRelevante>();
 
     public virtual ICollection<Negocio> Negocios { get; set; } = new List<Negocio>();
 
