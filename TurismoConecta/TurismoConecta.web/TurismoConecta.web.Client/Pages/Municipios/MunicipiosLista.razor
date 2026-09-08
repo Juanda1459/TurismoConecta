@@ -1,4 +1,5 @@
-﻿@using TurismoConecta.web.Client.Services 
+﻿@using TurismoConecta.web.Client.Services
+@using Microsoft.AspNetCore.Components.Web
 @page "/municipios"
 @layout EmptyLayout
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
@@ -6,145 +7,390 @@
 @inject NavigationManager Nav
 @implements IDisposable
 
-<h3>Explora los municipios de Boyacá</h3>
+<HeadContent>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</HeadContent>
 
-<input @bind="textoBusqueda" @bind:event="oninput" @onkeyup="OnTeclaBusqueda" placeholder="Buscar por nombre..." />
+<div class="pagina-municipios">
 
-@if (cargando)
-{
-    <p>Cargando...</p>
-}
-else if (huboError)
-{
-    <p class="mensaje-error">No se pudo cargar la información. Intenta de nuevo.</p>
-    <button @onclick="() => CargarPagina(paginaActual)">Reintentar</button>
-}
-else if (municipios is not null && !municipios.Any())
-{
-    <p>No se encontraron municipios con esos criterios.</p>
-}
-else if (municipios is not null)
-{
-    <div class="grid-municipios">
-        @foreach (var m in municipios)
-        {
-            <div class="card-municipio">
-                @if (!string.IsNullOrEmpty(m.ImagenUrl))
+    @* ============ HERO ============ *@
+    <section class="hero">
+        <div class="hero-fondo" aria-hidden="true"></div>
+        <div class="hero-contenido">
+            <p class="hero-eyebrow">Boyacá, Colombia</p>
+            <h1 class="hero-titulo">Explora los pueblos mágicos de Boyacá</h1>
+            <p class="hero-bajada">
+                Calles de piedra, plazas blancas y montañas de páramo: encuentra el municipio
+                que combina con tu próximo viaje y súmalo a tu itinerario en un clic.
+            </p>
+
+            <div class="buscador">
+                <svg class="icono-buscar" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" />
+                    <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                <input class="buscador-input" @bind="textoBusqueda" @bind:event="oninput" @onkeyup="OnTeclaBusqueda"
+                       placeholder="Busca por nombre: Villa de Leyva, Monguí..." />
+                @if (!string.IsNullOrWhiteSpace(textoBusqueda))
                 {
-                    <img src="@m.ImagenUrl" alt="@m.Nombre" />
+                    <button class="buscador-limpiar" @onclick="LimpiarBusqueda" aria-label="Limpiar búsqueda">✕</button>
                 }
-                <h4>@m.Nombre</h4>
-                <p>@string.Join(", ", m.Etiquetas)</p>
+            </div>
+        </div>
+        <svg class="hero-horizonte" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0,80 L120,40 L260,65 L400,20 L560,55 L720,15 L900,60 L1060,30 L1220,58 L1440,25 L1440,90 L0,90 Z" />
+        </svg>
+    </section>
 
-                <input type="checkbox"
-                       checked="@seleccionados.Contains(m.IdMunicipio)"
-                       @onchange="e => ToggleSeleccion(m.IdMunicipio, (bool)e.Value!)" />
-                <label>Agregar al itinerario</label>
+    @* ============ FILTROS POR ETIQUETA ============ *@
+    @if (etiquetasDisponibles.Any())
+    {
+        <section class="filtros" aria-label="Filtrar por experiencia">
+            <div class="filtros-lista">
+                @foreach (var etiqueta in etiquetasDisponibles)
+                {
+                    <button class="chip @(filtrosActivos.Contains(etiqueta) ? "chip-activo" : "")"
+                            @onclick="() => ToggleFiltro(etiqueta)">
+                        @etiqueta
+                    </button>
+                }
+            </div>
+            @if (filtrosActivos.Any())
+            {
+                <button class="filtros-limpiar" @onclick="LimpiarFiltros">Limpiar filtros</button>
+            }
+        </section>
+    }
 
-                <button @onclick="() => VerFicha(m.IdMunicipio)">Ver más</button>
+    @* ============ CARRUSEL DE DESTACADOS ============ *@
+    @if (!cargando && destacados.Any())
+    {
+        <section class="destacados" @onmouseenter="() => carruselPausado = true" @onmouseleave="() => carruselPausado = false">
+            <h2 class="destacados-titulo">Recomendado para ti</h2>
+            <div class="destacados-carrusel">
+                @{
+                    var actual = destacados[indiceCarrusel % destacados.Count];
+                }
+                <div class="destacado-card" @key="actual.Id">
+                    <div class="destacado-img" style="background-image:url('@actual.ImagenUrl')"></div>
+                    <div class="destacado-info">
+                        <span class="sello-recomendado">★ Popular entre viajeros</span>
+                        <h3>@actual.Nombre</h3>
+                        <p>@actual.Resumen</p>
+                        <button class="btn-primario" @onclick="() => VerFicha(actual.Id)">Explorar pueblo</button>
+                    </div>
+                </div>
+                <div class="destacados-puntos">
+                    @for (int i = 0; i < destacados.Count; i++)
+                    {
+                        var idx = i;
+                        <button class="punto @(idx == indiceCarrusel ? "punto-activo" : "")"
+                                @onclick="() => IrADestacado(idx)" aria-label="Ver destacado @(idx + 1)"></button>
+                    }
+                </div>
+            </div>
+        </section>
+    }
+
+    @* ============ CONTENIDO PRINCIPAL ============ *@
+    <section class="catalogo">
+        @if (cargando)
+        {
+            <div class="grid-municipios">
+                @for (int i = 0; i < 9; i++)
+                {
+                    <div class="card-esqueleto">
+                        <div class="esqueleto-img shimmer"></div>
+                        <div class="esqueleto-linea shimmer" style="width:70%"></div>
+                        <div class="esqueleto-linea shimmer" style="width:45%"></div>
+                    </div>
+                }
             </div>
         }
-    </div>
+        else if (huboError)
+        {
+            <div class="estado estado-error">
+                <p class="estado-titulo">No se pudo cargar la información</p>
+                <p class="estado-texto">Revisa tu conexión e inténtalo de nuevo.</p>
+                <button class="btn-primario" @onclick="() => CargarPagina(paginaActual)">Reintentar</button>
+            </div>
+        }
+        else if (municipiosFiltrados is not null && !municipiosFiltrados.Any())
+        {
+            <div class="estado estado-vacio">
+                <svg viewBox="0 0 64 64" class="estado-icono" aria-hidden="true">
+                    <circle cx="27" cy="27" r="16" fill="none" stroke="currentColor" stroke-width="3" />
+                    <line x1="39" y1="39" x2="54" y2="54" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+                </svg>
+                <p class="estado-titulo">No encontramos municipios con esos criterios</p>
+                <p class="estado-texto">Intenta limpiar los filtros o buscar con otro nombre.</p>
+                <button class="btn-secundario" @onclick="LimpiarFiltros">Limpiar filtros</button>
+            </div>
+        }
+        else if (municipiosFiltrados is not null)
+        {
+            <div class="grid-municipios">
+                @foreach (var m in municipiosFiltrados)
+                {
+                    <article class="card-municipio" @key="m.Id">
+                        <div class="card-img-container">
+                            <img src="@m.ImagenUrl" alt="@m.Nombre"
+                                 onerror="this.src='https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=500&auto=format&fit=crop';" />
 
-    @if (totalPaginas > 1 && string.IsNullOrWhiteSpace(textoBusqueda))
-    {
-        <div class="paginacion">
-            <button disabled="@(paginaActual <= 1)" @onclick="() => CargarPagina(paginaActual - 1)">Anterior</button>
-            <span>Página @paginaActual de @totalPaginas</span>
-            <button disabled="@(paginaActual >= totalPaginas)" @onclick="() => CargarPagina(paginaActual + 1)">Siguiente</button>
+                            <div class="card-badges">
+                                @foreach (var etiqueta in m.Etiquetas.Take(2))
+                                {
+                                    <span class="badge">@etiqueta</span>
+                                }
+                            </div>
+
+                            @if (m.Recomendado)
+                            {
+                                <span class="badge-recomendado">Recomendado</span>
+                            }
+
+                            <button class="btn-agregar @(seleccionados.Contains(m.Id) ? "btn-agregar-activo" : "")"
+                                    title="@(seleccionados.Contains(m.Id) ? "Quitar del itinerario" : "Añadir al itinerario")"
+                                    @onclick="() => ToggleSeleccion(m.Id)">
+                                @(seleccionados.Contains(m.Id) ? "✓" : "+")
+                            </button>
+                        </div>
+
+                        <div class="card-content">
+                            <div class="card-ubicacion">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 21s-7-6.1-7-11a7 7 0 1 1 14 0c0 4.9-7 11-7 11Z" stroke="currentColor" stroke-width="1.6" />
+                                    <circle cx="12" cy="10" r="2.4" stroke="currentColor" stroke-width="1.6" />
+                                </svg>
+                                <span>Boyacá</span>
+                            </div>
+                            <h3 class="card-titulo">@m.Nombre</h3>
+                            <p class="card-resumen">@m.Resumen</p>
+                        </div>
+
+                        <div class="card-footer">
+                            <button class="btn-primario btn-full" @onclick="() => VerFicha(m.Id)">Explorar pueblo</button>
+                        </div>
+                    </article>
+                }
+            </div>
+
+            @if (totalPaginas > 1 && string.IsNullOrWhiteSpace(textoBusqueda))
+            {
+                <div class="paginacion">
+                    <button class="btn-page" disabled="@(paginaActual <= 1)" @onclick="() => CargarPagina(paginaActual - 1)">← Anterior</button>
+                    <span class="page-info">Página @paginaActual de @totalPaginas</span>
+                    <button class="btn-page" disabled="@(paginaActual >= totalPaginas)" @onclick="() => CargarPagina(paginaActual + 1)">Siguiente →</button>
+                </div>
+            }
+        }
+    </section>
+</div>
+
+@if (seleccionados.Any())
+{
+    <div class="floating-action">
+        <div class="floating-texto">
+            <strong>@seleccionados.Count</strong> municipio@(seleccionados.Count == 1 ? "" : "s") en tu itinerario
         </div>
-    }
-
-    @if (seleccionados.Any())
-    {
-        <p>@seleccionados.Count municipio(s) seleccionados.</p>
-        <button @onclick="IrACrearItinerario">Crear itinerario con estos</button>
-    }
+        <button class="btn-itinerario" @onclick="IrACrearItinerario">Crear itinerario</button>
+    </div>
 }
 
 @code {
-    private List<MunicipioListadoDto>? municipios;
-    private string textoBusqueda = "";
-    private HashSet<int> seleccionados = new();
-    private bool cargando = true;
-    private bool huboError;
-    private int paginaActual = 1;
-    private int totalPaginas = 1;
+    // ---- Vista enriquecida sobre el DTO de la API ----
+    // NOTA: MunicipioListadoDto hoy solo trae Nombre, ImagenUrl, IdMunicipio y Etiquetas.
+    // "Resumen" y "Recomendado" se calculan aquí a partir de esos datos como marcador
+    // visual temporal. Cuando el backend agregue campos reales (Descripcion, EsRecomendado,
+    // Provincia, DistanciaKm) basta con reemplazar CrearVista(...) por esos valores
+    
+        // ---- Vista enriquecida sobre el DTO de la API ----
+        private record MunicipioVista(int Id, string Nombre, string ImagenUrl, List<string> Etiquetas, string Resumen, bool Recomendado);
 
-    // Cancela la búsqueda anterior si el usuario sigue escribiendo antes de que termine —
-    // evita que respuestas "viejas" lleguen tarde y pisen resultados más nuevos.
-    private CancellationTokenSource? _ctsBusqueda;
-    private System.Timers.Timer? _debounceTimer;
+        private List<MunicipioListadoDto>? municipios;
+        private List<MunicipioVista> vistas = new();
+        private string textoBusqueda = "";
+        private HashSet<int> seleccionados = new();
+        private HashSet<string> filtrosActivos = new();
+        private bool cargando = true;
+        private bool huboError;
+        private int paginaActual = 1;
+        private int totalPaginas = 1;
 
-    protected override async Task OnInitializedAsync() => await CargarPagina(1);
+        private List<MunicipioVista> destacados = new();
+        private int indiceCarrusel = 0;
+        private bool carruselPausado = false;
+        private System.Timers.Timer? _carruselTimer;
 
-    private void OnTeclaBusqueda(KeyboardEventArgs e)
-    {
-        _debounceTimer?.Stop();
-        _debounceTimer = new System.Timers.Timer(400) { AutoReset = false }; // espera 400ms de silencio antes de buscar
-        _debounceTimer.Elapsed += async (_, _) => await InvokeAsync(EjecutarBusqueda);
-        _debounceTimer.Start();
-    }
+        private CancellationTokenSource? _ctsBusqueda;
+        private System.Timers.Timer? _debounceTimer;
 
-    private async Task EjecutarBusqueda()
-    {
-        _ctsBusqueda?.Cancel();
-        _ctsBusqueda = new CancellationTokenSource();
+        private List<string> etiquetasDisponibles =>
+            vistas.SelectMany(v => v.Etiquetas).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(e => e).ToList();
 
-        if (string.IsNullOrWhiteSpace(textoBusqueda))
+        private IEnumerable<MunicipioVista>? municipiosFiltrados =>
+            vistas.Where(v => !filtrosActivos.Any() || filtrosActivos.All(f => v.Etiquetas.Contains(f, StringComparer.OrdinalIgnoreCase)));
+
+        protected override async Task OnInitializedAsync() => await CargarPagina(1);
+
+        // ---- Misma lógica de imagen que tenías en el archivo original ----
+        private string ObtenerImagenMunicipio(string nombre, string? imagenUrl)
         {
-            await CargarPagina(1);
-            return;
+            if (!string.IsNullOrWhiteSpace(imagenUrl) && imagenUrl.StartsWith("http"))
+                return imagenUrl;
+
+            if (string.IsNullOrWhiteSpace(nombre))
+                return "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=500&auto=format&fit=crop";
+
+            string nombreLimpio = nombre.Replace(" de ", "")
+                                        .Replace("á", "a").Replace("Á", "A")
+                                        .Replace("é", "e").Replace("É", "E")
+                                        .Replace("í", "i").Replace("Í", "I")
+                                        .Replace("ó", "o").Replace("Ó", "O")
+                                        .Replace("ú", "u").Replace("Ú", "U")
+                                        .Replace(" ", "");
+
+            return $"https://localhost:7078/images/municipios/{nombreLimpio}ImgPerfil.jpg";
         }
 
-        cargando = true;
-        huboError = false;
-        StateHasChanged();
-
-        var resultado = await ApiService.BuscarAsync(textoBusqueda, _ctsBusqueda.Token);
-        municipios = resultado;
-        huboError = resultado is null;
-        cargando = false;
-        StateHasChanged();
-    }
-
-    private async Task CargarPagina(int pagina)
-    {
-        cargando = true;
-        huboError = false;
-        var resultado = await ApiService.ListarAsync(pagina, 12);
-
-        if (resultado is null)
+        private MunicipioVista CrearVista(MunicipioListadoDto m)
         {
-            huboError = true;
+            var etiquetas = m.Etiquetas?.ToList() ?? new List<string>();
+
+            var resumen = etiquetas.Any()
+                ? $"Un pueblo para vivir {string.Join(" y ", etiquetas.Take(2)).ToLowerInvariant()}, a tu ritmo."
+                : "Un rincón de Boyacá con historia, montañas y gente cálida esperando ser descubierto.";
+            if (resumen.Length > 100) resumen = resumen[..97] + "...";
+
+            var recomendado = etiquetas.Count >= 2;
+            var imagen = ObtenerImagenMunicipio(m.Nombre, m.ImagenUrl);
+
+            return new MunicipioVista(m.IdMunicipio, m.Nombre, imagen, etiquetas, resumen, recomendado);
         }
-        else
+
+        private void ActualizarVistas(List<MunicipioListadoDto>? datos)
         {
-            municipios = resultado.Items;
-            paginaActual = resultado.Pagina;
-            totalPaginas = Math.Max(1, resultado.TotalPaginas);
+            municipios = datos;
+            vistas = datos?.Select(CrearVista).ToList() ?? new List<MunicipioVista>();
+
+            destacados = vistas.Where(v => v.Recomendado).Take(5).ToList();
+            indiceCarrusel = 0;
+            ReiniciarCarrusel();
         }
-        cargando = false;
-    }
 
-    private void ToggleSeleccion(int id, bool marcado)
-    {
-        if (marcado) seleccionados.Add(id);
-        else seleccionados.Remove(id);
-    }
+        private void ReiniciarCarrusel()
+        {
+            _carruselTimer?.Stop();
+            _carruselTimer?.Dispose();
+            _carruselTimer = null;
 
-    private void VerFicha(int id) => Nav.NavigateTo($"/municipios/{id}");
+            if (destacados.Count <= 1) return;
 
-    private void IrACrearItinerario()
-    {
-        var ids = string.Join(",", seleccionados);
-        Nav.NavigateTo($"/itinerarios/crear?municipios={ids}");
-    }
+            _carruselTimer = new System.Timers.Timer(4500) { AutoReset = true };
+            _carruselTimer.Elapsed += async (_, _) =>
+            {
+                if (carruselPausado) return;
+                indiceCarrusel = (indiceCarrusel + 1) % destacados.Count;
+                await InvokeAsync(StateHasChanged);
+            };
+            _carruselTimer.Start();
+        }
 
-    public void Dispose()
-    {
-        _debounceTimer?.Dispose();
-        _ctsBusqueda?.Cancel();
-        _ctsBusqueda?.Dispose();
-    }
+        private void IrADestacado(int indice)
+        {
+            indiceCarrusel = indice;
+        }
+
+        private void OnTeclaBusqueda(KeyboardEventArgs e)
+        {
+            _debounceTimer?.Stop();
+            _debounceTimer = new System.Timers.Timer(400) { AutoReset = false };
+            _debounceTimer.Elapsed += async (_, _) => await InvokeAsync(EjecutarBusqueda);
+            _debounceTimer.Start();
+        }
+
+        // ---- CORREGIDO: ahora SIEMPRE llama StateHasChanged al final,
+        // sin importar si el texto quedó vacío o no ----
+        private async Task EjecutarBusqueda()
+        {
+            _ctsBusqueda?.Cancel();
+            _ctsBusqueda = new CancellationTokenSource();
+
+            cargando = true;
+            huboError = false;
+            StateHasChanged();
+
+            if (string.IsNullOrWhiteSpace(textoBusqueda))
+            {
+                await CargarPagina(1);
+            }
+            else
+            {
+                var resultado = await ApiService.BuscarAsync(textoBusqueda, _ctsBusqueda.Token);
+                ActualizarVistas(resultado);
+                huboError = resultado is null;
+            }
+
+            cargando = false;
+            StateHasChanged();
+        }
+
+        private async Task LimpiarBusqueda()
+        {
+            textoBusqueda = "";
+            await EjecutarBusqueda();
+        }
+
+        private void ToggleFiltro(string etiqueta)
+        {
+            if (!filtrosActivos.Remove(etiqueta))
+                filtrosActivos.Add(etiqueta);
+        }
+
+        private void LimpiarFiltros() => filtrosActivos.Clear();
+
+        private async Task CargarPagina(int pagina)
+        {
+            cargando = true;
+            huboError = false;
+            var resultado = await ApiService.ListarAsync(pagina, 12);
+
+            if (resultado is null)
+            {
+                huboError = true;
+            }
+            else
+            {
+                ActualizarVistas(resultado.Items);
+                paginaActual = resultado.Pagina;
+                totalPaginas = Math.Max(1, resultado.TotalPaginas);
+            }
+            cargando = false;
+        }
+
+        private void ToggleSeleccion(int id)
+        {
+            if (!seleccionados.Remove(id))
+                seleccionados.Add(id);
+        }
+
+        private void VerFicha(int id) => Nav.NavigateTo($"/municipios/{id}");
+
+        private void IrACrearItinerario()
+        {
+            var ids = string.Join(",", seleccionados);
+            Nav.NavigateTo($"/itinerarios/crear?municipios={ids}");
+        }
+
+        public void Dispose()
+        {
+            _debounceTimer?.Dispose();
+            _ctsBusqueda?.Cancel();
+            _ctsBusqueda?.Dispose();
+            _carruselTimer?.Stop();
+            _carruselTimer?.Dispose();
+        }
+    
 }

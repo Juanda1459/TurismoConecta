@@ -1,0 +1,189 @@
+﻿.ficha-container {
+    max-width: 900px;
+    margin: 0 auto 40px auto;
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.ficha-header {
+    position: relative;
+    height: 400px;
+}
+
+.ficha-imagen {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ficha-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+    color: white;
+    padding: 40px 30px 20px 30px;
+}
+
+    .ficha-overlay h2 {
+        margin: 0 0 15px 0;
+        font-size: 3rem;
+        font-weight: 700;
+    }
+
+.etiquetas-container {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.etiqueta-pill {
+    background: rgba(255,255,255,0.25);
+    backdrop-filter: blur(5px);
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.ficha-body {
+    padding: 40px;
+}
+
+.info-section {
+    margin-bottom: 35px;
+}
+
+    .info-section h3 {
+        color: #1f2937;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+        font-size: 1.5rem;
+    }
+
+    .info-section p {
+        color: #4b5563;
+        line-height: 1.8;
+        font-size: 1.05rem;
+    }
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 35px;
+}
+
+.info-card {
+    background: #f8fafc;
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+    .info-card h4 {
+        margin: 0 0 10px 0;
+        color: #3b82f6;
+        font-size: 1.2rem;
+    }
+
+    .info-card p {
+        margin: 0;
+        color: #475569;
+        font-size: 1.05rem;
+    }
+
+.ficha-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 40px;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 25px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background-color: #3b82f6;
+    color: white;
+}
+
+    .btn-primary:hover {
+        background-color: #2563eb;
+        transform: translateY(-2px);
+    }
+
+.btn-secondary {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+
+    .btn-secondary:hover {
+        background-color: #e2e8f0;
+    }
+
+.btn-danger {
+    background-color: #ef4444;
+    color: white;
+}
+
+    .btn-danger:hover {
+        background-color: #dc2626;
+        transform: translateY(-2px);
+    }
+
+/* Modal de confirmación para eliminar */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-card {
+    background: white;
+    padding: 35px;
+    border-radius: 16px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    text-align: center;
+}
+
+    .modal-card h3 {
+        margin: 0 0 15px 0;
+        color: #1f2937;
+        font-size: 1.5rem;
+    }
+
+    .modal-card p {
+        color: #6b7280;
+        margin-bottom: 25px;
+    }
+
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}

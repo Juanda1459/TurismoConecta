@@ -115,6 +115,7 @@
             {
                 respuesta = await resultadoHttp.Content.ReadFromJsonAsync<AuthResponse>();
 
+                if (respuesta is null) return; // si por alguna razón llega null, salimos
 
                 await JS.InvokeVoidAsync("guardarToken", respuesta.Token);
 

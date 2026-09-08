@@ -64,15 +64,15 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.IdCategoria).HasColumnName("idCategoria");
             entity.Property(e => e.Descripcion)
                 .HasMaxLength(300)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("descripcion");
             entity.Property(e => e.Icono)
                 .HasMaxLength(100)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("icono");
             entity.Property(e => e.Nombre)
                 .HasMaxLength(100)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("nombre");
         });
 
@@ -85,16 +85,16 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.IdDepartamento).HasColumnName("idDepartamento");
             entity.Property(e => e.Descripcion)
                 .HasMaxLength(500)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("descripcion");
             entity.Property(e => e.Nombre)
                 .HasMaxLength(100)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("nombre");
             entity.Property(e => e.Pais)
                 .HasMaxLength(100)
                 .HasDefaultValue("Colombia")
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("pais");
         });
 
@@ -108,14 +108,15 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("activo");
             entity.Property(e => e.Descripcion)
                 .HasMaxLength(300)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("descripcion");
             entity.Property(e => e.Icono)
                 .HasMaxLength(100)
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("icono");
             entity.Property(e => e.Nombre)
                 .HasMaxLength(100)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")       
                 .HasColumnName("nombre");
         });
 
@@ -184,7 +185,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.IdNegocio).HasColumnName("idNegocio");
             entity.Property(e => e.ImagenUrl)
                 .HasMaxLength(300)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("imagenUrl");
 
             entity.HasOne(d => d.IdNegocioNavigation).WithMany(p => p.GaleriaNegocios)
@@ -212,11 +213,11 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.IdUsuario).HasColumnName("idUsuario");
             entity.Property(e => e.Nombre)
                 .HasMaxLength(150)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("nombre");
             entity.Property(e => e.Observaciones)
                 .HasMaxLength(150)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("observaciones");
 
             entity.HasOne(d => d.IdUsuarioNavigation).WithMany(p => p.Itinerarios)
@@ -268,22 +269,22 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("activo");
             entity.Property(e => e.Clima)
                 .HasMaxLength(200)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")   
                 .HasColumnName("clima");
             entity.Property(e => e.Descripcion)
                 .HasMaxLength(1000)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("descripcion");
             entity.Property(e => e.FechaCreacion)
                 .HasDefaultValueSql("(sysdatetime())")
                 .HasColumnName("fechaCreacion");
             entity.Property(e => e.Historia)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("historia");
             entity.Property(e => e.IdDepartamento).HasColumnName("idDepartamento");
             entity.Property(e => e.ImagenUrl)
                 .HasMaxLength(300)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("imagenUrl");
             entity.Property(e => e.Latitud)
                 .HasColumnType("decimal(9, 6)")
@@ -293,7 +294,7 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("longitud");
             entity.Property(e => e.Nombre)
                 .HasMaxLength(100)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("nombre");
 
             entity.HasOne(d => d.IdDepartamentoNavigation).WithMany(p => p.Municipios)
@@ -359,33 +360,33 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.IdNegocio).HasColumnName("idNegocio");
             entity.Property(e => e.Descripcion)
                 .HasMaxLength(1000)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("descripcion");
             entity.Property(e => e.Direccion)
                 .HasMaxLength(250)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("direccion");
             entity.Property(e => e.Email)
                 .HasMaxLength(200)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("email");
             entity.Property(e => e.Estado)
                 .HasMaxLength(20)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasDefaultValue("Pendiente", "DF_Negocio_estado")
                 .HasColumnName("estado");
             entity.Property(e => e.FechaAprobacion).HasColumnName("fechaAprobacion");
             entity.Property(e => e.FechaRegistro).HasColumnName("fechaRegistro");
             entity.Property(e => e.Horario)
                 .HasMaxLength(200)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("horario");
             entity.Property(e => e.IdCategoria).HasColumnName("idCategoria");
             entity.Property(e => e.IdMunicipio).HasColumnName("idMunicipio");
             entity.Property(e => e.IdUsuario).HasColumnName("idUsuario");
             entity.Property(e => e.ImagenPrincipalUrl)
                 .HasMaxLength(300)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("imagenPrincipalUrl");
             entity.Property(e => e.Latitud)
                 .HasColumnType("decimal(9, 6)")
@@ -395,11 +396,11 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("longitud");
             entity.Property(e => e.Nombre)
                 .HasMaxLength(150)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("nombre");
             entity.Property(e => e.Telefono)
                 .HasMaxLength(30)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("telefono");
 
             entity.HasOne(d => d.IdCategoriaNavigation).WithMany(p => p.Negocios)
@@ -451,7 +452,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Leida).HasColumnName("leida");
             entity.Property(e => e.Mensaje)
                 .HasMaxLength(500)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("mensaje");
 
             entity.HasOne(d => d.IdTipoNotificacionNavigation).WithMany(p => p.Notificacions)
@@ -475,7 +476,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Calificacion).HasColumnName("calificacion");
             entity.Property(e => e.Comentario)
                 .HasMaxLength(1000)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("comentario");
             entity.Property(e => e.FechaCreacion).HasColumnName("fechaCreacion");
             entity.Property(e => e.FechaRespuesta).HasColumnName("fechaRespuesta");
@@ -485,7 +486,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Moderada).HasColumnName("moderada");
             entity.Property(e => e.Respuesta)
                 .HasMaxLength(1000)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("respuesta");
 
             entity.HasOne(d => d.IdMunicipioNavigation).WithMany(p => p.Reseñas)
@@ -513,11 +514,11 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.IdRol).HasColumnName("idRol");
             entity.Property(e => e.Descripcion)
                 .HasMaxLength(300)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("descripcion");
             entity.Property(e => e.Nombre)
                 .HasMaxLength(50)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("nombre");
         });
 
@@ -532,11 +533,11 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.IdTipoNotificacion).HasColumnName("idTipoNotificacion");
             entity.Property(e => e.Codigo)
                 .HasMaxLength(50)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("codigo");
             entity.Property(e => e.Descripcion)
                 .HasMaxLength(300)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("descripcion");
         });
 
@@ -554,11 +555,11 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("activo");
             entity.Property(e => e.Apellido)
                 .HasMaxLength(100)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("apellido");
             entity.Property(e => e.Email)
                 .HasMaxLength(200)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("email");
             entity.Property(e => e.EmailConfirmado).HasColumnName("emailConfirmado");
             entity.Property(e => e.FechaRegistro)
@@ -566,23 +567,23 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("fechaRegistro");
             entity.Property(e => e.FotoUrl)
                 .IsUnicode(false)
-                .UseCollation("Modern_Spanish_CI_AS");
+                .UseCollation("Modern_Spanish_CI_AI");
             entity.Property(e => e.IdRol).HasColumnName("idRol");
             entity.Property(e => e.MunicipioAsignadoId).HasColumnName("municipioAsignadoId");
             entity.Property(e => e.Nombre)
                 .HasMaxLength(100)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("nombre");
             entity.Property(e => e.PasswordHash)
                 .HasMaxLength(300)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("passwordHash");
             entity.Property(e => e.PasswordResetToken)
                 .HasMaxLength(256)
-                .UseCollation("Modern_Spanish_CI_AS");
+                .UseCollation("Modern_Spanish_CI_AI");
             entity.Property(e => e.Telefono)
                 .HasMaxLength(30)
-                .UseCollation("Modern_Spanish_CI_AS")
+                .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("telefono");
 
             entity.HasOne(d => d.IdRolNavigation).WithMany(p => p.Usuarios)

@@ -1,0 +1,87 @@
+﻿@page "/itinerarios/compartido/{Codigo:guid}"
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@using TurismoConecta.web.Client.Services
+@inject ItinerarioApiService ApiService
+@inject NavigationManager Nav
+
+<div class="container mt-4">
+    @if (cargando)
+    {
+        <p class="text-center">Cargando itinerario de viaje...</p>
+    }
+    else if (itinerario == null)
+    {
+        <div class="alert alert-warning text-center">
+            <h4>¡Ups! Enlace no válido</h4>
+            <p>El itinerario no existe o el creador dejó de compartirlo.</p>
+            <button class="btn btn-primary" @onclick='() => Nav.NavigateTo("/")'>Ir al inicio</button>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center mb-4">
+            🌟 <strong>Estás viendo un itinerario compartido.</strong> ¿Te gusta? <a href="/register">Crea tu cuenta</a> para armar el tuyo.
+        </div>
+
+        <div class="hero-itinerario mb-5">
+            <h2 class="hero-titulo">@itinerario.Nombre</h2>
+            <p class="lead">
+                Del <strong>@(itinerario.FechaInicio?.ToString("dd/MM/yyyy") ?? "Inicio sin definir")</strong> 
+                al <strong>@(itinerario.FechaFin?.ToString("dd/MM/yyyy") ?? "Fin sin definir")</strong>
+            </p>
+            @if (!string.IsNullOrEmpty(itinerario.Observaciones))
+            {
+                <hr />
+                <p class="text-muted"><em>"@itinerario.Observaciones"</em></p>
+            }
+        </div>
+
+        <h4 class="mb-4">Ruta sugerida</h4>
+
+        @if (!itinerario.Paradas.Any())
+        {
+            <p class="text-muted">Aún no hay paradas en este itinerario.</p>
+        }
+        else
+        {
+            var paradasAgrupadasPorDia = itinerario.Paradas.GroupBy(p => p.DiaNumero).OrderBy(g => g.Key);
+
+            <div class="row">
+                @foreach (var grupoDia in paradasAgrupadasPorDia)
+                {
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">Día @grupoDia.Key</h5>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                @foreach (var parada in grupoDia.OrderBy(p => p.Orden))
+                                {
+                                    <li class="list-group-item parada-item-publico">
+                                        <span class="numero-parada-publico">@parada.Orden</span>
+                                        <div>
+                                            <h6 class="mb-0">@parada.NombreMunicipio</h6>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public Guid Codigo { get; set; }
+    private ItinerarioDetalleDto? itinerario;
+    private bool cargando = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        cargando = true;
+        itinerario = await ApiService.ObtenerCompartidoAsync(Codigo);
+        cargando = false;
+    }
+}

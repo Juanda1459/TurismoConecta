@@ -1,0 +1,125 @@
+﻿@page "/itinerarios/crear"
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@using TurismoConecta.web.Client.Services
+@inject ItinerarioApiService ItiApi
+@inject MunicipioApiService MuniApi
+@inject NavigationManager Nav
+
+<h3>Crear Nuevo Itinerario</h3>
+
+@if (cargandoInicial)
+{
+    <p>Cargando datos...</p>
+}
+else
+{
+    <EditForm Model="modelo" OnValidSubmit="GuardarItinerario">
+        <DataAnnotationsValidator />
+        
+        @if (!string.IsNullOrEmpty(mensajeError))
+        {
+            <div class="alert alert-danger">@mensajeError</div>
+        }
+
+        <div class="form-seccion">
+            <h4 class="form-titulo">Datos Generales</h4>
+            
+            <div class="mb-3">
+                <label class="form-label">Nombre del Itinerario (*)</label>
+                <InputText @bind-Value="modelo.Nombre" class="form-control" placeholder="Ej: Viaje de fin de semana" />
+                <ValidationMessage For="@(() => modelo.Nombre)" class="text-danger" />
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Fecha de Inicio</label>
+                    <InputDate @bind-Value="modelo.FechaInicio" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Fecha de Fin</label>
+                    <InputDate @bind-Value="modelo.FechaFin" class="form-control" />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Observaciones</label>
+                <InputTextArea @bind-Value="modelo.Observaciones" class="form-control" rows="3" />
+            </div>
+        </div>
+
+        <div class="form-seccion">
+            <h4 class="form-titulo">Municipios Seleccionados</h4>
+            
+            @if (municipiosSeleccionados.Any())
+            {
+                <ul class="list-group lista-municipios">
+                    @foreach (var muni in municipiosSeleccionados)
+                    {
+                        <li class="list-group-item"><strong>@muni.Nombre</strong></li>
+                    }
+                </ul>
+                <p class="text-muted mt-2"><small>Podrás editar los días y reordenar las paradas más adelante.</small></p>
+            }
+            else
+            {
+                <p class="text-warning">No has seleccionado municipios.</p>
+                <button type="button" class="btn btn-secondary" @onclick='() => Nav.NavigateTo("/municipios")'>Ir a Municipios</button>
+            }
+        </div>
+
+        <button type="submit" class="btn btn-success me-2" disabled="@guardando">
+            @(guardando ? "Guardando..." : "Crear Itinerario")
+        </button>
+        <button type="button" class="btn btn-secondary" @onclick='() => Nav.NavigateTo("/municipios")'>Cancelar</button>
+    </EditForm>
+}
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? Municipios { get; set; }
+
+    private ItinerarioCreateRequest modelo = new();
+    private List<MunicipioFichaDto> municipiosSeleccionados = new();
+
+    private bool cargandoInicial = true;
+    private bool guardando = false;
+    private string? mensajeError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        cargandoInicial = true;
+        if (!string.IsNullOrEmpty(Municipios))
+        {
+            var ids = Municipios.Split(',').Select(int.Parse).ToList();
+            int orden = 1;
+            foreach (var id in ids)
+            {
+                var muniInfo = await MuniApi.ObtenerFichaAsync(id);
+                if (muniInfo != null)
+                {
+                    municipiosSeleccionados.Add(muniInfo);
+                    modelo.Paradas.Add(new ParadaCreateRequest { IdMunicipio = id, DiaNumero = 1, Orden = orden++ });
+                }
+            }
+        }
+        cargandoInicial = false;
+    }
+
+    private async Task GuardarItinerario()
+    {
+        if (!modelo.Paradas.Any())
+        {
+            mensajeError = "Debes seleccionar al menos un municipio.";
+            return;
+        }
+
+        guardando = true;
+        mensajeError = null;
+
+        var resultado = await ItiApi.CrearAsync(modelo);
+        if (resultado != null) Nav.NavigateTo($"/itinerarios/{resultado.IdItinerario}");
+        else mensajeError = "Error al guardar. Inténtalo de nuevo.";
+        
+        guardando = false;
+    }
+}

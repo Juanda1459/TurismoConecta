@@ -1,5 +1,100 @@
-﻿<h3>CrearMunicipio</h3>
+﻿@using TurismoConecta.web.Client.Services 
+@page "/municipios/crear"
+@layout EmptyLayout
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@inject MunicipioApiService ApiService
+@inject NavigationManager Nav
+
+<AuthorizeView Roles="AdminGeneral">
+    <Authorized Context="authContext">
+        <div class="form-wrapper">
+            <div class="form-header">
+                <h2>Crear Nuevo Municipio</h2>
+                <p>Agrega un nuevo destino turístico al catálogo.</p>
+            </div>
+
+            <div class="form-card">
+                <EditForm Model="dto" OnValidSubmit="Guardar">
+                    <DataAnnotationsValidator />
+                    
+                    <div class="form-group">
+                        <label>Nombre del Municipio</label>
+                        <InputText @bind-Value="dto.Nombre" class="form-control" placeholder="Ej. Monguí" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Descripción General</label>
+                        <InputTextArea @bind-Value="dto.Descripcion" class="form-control" rows="3" placeholder="Describe los atractivos principales..." />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Clima</label>
+                            <InputText @bind-Value="dto.Clima" class="form-control" placeholder="Ej. Frío, 12°C" />
+                        </div>
+                        <div class="form-group half">
+                            <label>Fechas Relevantes</label>
+                            <InputText @bind-Value="dto.FechasRelevantes" class="form-control" placeholder="Ej. Ferias en Enero" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Historia</label>
+                        <InputTextArea @bind-Value="dto.Historia" class="form-control" rows="4" placeholder="Breve reseña histórica..." />
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+                        <button type="submit" class="btn btn-success" disabled="@guardando">
+                            @(guardando ? "Creando..." : "Crear Municipio")
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+
+            @if (mensaje is not null)
+            {
+                <div class="toast-message @(exito ? "toast-success" : "toast-error")">
+                    @mensaje
+                </div>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="acceso-denegado">
+            <h3>⛔ Acceso Denegado</h3>
+            <p>No tienes permisos para crear municipios. Solo el <strong>Administrador General</strong> puede hacerlo.</p>
+            <button class="btn btn-secondary" @onclick='() => Nav.NavigateTo("/municipios")'>Volver al listado</button>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
+    private MunicipioEditarDto dto = new(); 
+    
+    private bool guardando;
+    private string? mensaje;
+    private bool exito;
 
+    private async Task Guardar()
+    {
+        guardando = true;
+        mensaje = null;
+        
+        // TODO: Descomentar cuando tengas el método en el ApiService:
+        // exito = await ApiService.CrearAsync(dto);
+        
+        exito = false; 
+        mensaje = exito ? "Municipio creado exitosamente." : "Método CrearAsync pendiente de implementar.";
+        
+        guardando = false;
+        
+        if (exito)
+        {
+            await Task.Delay(1500);
+            Nav.NavigateTo("/municipios");
+        }
+    }
+
+    private void Cancelar() => Nav.NavigateTo("/municipios");
 }

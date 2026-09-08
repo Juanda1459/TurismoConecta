@@ -68,6 +68,7 @@ builder.Services.AddScoped<IMunicipioService, MunicipioService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IMunicipioEtiquetaService, MunicipioEtiquetaService>();
 builder.Services.AddScoped<IFiltroEtiquetasService, FiltroEtiquetasService>();
+builder.Services.AddScoped<IItinerarioService, ItinerarioService>();
 
 
 
