@@ -2,6 +2,7 @@
 using TurismoConecta.api.Data;
 using TurismoConecta.api.DTOs.Common;
 using TurismoConecta.api.DTOs.Municipios;
+using TurismoConecta.api.Models;
 using TurismoConecta.api.Services.Interfaces;
 using TurismoConecta.api.Services.Mappers;
 
@@ -17,9 +18,33 @@ namespace TurismoConecta.api.Services
             _context = context;
             _logger = logger;
         }
-        public async Task<int> CrearAsync(MunicipioCrearDto dto, CancellationToken cancellationToken = default)
+
+        public async Task<int> CrearAsync(MunicipioCrearDto dto, CancellationToken ct = default)
         {
-            throw new NotImplementedException();
+            // Regla de negocio: no permitir dos municipios con el mismo nombre en el mismo departamento
+            var existe = await _context.Municipios
+                .AnyAsync(m => m.Nombre.ToLower() == dto.Nombre.Trim().ToLower()
+                            && m.IdDepartamento == dto.IdDepartamento, ct);
+            if (existe)
+                throw new InvalidOperationException("Ya existe un municipio con ese nombre en el departamento.");
+
+            var municipio = new Municipio
+            {
+                IdDepartamento = dto.IdDepartamento,
+                Nombre = dto.Nombre.Trim(),
+                Descripcion = dto.Descripcion,
+                Historia = dto.Historia,
+                Clima = dto.Clima,
+                ImagenUrl = dto.ImagenUrl,
+                Latitud = dto.Latitud,
+                Longitud = dto.Longitud,
+                FechaCreacion = DateTime.UtcNow,
+                Activo = true
+            };
+
+            _context.Municipios.Add(municipio);
+            await _context.SaveChangesAsync(ct);
+            return municipio.IdMunicipio;
         }
         public async Task<ResultadoPaginado<MunicipioListadoDto>> ListarAsync(int pagina, int tamano, CancellationToken ct = default)
         {
@@ -67,6 +92,7 @@ namespace TurismoConecta.api.Services
         {
             var m = await _context.Municipios
                 .Include(x => x.MunicipioEtiqueta).ThenInclude(me => me.IdEtiquetaNavigation)
+                .Include(x => x.MunicipioFechaRelevantes).ThenInclude(mfr => mfr.IdFechaRelevanteNavigation) // nuevo
                 .FirstOrDefaultAsync(x => x.IdMunicipio == id && x.Activo, ct);
 
             return m is null ? null : MunicipioMapper.ToFichaDto(m);
@@ -94,5 +120,6 @@ namespace TurismoConecta.api.Services
             _logger.LogInformation("Municipio {IdMunicipio} actualizado por el usuario {IdUsuario}", id, idAdminSolicitante);
             return (true, null);
         }
+
     }
 }

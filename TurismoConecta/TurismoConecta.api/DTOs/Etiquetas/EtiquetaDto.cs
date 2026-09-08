@@ -1,11 +1,14 @@
 ﻿namespace TurismoConecta.api.DTOs.Etiquetas;
 
 using System.ComponentModel.DataAnnotations;
+
 public class EtiquetaDto
 {
     public int IdEtiqueta { get; set; }
     public string Nombre { get; set; } = string.Empty;
     public string? Descripcion { get; set; }
+    public string? Icono { get; set; }
+    public string? Categoria { get; set; }
     public bool Activo { get; set; }
 }
 
@@ -17,6 +20,12 @@ public class EtiquetaCrearDto
 
     [MaxLength(300)]
     public string? Descripcion { get; set; }
+
+    [MaxLength(50)]
+    public string? Icono { get; set; }
+
+    [MaxLength(50)]
+    public string? Categoria { get; set; }
 }
 
 public class EtiquetaActualizarDto
@@ -26,4 +35,10 @@ public class EtiquetaActualizarDto
 
     [MaxLength(300)]
     public string? Descripcion { get; set; }
+
+    [MaxLength(50)]
+    public string? Icono { get; set; }
+
+    [MaxLength(50)]
+    public string? Categoria { get; set; }
 }

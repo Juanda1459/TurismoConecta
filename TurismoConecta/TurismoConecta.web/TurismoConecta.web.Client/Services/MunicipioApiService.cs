@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
 
+
 namespace TurismoConecta.web.Client.Services
 {
     public class MunicipioApiService
@@ -19,6 +20,20 @@ namespace TurismoConecta.web.Client.Services
                 return null; // el componente decide qué mostrar (mensaje de error) si recibe null
             }
         }
+
+        public async Task<(bool exito, int idCreado, string? error)> CrearAsync(MunicipioCrearDto dto, CancellationToken ct = default)
+        {
+            var respuesta = await _http.PostAsJsonAsync("api/municipios", dto, ct);
+            if (respuesta.IsSuccessStatusCode)
+            {
+                var resultado = await respuesta.Content.ReadFromJsonAsync<CrearResultado>(cancellationToken: ct);
+                return (true, resultado?.IdMunicipio ?? 0, null);
+            }
+            var error = await respuesta.Content.ReadAsStringAsync(ct);
+            return (false, 0, error);
+        }
+
+        private class CrearResultado { public int IdMunicipio { get; set; } }
 
         public async Task<List<MunicipioListadoDto>?> BuscarAsync(string texto, CancellationToken ct = default)
         {
@@ -97,7 +112,28 @@ namespace TurismoConecta.web.Client.Services
         public string? Descripcion { get; set; }
         public string? Clima { get; set; }
         public string? Historia { get; set; }
-        public string? FechasRelevantes { get; set; }
+        public List<FechaRelevanteDto> FechasRelevantes { get; set; } = new();
+    }
+
+    public class FechaRelevanteDto
+    {
+        public string NombreFestividad { get; set; } = "";
+        public DateOnly FechaInicio { get; set; }
+        public DateOnly FechaFin { get; set; }
+        public string? Descripcion { get; set; }
+        public bool EsRecurrente { get; set; }
+    }
+
+    public class MunicipioCrearDto
+    {
+        public int IdDepartamento { get; set; }
+        public string Nombre { get; set; } = "";
+        public string? Descripcion { get; set; }
+        public string? Historia { get; set; }
+        public string? Clima { get; set; }
+        public string? ImagenUrl { get; set; }
+        public decimal? Latitud { get; set; }
+        public decimal? Longitud { get; set; }
     }
 
     public class MunicipioEditarDto
