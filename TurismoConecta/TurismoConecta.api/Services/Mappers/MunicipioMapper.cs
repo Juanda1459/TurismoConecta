@@ -21,7 +21,6 @@ namespace TurismoConecta.api.Services.Mappers
             Descripcion = m.Descripcion,
             Clima = m.Clima,
             Historia = m.Historia,
-            FechasRelevantes = m.FechasRelevantes,
             Latitud = m.Latitud,
             Longitud = m.Longitud,
             Etiquetas = m.MunicipioEtiqueta.Select(me => me.IdEtiquetaNavigation.Nombre).ToList()
