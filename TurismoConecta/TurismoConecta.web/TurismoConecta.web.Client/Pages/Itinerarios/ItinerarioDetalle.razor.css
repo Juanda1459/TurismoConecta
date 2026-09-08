@@ -1,0 +1,25 @@
+﻿.info-box {
+    padding: 25px;
+    border-radius: 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    margin-bottom: 30px;
+}
+
+.numero-parada {
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #0d6efd;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+}
+
+.parada-item {
+    display: flex;
+    align-items: center;
+}

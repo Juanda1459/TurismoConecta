@@ -1,0 +1,83 @@
+﻿@page "/itinerarios"
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@using TurismoConecta.web.Client.Services
+@inject ItinerarioApiService ApiService
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<h3>Mis Itinerarios</h3>
+
+@if (cargando)
+{
+    <p>Cargando tus itinerarios...</p>
+}
+else if (huboError)
+{
+    <p class="text-danger">Hubo un error al cargar los itinerarios.</p>
+    <button class="btn btn-primary" @onclick="CargarItinerarios">Reintentar</button>
+}
+else if (itinerarios != null && !itinerarios.Any())
+{
+    <div class="alert alert-info">
+        <p>Aún no tienes itinerarios. ¡Empieza a planear tu viaje!</p>
+        <button class="btn btn-success" @onclick='() => Nav.NavigateTo("/municipios")'>Explorar Municipios</button>
+    </div>
+}
+else if (itinerarios != null)
+{
+    <div class="grid-itinerarios">
+        @foreach (var iti in itinerarios)
+        {
+            <div class="card-itinerario">
+                <h4>@iti.Nombre</h4>
+                <p>
+                    <strong>Fechas:</strong> 
+                    @(iti.FechaInicio?.ToString("dd/MM/yyyy") ?? "Sin fecha") - 
+                    @(iti.FechaFin?.ToString("dd/MM/yyyy") ?? "Sin fecha")
+                </p>
+                <p><strong>Paradas:</strong> @iti.CantidadParadas municipios</p>
+                
+                <div class="botones-card">
+                    <button class="btn btn-primary" @onclick="() => VerDetalle(iti.IdItinerario)">Ver Detalle</button>
+                    <button class="btn btn-danger" @onclick="() => Eliminar(iti.IdItinerario)">Eliminar</button>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<ItinerarioListadoDto>? itinerarios;
+    private bool cargando = true;
+    private bool huboError = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarItinerarios();
+    }
+
+    private async Task CargarItinerarios()
+    {
+        cargando = true;
+        huboError = false;
+        var resultado = await ApiService.ListarAsync();
+        
+        if (resultado == null) huboError = true;
+        else itinerarios = resultado;
+        
+        cargando = false;
+    }
+
+    private void VerDetalle(int id) => Nav.NavigateTo($"/itinerarios/{id}");
+
+    private async Task Eliminar(int id)
+    {
+        bool confirmado = await JS.InvokeAsync<bool>("confirm", "¿Estás seguro de eliminar este itinerario?");
+        if (confirmado)
+        {
+            var exito = await ApiService.EliminarAsync(id);
+            if (exito) await CargarItinerarios();
+            else await JS.InvokeVoidAsync("alert", "No se pudo eliminar el itinerario.");
+        }
+    }
+}

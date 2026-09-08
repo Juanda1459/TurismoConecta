@@ -1,0 +1,124 @@
+﻿@using TurismoConecta.web.Client.Services 
+@page "/municipios/{Id:int}/editar"
+@layout EmptyLayout
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@inject MunicipioApiService ApiService
+@inject NavigationManager Nav
+
+<AuthorizeView Roles="AdminGeneral,AdminMunicipio">
+    <Authorized Context="authContext">
+        <div class="form-wrapper">
+            <div class="form-header">
+                <h2>Editar Municipio</h2>
+                <p>Actualiza la información detallada del municipio.</p>
+            </div>
+
+            @if (cargando)
+            {
+                <div class="loading-spinner">Cargando datos...</div>
+            }
+            else if (dto is null)
+            {
+                <div class="alert alert-danger">No se pudo cargar el municipio.</div>
+            }
+            else
+            {
+                <div class="form-card">
+                    <EditForm Model="dto" OnValidSubmit="Guardar">
+                        <DataAnnotationsValidator />
+                        
+                        <div class="form-group">
+                            <label>Nombre del Municipio</label>
+                            <InputText @bind-Value="dto.Nombre" class="form-control" placeholder="Ej. Villa de Leyva" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Descripción General</label>
+                            <InputTextArea @bind-Value="dto.Descripcion" class="form-control" rows="3" placeholder="Describe los atractivos principales..." />
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label>Clima</label>
+                                <InputText @bind-Value="dto.Clima" class="form-control" placeholder="Ej. Templado, 18°C" />
+                            </div>
+                            <div class="form-group half">
+                                <label>Fechas Relevantes</label>
+                                <InputText @bind-Value="dto.FechasRelevantes" class="form-control" placeholder="Ej. Festival en Agosto" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Historia</label>
+                            <InputTextArea @bind-Value="dto.Historia" class="form-control" rows="4" placeholder="Breve reseña histórica..." />
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+                            <button type="submit" class="btn btn-primary" disabled="@guardando">
+                                @(guardando ? "Guardando..." : "Guardar cambios")
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+
+                @if (mensaje is not null)
+                {
+                    <div class="toast-message @(exito ? "toast-success" : "toast-error")">
+                        @mensaje
+                    </div>
+                }
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="acceso-denegado">
+            <h3>⛔ Acceso Denegado</h3>
+            <p>No tienes permisos para editar este municipio.</p>
+            <button class="btn btn-secondary" @onclick='() => Nav.NavigateTo("/municipios")'>Volver al listado</button>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private MunicipioEditarDto? dto;
+    private bool cargando = true;
+    private bool guardando;
+    private string? mensaje;
+    private bool exito;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var ficha = await ApiService.ObtenerFichaAsync(Id);
+        if (ficha is not null)
+        {
+            dto = new MunicipioEditarDto
+            {
+                Nombre = ficha.Nombre,
+                Descripcion = ficha.Descripcion,
+                Clima = ficha.Clima,
+                Historia = ficha.Historia,
+                FechasRelevantes = ficha.FechasRelevantes
+            };
+        }
+        cargando = false;
+    }
+
+    private async Task Guardar()
+    {
+        guardando = true;
+        mensaje = null;
+        exito = await ApiService.EditarAsync(Id, dto!);
+        mensaje = exito ? "Guardado correctamente." : "No se pudo guardar los cambios.";
+        guardando = false;
+        
+        if (exito)
+        {
+            await Task.Delay(1500);
+            Nav.NavigateTo($"/municipios/{Id}");
+        }
+    }
+
+    private void Cancelar() => Nav.NavigateTo($"/municipios/{Id}");
+}
