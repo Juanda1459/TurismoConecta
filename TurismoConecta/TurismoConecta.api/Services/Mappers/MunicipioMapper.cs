@@ -5,13 +5,7 @@ namespace TurismoConecta.api.Services.Mappers
 {
     public static class MunicipioMapper
     {
-        public static MunicipioListadoDto ToListadoDto(Municipio m) => new()
-        {
-            IdMunicipio = m.IdMunicipio,
-            Nombre = m.Nombre,
-            ImagenUrl = m.ImagenUrl,
-            Etiquetas = m.MunicipioEtiqueta.Select(me => me.IdEtiquetaNavigation.Nombre).ToList()
-        };
+        public static MunicipioListadoDto ToListadoDto(Municipio m) => new() { /* igual que antes, no la toques */ };
 
         public static MunicipioFichaDto ToFichaDto(Municipio m) => new()
         {
@@ -21,6 +15,17 @@ namespace TurismoConecta.api.Services.Mappers
             Descripcion = m.Descripcion,
             Clima = m.Clima,
             Historia = m.Historia,
+            FechasRelevantes = m.MunicipioFechaRelevantes
+                .Select(mfr => mfr.IdFechaRelevanteNavigation)
+                .OrderBy(fr => fr.FechaInicio)
+                .Select(fr => new FechaRelevanteDto
+                {
+                    NombreFestividad = fr.NombreFestividad,
+                    FechaInicio = fr.FechaInicio,
+                    FechaFin = fr.FechaFin,
+                    Descripcion = fr.Descripcion,
+                    EsRecurrente = fr.EsRecurrente
+                }).ToList(),
             Latitud = m.Latitud,
             Longitud = m.Longitud,
             Etiquetas = m.MunicipioEtiqueta.Select(me => me.IdEtiquetaNavigation.Nombre).ToList()

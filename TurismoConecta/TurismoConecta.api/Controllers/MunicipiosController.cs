@@ -55,5 +55,26 @@ namespace TurismoConecta.api.Controllers
             if (exito) return NoContent();
             return error!.Contains("permiso") ? Forbid() : BadRequest(new { mensaje = error });
         }
+
+
+        /// <summary>Crea un nuevo municipio en el catálogo. Solo AdminGeneral.</summary>
+        [HttpPost]
+        [Authorize(Roles = "AdminGeneral")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Crear([FromBody] MunicipioCrearDto dto, CancellationToken ct = default)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
+            {
+                var id = await _municipioService.CrearAsync(dto, ct);
+                return CreatedAtAction(nameof(Ficha), new { id }, new { idMunicipio = id });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
     }
 }
