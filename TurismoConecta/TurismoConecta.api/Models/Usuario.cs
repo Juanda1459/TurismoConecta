@@ -31,6 +31,8 @@ public partial class Usuario
 
     public DateTime? PasswordResetExpira { get; set; }
 
+    public string? FotoUrl { get; set; }
+
     public virtual ICollection<Favorito> Favoritos { get; set; } = new List<Favorito>();
 
     public virtual Rol IdRolNavigation { get; set; } = null!;
@@ -44,6 +46,4 @@ public partial class Usuario
     public virtual ICollection<Notificacion> Notificacions { get; set; } = new List<Notificacion>();
 
     public virtual ICollection<Reseña> Reseñas { get; set; } = new List<Reseña>();
-    public string? FotoUrl { get; set; }
-
 }

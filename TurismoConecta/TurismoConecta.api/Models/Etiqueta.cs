@@ -11,6 +11,7 @@ public partial class Etiqueta
 
     public string? Descripcion { get; set; }
     public bool Activo { get; set; }
+    public string? Icono { get; set; }
 
     public virtual ICollection<MunicipioEtiqueta> MunicipioEtiqueta { get; set; } = new List<MunicipioEtiqueta>();
 
