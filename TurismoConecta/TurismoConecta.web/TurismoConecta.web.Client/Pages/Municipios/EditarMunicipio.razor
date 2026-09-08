@@ -99,7 +99,9 @@
                 Descripcion = ficha.Descripcion,
                 Clima = ficha.Clima,
                 Historia = ficha.Historia,
-                FechasRelevantes = ficha.FechasRelevantes
+                FechasRelevantes = ficha.FechasRelevantes != null 
+    ? string.Join(", ", ficha.FechasRelevantes.Select(f => f.NombreFestividad)) 
+    : string.Empty
             };
         }
         cargando = false;

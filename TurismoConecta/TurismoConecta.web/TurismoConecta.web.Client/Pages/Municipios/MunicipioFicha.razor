@@ -48,7 +48,11 @@ else
                 </div>
                 <div class="info-card">
                     <h4>📅 Fechas Relevantes</h4>
-                    <p>@ficha.FechasRelevantes</p>
+                   <p>
+                    @(ficha.FechasRelevantes != null && ficha.FechasRelevantes.Any() 
+                        ? string.Join(", ", ficha.FechasRelevantes.Select(f => f.NombreFestividad)) 
+                        : "Sin fechas registradas")
+                    </p>
                 </div>
             </div>
 
