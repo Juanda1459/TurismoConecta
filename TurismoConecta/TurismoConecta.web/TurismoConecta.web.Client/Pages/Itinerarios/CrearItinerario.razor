@@ -1,78 +1,358 @@
-﻿@page "/itinerarios/crear"
+@page "/itinerarios/crear"
+@layout EmptyLayout
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @using TurismoConecta.web.Client.Services
 @inject ItinerarioApiService ItiApi
 @inject MunicipioApiService MuniApi
 @inject NavigationManager Nav
+@inject HttpClient Http
 
-<h3>Crear Nuevo Itinerario</h3>
+<HeadContent>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</HeadContent>
 
-@if (cargandoInicial)
-{
-    <p>Cargando datos...</p>
-}
-else
-{
-    <EditForm Model="modelo" OnValidSubmit="GuardarItinerario">
-        <DataAnnotationsValidator />
-        
-        @if (!string.IsNullOrEmpty(mensajeError))
-        {
-            <div class="alert alert-danger">@mensajeError</div>
-        }
+<div class="itinerario-page">
 
-        <div class="form-seccion">
-            <h4 class="form-titulo">Datos Generales</h4>
-            
-            <div class="mb-3">
-                <label class="form-label">Nombre del Itinerario (*)</label>
-                <InputText @bind-Value="modelo.Nombre" class="form-control" placeholder="Ej: Viaje de fin de semana" />
-                <ValidationMessage For="@(() => modelo.Nombre)" class="text-danger" />
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Fecha de Inicio</label>
-                    <InputDate @bind-Value="modelo.FechaInicio" class="form-control" />
+    @* PANTALLA DE ESPERA INMERSIVA *@
+    @if (cargandoInicial || guardando)
+    {
+        <div class="pantalla-espera-inmersiva">
+            <img src="@paisajeEspera.Url" alt="Boyacá" class="espera-bg-img" />
+            <div class="espera-scrim">
+                <div class="espera-contenido">
+                    <span class="espera-eyebrow">Planificador de Viaje</span>
+                    <h2 class="espera-lugar">@paisajeEspera.Lugar</h2>
+                    <p class="espera-cita">"@paisajeEspera.Frase"</p>
+                    <div class="espera-indicador">
+                        <div class="spinner-anillo-selva"></div>
+                        <span class="espera-texto-progreso">
+                            @(guardando ? "Creando tu itinerario por Boyacá..." : "Cargando tus pueblos elegidos...")
+                        </span>
+                    </div>
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Fecha de Fin</label>
-                    <InputDate @bind-Value="modelo.FechaFin" class="form-control" />
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Observaciones</label>
-                <InputTextArea @bind-Value="modelo.Observaciones" class="form-control" rows="3" />
             </div>
         </div>
+    }
 
-        <div class="form-seccion">
-            <h4 class="form-titulo">Municipios Seleccionados</h4>
-            
-            @if (municipiosSeleccionados.Any())
-            {
-                <ul class="list-group lista-municipios">
-                    @foreach (var muni in municipiosSeleccionados)
+    @* MODAL DE DETALLE DEL MUNICIPIO *@
+    @if (municipioModal != null)
+    {
+        <div class="modal-backdrop" @onclick="CerrarModal">
+            <div class="modal-card-municipio" @onclick:stopPropagation="true">
+                <div class="modal-banner-wrap">
+                    <img src="@ObtenerFotoPrincipal(municipioModal)"
+                         alt="@municipioModal.Nombre"
+                         class="modal-banner-foto"
+                         onerror="this.onerror=null; this.src='@ObtenerFotoFallback(municipioModal)';" />
+                    <div class="modal-banner-scrim">
+                        <span class="modal-banner-tag">Destino Boyacense</span>
+                        <h2 class="modal-banner-nombre">@municipioModal.Nombre</h2>
+                        @if (!string.IsNullOrWhiteSpace(municipioModal.Clima))
+                        {
+                            <p class="modal-banner-clima">🌤️ @municipioModal.Clima</p>
+                        }
+                    </div>
+                    <button type="button" class="modal-btn-cerrar" @onclick="CerrarModal" title="Cerrar">✕</button>
+                </div>
+
+                <div class="modal-cuerpo">
+                    @if (municipioModal.Etiquetas != null && municipioModal.Etiquetas.Any())
                     {
-                        <li class="list-group-item"><strong>@muni.Nombre</strong></li>
+                        <div class="modal-etiquetas-pills">
+                            @foreach (var tag in municipioModal.Etiquetas)
+                            {
+                                <span class="pill-experiencia">✦ @tag</span>
+                            }
+                        </div>
                     }
-                </ul>
-                <p class="text-muted mt-2"><small>Podrás editar los días y reordenar las paradas más adelante.</small></p>
-            }
-            else
-            {
-                <p class="text-warning">No has seleccionado municipios.</p>
-                <button type="button" class="btn btn-secondary" @onclick='() => Nav.NavigateTo("/municipios")'>Ir a Municipios</button>
-            }
-        </div>
 
-        <button type="submit" class="btn btn-success me-2" disabled="@guardando">
-            @(guardando ? "Guardando..." : "Crear Itinerario")
+                    @if (!string.IsNullOrWhiteSpace(municipioModal.Descripcion))
+                    {
+                        <div class="modal-seccion">
+                            <span class="modal-seccion-label">Sobre este pueblo</span>
+                            <p class="modal-seccion-texto">@municipioModal.Descripcion</p>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(municipioModal.Historia))
+                    {
+                        <div class="modal-seccion">
+                            <span class="modal-seccion-label">Historia y Tradición</span>
+                            <p class="modal-seccion-texto modal-historia">@municipioModal.Historia</p>
+                        </div>
+                    }
+
+                    @if (municipioModal.FechasRelevantes != null && municipioModal.FechasRelevantes.Any())
+                    {
+                        <div class="modal-seccion">
+                            <span class="modal-seccion-label">Festividades Destacadas</span>
+                            <div class="modal-festividades-grid">
+                                @foreach (var fest in municipioModal.FechasRelevantes)
+                                {
+                                    <div class="modal-fest-card">
+                                        <strong>@fest.NombreFestividad</strong>
+                                        <span>@(string.IsNullOrWhiteSpace(fest.TipoFestividad) ? "Cultural" : fest.TipoFestividad)</span>
+                                        @if (fest.FechaInicio != default)
+                                        {
+                                            <span class="fest-fecha">📅 @fest.FechaInicio.ToString("MMMM yyyy")</span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <div class="modal-footer-acciones">
+                        <a href="/municipios/@municipioModal.IdMunicipio" target="_blank" class="enlace-ficha-completa">
+                            Ver ficha turística completa ↗
+                        </a>
+                        <button type="button" class="btn-guardar-iti" @onclick="CerrarModal">
+                            ← Volver al itinerario
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @* MODAL DE BÚSQUEDA PARA AGREGAR MUNICIPIOS *@
+    @if (modalAgregarAbierto)
+    {
+        <div class="modal-backdrop" @onclick="CerrarModalAgregar">
+            <div class="modal-agregar-municipio" @onclick:stopPropagation="true">
+                <div class="modal-agregar-header">
+                    <h3>Agregar pueblos a tu ruta</h3>
+                    <button type="button" class="modal-btn-cerrar" @onclick="CerrarModalAgregar">✕</button>
+                </div>
+
+                <div class="modal-agregar-busqueda">
+                    <input type="text"
+                           class="input-buscar-modal"
+                           placeholder="Busca un pueblo boyacense: Monguí, Nobsa, Arcabuco..."
+                           value="@textoBusquedaAgregar"
+                           @oninput="async (e) => { textoBusquedaAgregar = e.Value?.ToString() ?? string.Empty; await BuscarMunicipiosParaAgregar(); }" />
+                </div>
+
+                @if (cargandoBusqueda)
+                {
+                    <div class="modal-agregar-estado">
+                        <div class="spinner-mini"></div>
+                        <span>Buscando...</span>
+                    </div>
+                }
+                else if (resultadosBusqueda.Any())
+                {
+                    <div class="modal-agregar-resultados">
+                        @foreach (var m in resultadosBusqueda)
+                        {
+                            var yaEnRuta = municipiosSeleccionados.Any(s => s.IdMunicipio == m.IdMunicipio);
+                            <div class="resultado-item @(yaEnRuta ? "resultado-item-ya" : "")"
+                                 @onclick="() => AgregarMunicipioDesdeModal(m.IdMunicipio)">
+                                <img src="@ObtenerFotoListado(m)"
+                                     alt="@m.Nombre"
+                                     class="resultado-miniatura"
+                                     onerror="this.onerror=null; this.src='@FotoFallback';" />
+                                <div class="resultado-info">
+                                    <span class="resultado-nombre">@m.Nombre</span>
+                                    @if (m.Etiquetas != null && m.Etiquetas.Any())
+                                    {
+                                        <span class="resultado-tags">@string.Join(" · ", m.Etiquetas.Take(2))</span>
+                                    }
+                                </div>
+                                @if (yaEnRuta)
+                                {
+                                    <span class="resultado-badge-ya">✓ En tu ruta</span>
+                                }
+                                else
+                                {
+                                    <span class="resultado-badge-add">+ Añadir</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                else if (!string.IsNullOrWhiteSpace(textoBusquedaAgregar))
+                {
+                    <div class="modal-agregar-estado">
+                        <span>No encontramos resultados para "<strong>@textoBusquedaAgregar</strong>"</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="modal-agregar-sugerencias">
+                        <p>Escribe el nombre de un municipio para añadirlo a tu ruta.</p>
+                        <div class="sugerencias-chips">
+                            @foreach (var sugerido in new[] { "Monguí", "Villa de Leyva", "Nobsa", "Arcabuco", "Tibaná" })
+                            {
+                                var s = sugerido;
+                                <button type="button" class="chip-sugerencia"
+                                        @onclick="async () => { textoBusquedaAgregar = s; await BuscarMunicipiosParaAgregar(); }">
+                                    @sugerido
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @* CONTENIDO PRINCIPAL *@
+    <header class="itinerario-nav">
+        <button type="button" class="nav-back-link" @onclick='() => Nav.NavigateTo("/municipios")'>
+            <span class="nav-back-arrow">←</span> Explorar más pueblos
         </button>
-        <button type="button" class="btn btn-secondary" @onclick='() => Nav.NavigateTo("/municipios")'>Cancelar</button>
-    </EditForm>
-}
+        <span class="nav-badge-estado">Tu Hoja de Ruta</span>
+    </header>
+
+    <div class="itinerario-container">
+        <header class="itinerario-header">
+            <span class="itinerario-eyebrow">Aventura en Boyacá</span>
+            <h1 class="itinerario-titulo">Diseña tu Itinerario</h1>
+            <p class="itinerario-subtitulo">
+                Personaliza fechas y paradas. Haz clic en un pueblo para ver toda su información.
+            </p>
+        </header>
+
+        <EditForm Model="modelo" OnValidSubmit="GuardarItinerario">
+            <DataAnnotationsValidator />
+
+            @if (!string.IsNullOrEmpty(mensajeError))
+            {
+                <div class="alerta-error-itinerario">
+                    <span>⚠️</span>
+                    <p>@mensajeError</p>
+                </div>
+            }
+
+            <div class="itinerario-layout-grid">
+
+                <!-- COLUMNA IZQUIERDA: DATOS GENERALES -->
+                <div class="card-itinerario">
+                    <div class="card-header-badge">
+                        <span class="badge-num">01</span>
+                        <h3>Datos Generales del Viaje</h3>
+                    </div>
+
+                    <div class="form-group-iti">
+                        <label>Nombre del Itinerario *</label>
+                        <InputText @bind-Value="modelo.Nombre" class="input-iti"
+                                   placeholder="Ej. Ruta del Páramo y Aguas Termales" />
+                        <ValidationMessage For="@(() => modelo.Nombre)" class="error-msg" />
+                    </div>
+
+                    <div class="form-grid-dos">
+                        <div class="form-group-iti">
+                            <label>Fecha de Inicio</label>
+                            <InputDate @bind-Value="modelo.FechaInicio" class="input-iti" />
+                        </div>
+                        <div class="form-group-iti">
+                            <label>Fecha de Regreso</label>
+                            <InputDate @bind-Value="modelo.FechaFin" class="input-iti" />
+                        </div>
+                    </div>
+
+                    @if (modelo.FechaInicio.HasValue && modelo.FechaFin.HasValue && modelo.FechaFin >= modelo.FechaInicio)
+                    {
+                        var dias = (modelo.FechaFin.Value.DayNumber - modelo.FechaInicio.Value.DayNumber) + 1;
+                        <div class="info-duracion-pill">
+                            🗓️ Duración estimada: <strong>@dias @(dias == 1 ? "día" : "días") de viaje</strong>
+                        </div>
+                    }
+
+                    <div class="form-group-iti">
+                        <label>Notas y Recomendaciones</label>
+                        <InputTextArea @bind-Value="modelo.Observaciones" class="textarea-iti" rows="5"
+                                       placeholder="Hospedajes sugeridos, gastronomía, actividades especiales..." />
+                    </div>
+                </div>
+
+                <!-- COLUMNA DERECHA: PARADAS -->
+                <div class="card-itinerario">
+                    <div class="card-header-badge">
+                        <span class="badge-num">02</span>
+                        <div class="card-title-group">
+                            <h3>Pueblos en tu Ruta</h3>
+                            <span class="card-subtitle">
+                                @municipiosSeleccionados.Count parada@(municipiosSeleccionados.Count != 1 ? "s" : "") • Clic para explorar
+                            </span>
+                        </div>
+                    </div>
+
+                    @if (municipiosSeleccionados.Any())
+                    {
+                        <div class="lista-paradas-cards">
+                            @for (int i = 0; i < municipiosSeleccionados.Count; i++)
+                            {
+                                var idx = i;
+                                var muni = municipiosSeleccionados[idx];
+
+                                <div class="parada-card-item" @key="muni.IdMunicipio" @onclick="() => AbrirModal(muni)">
+                                    <div class="parada-orden">@(idx + 1)</div>
+
+                                    <img src="@ObtenerFotoPrincipal(muni)"
+                                         alt="@muni.Nombre"
+                                         class="parada-miniatura"
+                                         onerror="this.onerror=null; this.src='@ObtenerFotoFallback(muni)';" />
+
+                                    <div class="parada-detalles">
+                                        <div class="parada-titulo-row">
+                                            <h4 class="parada-nombre">@muni.Nombre</h4>
+                                            <span class="badge-expandir">▼ Ver info</span>
+                                        </div>
+                                        <span class="parada-clima" title="@(string.IsNullOrWhiteSpace(muni.Clima) ? "Clima de montaña" : muni.Clima)">
+                                            🌤️ @(string.IsNullOrWhiteSpace(muni.Clima) ? "Clima de montaña" : muni.Clima)
+                                        </span>
+                                    </div>
+
+                                    <div class="parada-acciones" @onclick:stopPropagation="true">
+                                        @if (idx > 0)
+                                        {
+                                            <button type="button" class="btn-accion-icono" title="Subir"
+                                                    @onclick="() => MoverParada(idx, -1)">↑</button>
+                                        }
+                                        @if (idx < municipiosSeleccionados.Count - 1)
+                                        {
+                                            <button type="button" class="btn-accion-icono" title="Bajar"
+                                                    @onclick="() => MoverParada(idx, 1)">↓</button>
+                                        }
+                                        <button type="button" class="btn-accion-icono btn-quitar" title="Eliminar"
+                                                @onclick="() => QuitarMunicipio(idx)">✕</button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="vacio-paradas-box">
+                            <span>🗺️</span>
+                            <p>No tienes municipios en tu ruta aún.</p>
+                        </div>
+                    }
+
+                    <button type="button" class="btn-agregar-municipio" @onclick="AbrirModalAgregar">
+                        <span class="btn-agregar-icono">＋</span>
+                        Agregar más pueblos a la ruta
+                    </button>
+                </div>
+            </div>
+
+            <div class="itinerario-footer-actions">
+                <button type="button" class="btn-cancelar-iti"
+                        @onclick='() => Nav.NavigateTo("/municipios")'>
+                    Cancelar
+                </button>
+                <button type="submit" class="btn-guardar-iti"
+                        disabled="@(guardando || !municipiosSeleccionados.Any())">
+                    @(guardando ? "Guardando ruta..." : "Crear y Guardar Itinerario →")
+                </button>
+            </div>
+        </EditForm>
+    </div>
+</div>
 
 @code {
     [SupplyParameterFromQuery]
@@ -81,35 +361,292 @@ else
     private ItinerarioCreateRequest modelo = new();
     private List<MunicipioFichaDto> municipiosSeleccionados = new();
 
+    // Modales
+    private MunicipioFichaDto? municipioModal = null;
+    private bool modalAgregarAbierto = false;
+    private string textoBusquedaAgregar = "";
+    private List<MunicipioListadoDto> resultadosBusqueda = new();
+    private bool cargandoBusqueda = false;
+    private System.Timers.Timer? _debounce;
+
     private bool cargandoInicial = true;
     private bool guardando = false;
     private string? mensajeError;
 
+    // Fotos Wikipedia — respaldo cuando la API no tiene imagen
+    private Dictionary<int, string> fotosWikipedia = new();
+    private record WikiThumbnail(string Source, int Width, int Height);
+    private record WikiSummary(WikiThumbnail? Thumbnail);
+
+    // Imagen genérica de Boyacá — último recurso
+    private const string FotoFallback =
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=900&auto=format&fit=crop";
+
+    // ──────────────────────────────────────────────────────────────
+    // LÓGICA DE FOTOS
+    // Prioridad: 1) API/BD  →  2) Wikipedia  →  3) Fallback genérico
+    // ──────────────────────────────────────────────────────────────
+
+    /// <summary>Devuelve la foto que se muestra inicialmente en el img src.</summary>
+    private string ObtenerFotoPrincipal(MunicipioFichaDto muni)
+    {
+        // 1. Imagen cargada desde la API
+        if (!string.IsNullOrWhiteSpace(muni.ImagenUrl))
+            return muni.ImagenUrl;
+
+        // 2. Wikipedia (ya cargada en segundo plano)
+        if (fotosWikipedia.TryGetValue(muni.IdMunicipio, out var wiki))
+            return wiki;
+
+        // 3. Fallback genérico
+        return FotoFallback;
+    }
+
+    /// <summary>
+    /// Devuelve la foto de respaldo para el atributo onerror del img.
+    /// Si la imagen de la API falla, intenta Wikipedia; si no, usa el genérico.
+    /// </summary>
+    private string ObtenerFotoFallback(MunicipioFichaDto muni)
+    {
+        if (fotosWikipedia.TryGetValue(muni.IdMunicipio, out var wiki))
+            return wiki;
+
+        return FotoFallback;
+    }
+
+    /// <summary>Foto para resultados de búsqueda (MunicipioListadoDto).</summary>
+    private string ObtenerFotoListado(MunicipioListadoDto m)
+    {
+        if (!string.IsNullOrWhiteSpace(m.ImagenUrl))
+            return m.ImagenUrl;
+
+        return FotoFallback;
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // WIKIPEDIA — carga fotos reales como respaldo
+    // ──────────────────────────────────────────────────────────────
+
+    private async Task CargarFotosWikipedia()
+    {
+        // Solo cargamos Wikipedia para los municipios que NO tienen imagen en la API
+        var sinImagen = municipiosSeleccionados
+            .Where(m => string.IsNullOrWhiteSpace(m.ImagenUrl) && !fotosWikipedia.ContainsKey(m.IdMunicipio))
+            .ToList();
+
+        var tareas = sinImagen.Select(async muni =>
+        {
+            // Intento 1: "Nombre (Boyacá)"
+            var foto = await BuscarFotoWikipedia($"{muni.Nombre} (Boyacá)");
+
+            // Intento 2: solo el nombre
+            if (foto == null)
+                foto = await BuscarFotoWikipedia(muni.Nombre);
+
+            if (foto != null)
+            {
+                // Mejorar resolución a 800px
+                var fotoHd = foto
+                    .Replace("/320px-", "/800px-")
+                    .Replace("/240px-", "/800px-")
+                    .Replace("/150px-", "/800px-");
+
+                fotosWikipedia[muni.IdMunicipio] = fotoHd;
+                await InvokeAsync(StateHasChanged);
+            }
+        });
+
+        await Task.WhenAll(tareas);
+    }
+
+    private async Task<string?> BuscarFotoWikipedia(string nombre)
+    {
+        try
+        {
+            var slug = Uri.EscapeDataString(nombre);
+            var resumen = await Http.GetFromJsonAsync<WikiSummary>(
+                $"https://es.wikipedia.org/api/rest_v1/page/summary/{slug}",
+                new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            return resumen?.Thumbnail?.Source;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // PAISAJES DE ESPERA
+    // ──────────────────────────────────────────────────────────────
+
+    private record PaisajeBoyaca(string Lugar, string Frase, string Url);
+    private static readonly PaisajeBoyaca[] PaisajesBoyaca =
+    {
+        new("Páramo de Ocetá",    "Caminos ancestrales entre frailejones gigantes.",          "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1600&auto=format&fit=crop"),
+        new("Laguna de Tota",     "La magia del mar interior de los Andes boyacenses.",       "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=1600&auto=format&fit=crop"),
+        new("Pueblos Patrimonio", "Arquitectura colonial y balcones florecidos de historia.", "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=1600&auto=format&fit=crop"),
+    };
+    private PaisajeBoyaca paisajeEspera = PaisajesBoyaca[Random.Shared.Next(PaisajesBoyaca.Length)];
+
+    // ──────────────────────────────────────────────────────────────
+    // CICLO DE VIDA
+    // ──────────────────────────────────────────────────────────────
+
     protected override async Task OnInitializedAsync()
     {
         cargandoInicial = true;
+        modelo.FechaInicio = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+        modelo.FechaFin    = DateOnly.FromDateTime(DateTime.Today.AddDays(3));
+
         if (!string.IsNullOrEmpty(Municipios))
         {
-            var ids = Municipios.Split(',').Select(int.Parse).ToList();
-            int orden = 1;
+            var ids = Municipios
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => int.TryParse(s, out var v) ? v : 0)
+                .Where(v => v > 0)
+                .Distinct()
+                .ToList();
+
             foreach (var id in ids)
             {
-                var muniInfo = await MuniApi.ObtenerFichaAsync(id);
-                if (muniInfo != null)
-                {
-                    municipiosSeleccionados.Add(muniInfo);
-                    modelo.Paradas.Add(new ParadaCreateRequest { IdMunicipio = id, DiaNumero = 1, Orden = orden++ });
-                }
+                var info = await MuniApi.ObtenerFichaAsync(id);
+                if (info != null) municipiosSeleccionados.Add(info);
             }
+
+            SincronizarParadas();
         }
+
         cargandoInicial = false;
+
+        // Wikipedia solo para municipios sin imagen en la API — no bloquea la UI
+        _ = CargarFotosWikipedia();
     }
+
+    // ──────────────────────────────────────────────────────────────
+    // MODALES
+    // ──────────────────────────────────────────────────────────────
+
+    private void AbrirModal(MunicipioFichaDto muni) => municipioModal = muni;
+    private void CerrarModal() => municipioModal = null;
+
+    private void AbrirModalAgregar()
+    {
+        textoBusquedaAgregar = "";
+        resultadosBusqueda = new();
+        modalAgregarAbierto = true;
+    }
+
+    private void CerrarModalAgregar()
+    {
+        modalAgregarAbierto = false;
+        _debounce?.Stop();
+        _debounce?.Dispose();
+        _debounce = null;
+    }
+
+    private async Task BuscarMunicipiosParaAgregar()
+    {
+        _debounce?.Stop();
+        _debounce?.Dispose();
+        _debounce = null;
+
+        if (string.IsNullOrWhiteSpace(textoBusquedaAgregar))
+        {
+            resultadosBusqueda = new();
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        _debounce = new System.Timers.Timer(320) { AutoReset = false };
+        _debounce.Elapsed += async (_, _) =>
+        {
+            cargandoBusqueda = true;
+            await InvokeAsync(StateHasChanged);
+
+            var resultado = await MuniApi.BuscarAsync(textoBusquedaAgregar);
+            resultadosBusqueda = resultado ?? new();
+            cargandoBusqueda = false;
+            await InvokeAsync(StateHasChanged);
+        };
+        _debounce.Start();
+    }
+
+    private async Task AgregarMunicipioDesdeModal(int id)
+    {
+        if (municipiosSeleccionados.Any(s => s.IdMunicipio == id)) return;
+
+        cargandoBusqueda = true;
+        await InvokeAsync(StateHasChanged);
+
+        var info = await MuniApi.ObtenerFichaAsync(id);
+        if (info != null)
+        {
+            municipiosSeleccionados.Add(info);
+            SincronizarParadas();
+            _ = CargarFotosWikipedia();
+        }
+
+        cargandoBusqueda = false;
+
+        if (!string.IsNullOrWhiteSpace(textoBusquedaAgregar))
+            await BuscarMunicipiosParaAgregar();
+        else
+            await InvokeAsync(StateHasChanged);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // LÓGICA DE PARADAS
+    // ──────────────────────────────────────────────────────────────
+
+    private void SincronizarParadas()
+    {
+        modelo.Paradas.Clear();
+        for (int i = 0; i < municipiosSeleccionados.Count; i++)
+        {
+            modelo.Paradas.Add(new ParadaCreateRequest
+            {
+                IdMunicipio = municipiosSeleccionados[i].IdMunicipio,
+                DiaNumero   = i + 1,
+                Orden       = i + 1
+            });
+        }
+    }
+
+    private void MoverParada(int index, int dir)
+    {
+        int ni = index + dir;
+        if (ni < 0 || ni >= municipiosSeleccionados.Count) return;
+        (municipiosSeleccionados[index], municipiosSeleccionados[ni]) =
+            (municipiosSeleccionados[ni], municipiosSeleccionados[index]);
+        SincronizarParadas();
+    }
+
+    private void QuitarMunicipio(int index)
+    {
+        if (index < 0 || index >= municipiosSeleccionados.Count) return;
+        var id = municipiosSeleccionados[index].IdMunicipio;
+        municipiosSeleccionados.RemoveAt(index);
+        if (municipioModal?.IdMunicipio == id) municipioModal = null;
+        SincronizarParadas();
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // GUARDAR
+    // ──────────────────────────────────────────────────────────────
 
     private async Task GuardarItinerario()
     {
-        if (!modelo.Paradas.Any())
+        if (!municipiosSeleccionados.Any())
         {
-            mensajeError = "Debes seleccionar al menos un municipio.";
+            mensajeError = "Añade al menos un municipio a tu ruta.";
+            return;
+        }
+
+        if (modelo.FechaInicio.HasValue && modelo.FechaFin.HasValue &&
+            modelo.FechaFin < modelo.FechaInicio)
+        {
+            mensajeError = "La fecha de regreso no puede ser anterior al inicio.";
             return;
         }
 
@@ -117,9 +654,15 @@ else
         mensajeError = null;
 
         var resultado = await ItiApi.CrearAsync(modelo);
-        if (resultado != null) Nav.NavigateTo($"/itinerarios/{resultado.IdItinerario}");
-        else mensajeError = "Error al guardar. Inténtalo de nuevo.";
-        
-        guardando = false;
+        if (resultado != null)
+        {
+            await Task.Delay(1500);
+            Nav.NavigateTo($"/itinerarios/{resultado.IdItinerario}");
+        }
+        else
+        {
+            mensajeError = "No pudimos crear el itinerario. Intenta nuevamente.";
+            guardando = false;
+        }
     }
 }

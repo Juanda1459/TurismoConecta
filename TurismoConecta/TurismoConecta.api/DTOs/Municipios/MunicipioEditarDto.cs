@@ -15,8 +15,12 @@ namespace TurismoConecta.api.DTOs.Municipios
         public string? Clima { get; set; }
 
         public string? Historia { get; set; }
+        public string? ImagenUrl { get; set; }
 
-        [MaxLength(500)]
-        public string? FechasRelevantes { get; set; }
+        // Ahora es una lista completa de festividades:
+        public List<FechaRelevanteDto> FechasRelevantes { get; set; } = new();
+        public List<string> Etiquetas { get; set; } = new();
+
+
     }
 }

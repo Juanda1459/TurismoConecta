@@ -1,70 +1,145 @@
-﻿@page "/itinerarios"
+@page "/itinerarios"
+@layout EmptyLayout
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @using TurismoConecta.web.Client.Services
 @inject ItinerarioApiService ApiService
 @inject NavigationManager Nav
 @inject IJSRuntime JS
 
-<h3>Mis Itinerarios</h3>
+<HeadContent>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</HeadContent>
 
-@if (cargando)
-{
-    <p>Cargando tus itinerarios...</p>
-}
-else if (huboError)
-{
-    <p class="text-danger">Hubo un error al cargar los itinerarios.</p>
-    <button class="btn btn-primary" @onclick="CargarItinerarios">Reintentar</button>
-}
-else if (itinerarios != null && !itinerarios.Any())
-{
-    <div class="alert alert-info">
-        <p>Aún no tienes itinerarios. ¡Empieza a planear tu viaje!</p>
-        <button class="btn btn-success" @onclick='() => Nav.NavigateTo("/municipios")'>Explorar Municipios</button>
-    </div>
-}
-else if (itinerarios != null)
-{
-    <div class="grid-itinerarios">
-        @foreach (var iti in itinerarios)
-        {
-            <div class="card-itinerario">
-                <h4>@iti.Nombre</h4>
-                <p>
-                    <strong>Fechas:</strong> 
-                    @(iti.FechaInicio?.ToString("dd/MM/yyyy") ?? "Sin fecha") - 
-                    @(iti.FechaFin?.ToString("dd/MM/yyyy") ?? "Sin fecha")
-                </p>
-                <p><strong>Paradas:</strong> @iti.CantidadParadas municipios</p>
-                
-                <div class="botones-card">
-                    <button class="btn btn-primary" @onclick="() => VerDetalle(iti.IdItinerario)">Ver Detalle</button>
-                    <button class="btn btn-danger" @onclick="() => Eliminar(iti.IdItinerario)">Eliminar</button>
+<div class="lista-page">
+
+    @* PANTALLA DE ESPERA *@
+    @if (cargando)
+    {
+        <div class="pantalla-espera-inmersiva">
+            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1600&auto=format&fit=crop"
+                 alt="Boyacá" class="espera-bg-img" />
+            <div class="espera-scrim">
+                <div class="espera-contenido">
+                    <span class="espera-eyebrow">Mis Itinerarios</span>
+                    <h2 class="espera-lugar">Tus Rutas Boyacenses</h2>
+                    <p class="espera-cita">"Cada viaje es una historia que merece ser recordada."</p>
+                    <div class="espera-indicador">
+                        <div class="spinner-anillo-selva"></div>
+                        <span class="espera-texto-progreso">Cargando tus itinerarios...</span>
+                    </div>
                 </div>
             </div>
-        }
-    </div>
-}
+        </div>
+    }
+
+    @* ESTADO: ERROR *@
+    else if (huboError)
+    {
+        <div class="lista-container">
+            <div class="estado-vacio">
+                <span class="estado-icono">⚠️</span>
+                <h3>No pudimos cargar tus itinerarios</h3>
+                <p>Revisa tu conexión e intenta nuevamente.</p>
+                <button class="btn-accion-primaria" @onclick="CargarItinerarios">Reintentar</button>
+            </div>
+        </div>
+    }
+
+    @* ESTADO: VACÍO *@
+    else if (itinerarios != null && !itinerarios.Any())
+    {
+        <div class="lista-container">
+            <header class="lista-header">
+                <span class="lista-eyebrow">Planificador de Viajes</span>
+                <h1 class="lista-titulo">Mis Itinerarios</h1>
+            </header>
+            <div class="estado-vacio">
+                <span class="estado-icono">🗺️</span>
+                <h3>Aún no tienes itinerarios</h3>
+                <p>Explora los municipios de Boyacá y arma tu primera ruta.</p>
+                <button class="btn-accion-primaria" @onclick='() => Nav.NavigateTo("/municipios")'>
+                    Explorar Municipios →
+                </button>
+            </div>
+        </div>
+    }
+
+    @* LISTA DE ITINERARIOS *@
+    else if (itinerarios != null)
+    {
+        <div class="lista-container">
+            <header class="lista-header">
+                <div class="lista-header-texto">
+                    <span class="lista-eyebrow">Planificador de Viajes</span>
+                    <h1 class="lista-titulo">Mis Itinerarios</h1>
+                    <p class="lista-subtitulo">
+                        @itinerarios.Count ruta@(itinerarios.Count != 1 ? "s" : "") planificada@(itinerarios.Count != 1 ? "s" : "") por Boyacá
+                    </p>
+                </div>
+                <button class="btn-nuevo-itinerario" @onclick='() => Nav.NavigateTo("/municipios")'>
+                    ＋ Nueva Ruta
+                </button>
+            </header>
+
+            <div class="grid-itinerarios">
+                @foreach (var iti in itinerarios)
+                {
+                    <div class="card-itinerario-lista" @onclick="() => VerDetalle(iti.IdItinerario)">
+                        <div class="card-iti-top">
+                            <div class="card-iti-icono">🏔️</div>
+                            <span class="badge-ruta-tag">Ruta</span>
+                        </div>
+
+                        <div class="card-iti-body">
+                            <h3 class="card-iti-nombre">@iti.Nombre</h3>
+
+                            <div class="card-iti-meta">
+                                @if (iti.FechaInicio.HasValue)
+                                {
+                                    <span class="meta-item">
+                                        📅 @iti.FechaInicio.Value.ToString("dd MMM yyyy")
+                                        @if (iti.FechaFin.HasValue)
+                                        {
+                                            <text> → @iti.FechaFin.Value.ToString("dd MMM yyyy")</text>
+                                        }
+                                    </span>
+                                }
+                                <span class="meta-item">📍 @iti.CantidadParadas municipio@(iti.CantidadParadas != 1 ? "s" : "")</span>
+                            </div>
+                        </div>
+
+                        <div class="card-iti-footer" @onclick:stopPropagation="true">
+                            <button class="btn-iti-ver" @onclick="() => VerDetalle(iti.IdItinerario)">
+                                Ver detalle →
+                            </button>
+                            <button class="btn-iti-eliminar" @onclick="() => Eliminar(iti.IdItinerario)"
+                                    title="Eliminar itinerario">
+                                🗑
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
 
 @code {
     private List<ItinerarioListadoDto>? itinerarios;
     private bool cargando = true;
     private bool huboError = false;
 
-    protected override async Task OnInitializedAsync()
-    {
-        await CargarItinerarios();
-    }
+    protected override async Task OnInitializedAsync() => await CargarItinerarios();
 
     private async Task CargarItinerarios()
     {
         cargando = true;
         huboError = false;
         var resultado = await ApiService.ListarAsync();
-        
         if (resultado == null) huboError = true;
         else itinerarios = resultado;
-        
         cargando = false;
     }
 
@@ -72,7 +147,7 @@ else if (itinerarios != null)
 
     private async Task Eliminar(int id)
     {
-        bool confirmado = await JS.InvokeAsync<bool>("confirm", "¿Estás seguro de eliminar este itinerario?");
+        bool confirmado = await JS.InvokeAsync<bool>("confirm", "¿Eliminar este itinerario? Esta acción no se puede deshacer.");
         if (confirmado)
         {
             var exito = await ApiService.EliminarAsync(id);

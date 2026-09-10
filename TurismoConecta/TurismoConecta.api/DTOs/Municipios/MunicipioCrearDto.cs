@@ -1,4 +1,3 @@
-﻿
 namespace TurismoConecta.api.DTOs.Municipios
 {
     public class MunicipioCrearDto
@@ -11,5 +10,10 @@ namespace TurismoConecta.api.DTOs.Municipios
         public string? ImagenUrl { get; set; }
         public decimal? Latitud { get; set; }
         public decimal? Longitud { get; set; }
+
+        // Ahora es una lista completa de festividades:
+        public List<FechaRelevanteDto> FechasRelevantes { get; set; } = new();
+
+        public List<string> Etiquetas { get; set; } = new();
     }
 }

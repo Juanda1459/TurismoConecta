@@ -1,105 +1,300 @@
-﻿@page "/itinerarios/{Id:int}"
+@page "/itinerarios/{Id:int}"
+@layout EmptyLayout
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @using TurismoConecta.web.Client.Services
 @inject ItinerarioApiService ApiService
+@inject MunicipioApiService MuniApi
 @inject NavigationManager Nav
 @inject IJSRuntime JS
 
-@if (cargando)
-{
-    <p>Cargando detalles...</p>
-}
-else if (itinerario == null)
-{
-    <div class="alert alert-danger">
-        <p>No se pudo cargar el itinerario.</p>
-        <button class="btn btn-primary" @onclick='() => Nav.NavigateTo("/itinerarios")'>Volver</button>
-    </div>
-}
-else
-{
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>@itinerario.Nombre</h3>
-        <button class="btn btn-outline-secondary" @onclick='() => Nav.NavigateTo("/itinerarios")'>Volver</button>
-    </div>
+<HeadContent>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</HeadContent>
 
-    <div class="info-box">
-        <p>
-            <strong>Fechas:</strong> 
-            @(itinerario.FechaInicio?.ToString("dd/MM/yyyy") ?? "No definida") al 
-            @(itinerario.FechaFin?.ToString("dd/MM/yyyy") ?? "No definida")
-        </p>
-        @if (!string.IsNullOrEmpty(itinerario.Observaciones))
-        {
-            <p><strong>Observaciones:</strong> @itinerario.Observaciones</p>
-        }
+<div class="detalle-page">
 
-        <hr />
-        
-        <div class="mt-3">
-            @if (itinerario.Compartido)
-            {
-                <div class="alert alert-success">
-                    <strong>Público:</strong><br/>
-                    <a href="/itinerarios/compartido/@itinerario.CodigoCompartir" target="_blank" class="alert-link">
-                        Ver vista pública
-                    </a>
-                </div>
-                <button class="btn btn-warning" @onclick="ToggleCompartir" disabled="@cambiandoCompartir">
-                    @(cambiandoCompartir ? "Procesando..." : "Dejar de compartir")
-                </button>
-            }
-            else
-            {
-                <div class="alert alert-secondary">
-                    <strong>Privado:</strong> Solo tú puedes verlo.
-                </div>
-                <button class="btn btn-success" @onclick="ToggleCompartir" disabled="@cambiandoCompartir">
-                    @(cambiandoCompartir ? "Procesando..." : "Compartir Itinerario")
-                </button>
-            }
-        </div>
-    </div>
-
-    <h4 class="mb-3">Ruta de Viaje</h4>
-    
-    @if (!itinerario.Paradas.Any())
+    @* PANTALLA DE ESPERA *@
+    @if (cargando)
     {
-        <p>No hay paradas registradas.</p>
-    }
-    else
-    {
-        var paradasAgrupadasPorDia = itinerario.Paradas.GroupBy(p => p.DiaNumero).OrderBy(g => g.Key);
-
-        <div class="row">
-            @foreach (var grupoDia in paradasAgrupadasPorDia)
-            {
-                <div class="col-md-6 mb-4">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">Día @grupoDia.Key</h5>
-                        </div>
-                        <ul class="list-group list-group-flush">
-                            @foreach (var parada in grupoDia.OrderBy(p => p.Orden))
-                            {
-                                <li class="list-group-item parada-item">
-                                    <span class="numero-parada">@parada.Orden</span>
-                                    <span>@parada.NombreMunicipio</span>
-                                </li>
-                            }
-                        </ul>
+        <div class="pantalla-espera-inmersiva">
+            <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=1600&auto=format&fit=crop"
+                 alt="Boyacá" class="espera-bg-img" />
+            <div class="espera-scrim">
+                <div class="espera-contenido">
+                    <span class="espera-eyebrow">Tu Itinerario</span>
+                    <h2 class="espera-lugar">Cargando tu ruta...</h2>
+                    <p class="espera-cita">"Viajar es encontrarse a uno mismo en lugares desconocidos."</p>
+                    <div class="espera-indicador">
+                        <div class="spinner-anillo-selva"></div>
+                        <span class="espera-texto-progreso">Preparando los detalles de tu aventura...</span>
                     </div>
                 </div>
-            }
+            </div>
         </div>
     }
-}
+
+    @* MODAL DE DETALLE DEL MUNICIPIO *@
+    @if (municipioModal != null)
+    {
+        <div class="modal-backdrop" @onclick="CerrarModal">
+            <div class="modal-card-municipio" @onclick:stopPropagation="true">
+                <div class="modal-banner-wrap">
+                    <img src="@ObtenerFotoMunicipio(municipioModal)"
+                         alt="@municipioModal.Nombre"
+                         class="modal-banner-foto"
+                         onerror="this.onerror=null; this.src='@FotoFallback';" />
+                    <div class="modal-banner-scrim">
+                        <span class="modal-banner-tag">Destino Boyacense</span>
+                        <h2 class="modal-banner-nombre">@municipioModal.Nombre</h2>
+                        @if (!string.IsNullOrWhiteSpace(municipioModal.Clima))
+                        {
+                            <p class="modal-banner-clima">🌤️ @municipioModal.Clima</p>
+                        }
+                    </div>
+                    <button type="button" class="modal-btn-cerrar" @onclick="CerrarModal" title="Cerrar">✕</button>
+                </div>
+
+                <div class="modal-cuerpo">
+                    @if (municipioModal.Etiquetas != null && municipioModal.Etiquetas.Any())
+                    {
+                        <div class="modal-etiquetas-pills">
+                            @foreach (var tag in municipioModal.Etiquetas)
+                            {
+                                <span class="pill-experiencia">✦ @tag</span>
+                            }
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(municipioModal.Descripcion))
+                    {
+                        <div class="modal-seccion">
+                            <span class="modal-seccion-label">Sobre este pueblo</span>
+                            <p class="modal-seccion-texto">@municipioModal.Descripcion</p>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(municipioModal.Historia))
+                    {
+                        <div class="modal-seccion">
+                            <span class="modal-seccion-label">Historia y Tradición</span>
+                            <p class="modal-seccion-texto modal-historia">@municipioModal.Historia</p>
+                        </div>
+                    }
+
+                    @if (municipioModal.FechasRelevantes != null && municipioModal.FechasRelevantes.Any())
+                    {
+                        <div class="modal-seccion">
+                            <span class="modal-seccion-label">Festividades Destacadas</span>
+                            <div class="modal-festividades-grid">
+                                @foreach (var fest in municipioModal.FechasRelevantes)
+                                {
+                                    <div class="modal-fest-card">
+                                        <strong>@fest.NombreFestividad</strong>
+                                        <span>@(string.IsNullOrWhiteSpace(fest.TipoFestividad) ? "Cultural" : fest.TipoFestividad)</span>
+                                        @if (fest.FechaInicio != default)
+                                        {
+                                            <span class="fest-fecha">📅 @fest.FechaInicio.ToString("MMMM yyyy")</span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <div class="modal-footer-acciones">
+                        <a href="/municipios/@municipioModal.IdMunicipio" target="_blank" class="enlace-ficha-completa">
+                            Ver ficha turística completa ↗
+                        </a>
+                        <button type="button" class="btn-guardar-iti" @onclick="CerrarModal">
+                            ← Volver al itinerario
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @* ERROR *@
+    else if (itinerario == null)
+    {
+        <div class="detalle-container">
+            <div class="estado-error-box">
+                <span>😞</span>
+                <h3>No encontramos este itinerario</h3>
+                <p>Puede que haya sido eliminado o que el enlace sea incorrecto.</p>
+                <button class="btn-volver" @onclick='() => Nav.NavigateTo("/itinerarios")'>
+                    ← Volver a mis itinerarios
+                </button>
+            </div>
+        </div>
+    }
+
+    @* CONTENIDO COMPLETO *@
+    else
+    {
+        @* HERO *@
+        <div class="detalle-hero">
+            <div class="detalle-hero-contenido">
+                <button class="btn-volver-hero" @onclick='() => Nav.NavigateTo("/itinerarios")'>
+                    ← Mis itinerarios
+                </button>
+                <span class="detalle-eyebrow">Ruta Boyacense</span>
+                <h1 class="detalle-nombre">@itinerario.Nombre</h1>
+
+                <div class="detalle-hero-meta">
+                    @if (itinerario.FechaInicio.HasValue)
+                    {
+                        <span class="hero-meta-item">
+                            📅 @itinerario.FechaInicio.Value.ToString("dd 'de' MMMM")
+                            @if (itinerario.FechaFin.HasValue)
+                            {
+                                <text> → @itinerario.FechaFin.Value.ToString("dd 'de' MMMM, yyyy")</text>
+                            }
+                        </span>
+                    }
+                    <span class="hero-meta-item">
+                        📍 @itinerario.Paradas.Count parada@(itinerario.Paradas.Count != 1 ? "s" : "")
+                    </span>
+                    @if (itinerario.Compartido)
+                    {
+                        <span class="badge-publico-hero">✦ Público</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="detalle-container">
+            <div class="detalle-body-grid">
+
+                @* COLUMNA IZQUIERDA: PARADAS *@
+                <div class="detalle-col-paradas">
+                    <div class="seccion-card">
+                        <div class="seccion-titulo-wrap">
+                            <span class="seccion-num">01</span>
+                            <div class="seccion-titulo-textos">
+                                <h2 class="seccion-titulo">Ruta de Viaje</h2>
+                                <span class="seccion-subtitulo">Haz clic en cualquier pueblo para ver su información</span>
+                            </div>
+                        </div>
+
+                        @if (!itinerario.Paradas.Any())
+                        {
+                            <p class="texto-vacio">No hay paradas en este itinerario.</p>
+                        }
+                        else
+                        {
+                            var porDia = itinerario.Paradas.GroupBy(p => p.DiaNumero).OrderBy(g => g.Key);
+
+                            @foreach (var dia in porDia)
+                            {
+                                <div class="dia-bloque">
+                                    <div class="dia-label">
+                                        <span class="dia-num">Día @dia.Key</span>
+                                        <span class="dia-linea"></span>
+                                    </div>
+                                    @foreach (var parada in dia.OrderBy(p => p.Orden))
+                                    {
+                                        <div class="parada-linea-item" @onclick="() => VerMunicipio(parada.IdMunicipio)">
+                                            <div class="parada-dot"></div>
+                                            <div class="parada-info-texto">
+                                                <span class="parada-orden-num">@parada.Orden</span>
+                                                <span class="parada-municipio-nombre">@parada.NombreMunicipio</span>
+                                                <span class="badge-ver-parada">Ver info ↗</span>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+
+                @* COLUMNA DERECHA: INFO + COMPARTIR *@
+                <div class="detalle-col-info">
+
+                    @* OBSERVACIONES *@
+                    @if (!string.IsNullOrWhiteSpace(itinerario.Observaciones))
+                    {
+                        <div class="seccion-card">
+                            <div class="seccion-titulo-wrap">
+                                <span class="seccion-num">02</span>
+                                <h2 class="seccion-titulo">Notas del Viaje</h2>
+                            </div>
+                            <blockquote class="cita-observaciones">
+                                "@itinerario.Observaciones"
+                            </blockquote>
+                        </div>
+                    }
+
+                    @* COMPARTIR *@
+                    <div class="seccion-card">
+                        <div class="seccion-titulo-wrap">
+                            <span class="seccion-num">@(!string.IsNullOrWhiteSpace(itinerario.Observaciones) ? "03" : "02")</span>
+                            <h2 class="seccion-titulo">Visibilidad del Itinerario</h2>
+                        </div>
+
+                        @if (itinerario.Compartido)
+                        {
+                            <div class="compartir-estado publico">
+                                <div class="compartir-icono">🌐</div>
+                                <div class="compartir-texto">
+                                    <strong>Este itinerario es público</strong>
+                                    <p>Cualquiera con el enlace puede verlo.</p>
+                                    <a href="/itinerarios/compartido/@itinerario.CodigoCompartir"
+                                       target="_blank" class="enlace-compartido">
+                                        Ver vista pública ↗
+                                    </a>
+                                </div>
+                            </div>
+                            <button class="btn-toggle-compartir privado"
+                                    @onclick="ToggleCompartir"
+                                    disabled="@cambiandoCompartir">
+                                @(cambiandoCompartir ? "Procesando..." : "🔒 Hacer privado")
+                            </button>
+                        }
+                        else
+                        {
+                            <div class="compartir-estado privado">
+                                <div class="compartir-icono">🔒</div>
+                                <div class="compartir-texto">
+                                    <strong>Este itinerario es privado</strong>
+                                    <p>Solo tú puedes verlo. Compártelo para inspirar a otros viajeros.</p>
+                                </div>
+                            </div>
+                            <button class="btn-toggle-compartir publico"
+                                    @onclick="ToggleCompartir"
+                                    disabled="@cambiandoCompartir">
+                                @(cambiandoCompartir ? "Procesando..." : "🌐 Compartir itinerario")
+                            </button>
+                        }
+                    </div>
+
+                    @* ACCIONES *@
+                    <div class="detalle-acciones">
+                        <button class="btn-accion-secundaria"
+                                @onclick='() => Nav.NavigateTo("/municipios")'>
+                            ＋ Planear nueva ruta
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
 
 @code {
     [Parameter] public int Id { get; set; }
+
     private ItinerarioDetalleDto? itinerario;
     private bool cargando = true;
     private bool cambiandoCompartir = false;
+
+    // Modal de información del municipio
+    private MunicipioFichaDto? municipioModal;
+    private const string FotoFallback =
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=900&auto=format&fit=crop";
 
     protected override async Task OnInitializedAsync()
     {
@@ -108,19 +303,32 @@ else
         cargando = false;
     }
 
+    private async Task VerMunicipio(int idMunicipio)
+    {
+        municipioModal = await MuniApi.ObtenerFichaAsync(idMunicipio);
+    }
+
+    private void CerrarModal() => municipioModal = null;
+
+    private string ObtenerFotoMunicipio(MunicipioFichaDto muni)
+    {
+        if (!string.IsNullOrWhiteSpace(muni.ImagenUrl) && muni.ImagenUrl.StartsWith("http"))
+            return muni.ImagenUrl;
+
+        return FotoFallback;
+    }
+
     private async Task ToggleCompartir()
     {
         if (itinerario == null) return;
         cambiandoCompartir = true;
-        
         var resultado = await ApiService.ToggleCompartirAsync(Id);
         if (resultado != null)
         {
             itinerario.Compartido = resultado.Compartido;
             itinerario.CodigoCompartir = resultado.CodigoCompartir;
         }
-        else await JS.InvokeVoidAsync("alert", "Error al cambiar el estado.");
-
+        else await JS.InvokeVoidAsync("alert", "Error al cambiar el estado de visibilidad.");
         cambiandoCompartir = false;
     }
 }

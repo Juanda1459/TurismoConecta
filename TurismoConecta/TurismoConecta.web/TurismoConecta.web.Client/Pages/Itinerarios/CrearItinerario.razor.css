@@ -1,20 +1,969 @@
-﻿.form-seccion {
-    padding: 25px;
-    margin-bottom: 25px;
+/* ==========================================================================
+   CREAR ITINERARIO — Estética Editorial + Modal de Pantalla Completa
+   ========================================================================== */
+.itinerario-page {
+    --fondo: #FBF9F5;
+    --superficie: #FFFFFF;
+    --texto-principal: #1E2B25;
+    --texto-secundario: #5A6961;
+    --acento-bosque: #213B31;
+    --acento-tierra: #9E5B3D;
+    --acento-dorado: #E0A94D;
+    --borde-sutil: #E5E0D8;
+    --borde-divisor: #EDE9E1;
+    font-family: 'Montserrat', -apple-system, sans-serif;
+    color: var(--texto-principal);
+    background: var(--fondo);
+    min-height: 100vh;
+    padding-bottom: 80px;
+}
+
+/* ──────────────────────────────────────────
+   NAVEGACIÓN
+   ────────────────────────────────────────── */
+.itinerario-nav {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 24px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-back-link {
+    background: none;
+    border: none;
+    color: var(--texto-principal);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: opacity 0.2s;
+}
+
+    .nav-back-link:hover {
+        opacity: 0.6;
+    }
+
+.nav-badge-estado {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--acento-tierra);
+    font-weight: 700;
+}
+
+/* ──────────────────────────────────────────
+   ENCABEZADO
+   ────────────────────────────────────────── */
+.itinerario-container {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.itinerario-header {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.itinerario-eyebrow {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    color: var(--acento-tierra);
+    font-weight: 700;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.itinerario-titulo {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 3.2rem;
+    font-weight: 600;
+    color: var(--texto-principal);
+    margin: 0 0 10px;
+    line-height: 1.1;
+}
+
+.itinerario-subtitulo {
+    font-size: 0.95rem;
+    color: var(--texto-secundario);
+    max-width: 620px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* ──────────────────────────────────────────
+   ALERTA DE ERROR
+   ────────────────────────────────────────── */
+.alerta-error-itinerario {
+    background: #FDEDEC;
+    border-left: 4px solid #C0392B;
+    padding: 14px 18px;
     border-radius: 12px;
-    background-color: #ffffff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    color: #922B21;
+    font-size: 0.88rem;
 }
 
-.form-titulo {
-    color: #2c3e50;
+    .alerta-error-itinerario p {
+        margin: 0;
+    }
+
+/* ──────────────────────────────────────────
+   GRID DE DOS COLUMNAS
+   ────────────────────────────────────────── */
+.itinerario-layout-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: 28px;
+    align-items: start;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 920px) {
+    .itinerario-layout-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ──────────────────────────────────────────
+   CARDS CONTENEDORAS
+   ────────────────────────────────────────── */
+.card-itinerario {
+    background: var(--superficie);
+    border: 1px solid var(--borde-sutil);
+    border-radius: 20px;
+    padding: 30px 26px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.03);
+    min-width: 0;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.card-header-badge {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--borde-divisor);
+    padding-bottom: 16px;
+}
+
+.badge-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--acento-tierra);
+    line-height: 1.1;
+}
+
+.card-header-badge h3 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.55rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--texto-principal);
+}
+
+.card-title-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-subtitle {
+    font-size: 0.78rem;
+    color: var(--texto-secundario);
+    display: block;
+    margin-top: 3px;
+}
+
+/* ──────────────────────────────────────────
+   CAMPOS DE ENTRADA — ESTILO PÍLDORA
+   ────────────────────────────────────────── */
+.form-group-iti {
     margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #f0f2f5;
 }
 
-.lista-municipios {
-    max-height: 300px;
+    .form-group-iti label {
+        display: block;
+        font-size: 0.76rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--texto-principal);
+        margin-bottom: 8px;
+    }
+
+::deep .input-iti, .input-iti {
+    width: 100% !important;
+    display: block;
+    background: #FAF8F5 !important;
+    border: 1.5px solid var(--borde-sutil) !important;
+    border-radius: 24px !important;
+    padding: 11px 20px !important;
+    font-size: 0.90rem !important;
+    color: var(--texto-principal) !important;
+    font-family: inherit;
+    box-sizing: border-box;
+    transition: all 0.25s ease;
+    outline: none !important;
+}
+
+    ::deep .input-iti:focus, .input-iti:focus,
+    ::deep .textarea-iti:focus, .textarea-iti:focus {
+        background: #FFFFFF !important;
+        border-color: var(--acento-bosque) !important;
+        box-shadow: 0 0 0 3.5px rgba(33,59,49,.12) !important;
+    }
+
+::deep .textarea-iti, .textarea-iti {
+    width: 100% !important;
+    display: block;
+    background: #FAF8F5 !important;
+    border: 1.5px solid var(--borde-sutil) !important;
+    border-radius: 18px !important;
+    padding: 14px 20px !important;
+    font-size: 0.90rem !important;
+    color: var(--texto-principal) !important;
+    font-family: inherit;
+    box-sizing: border-box;
+    transition: all 0.25s ease;
+    outline: none !important;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.form-grid-dos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.error-msg {
+    font-size: 0.78rem;
+    color: #C0392B;
+    margin-top: 5px;
+    display: block;
+}
+
+.info-duracion-pill {
+    background: #F4EFEA;
+    border: 1px solid var(--borde-sutil);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.84rem;
+    color: var(--texto-principal);
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+/* ──────────────────────────────────────────
+   LISTA DE PARADAS (COMPACTAS, SIN EXPAND)
+   ────────────────────────────────────────── */
+.lista-paradas-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.parada-card-item {
+    background: #FAF8F5;
+    border: 1.5px solid var(--borde-sutil);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    user-select: none;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+    .parada-card-item:hover {
+        border-color: var(--acento-bosque);
+        background: #FFFFFF;
+        box-shadow: 0 4px 14px rgba(33,59,49,.07);
+        transform: translateX(4px);
+    }
+
+.parada-orden {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--acento-bosque);
+    color: #FFF;
+    font-weight: 700;
+    font-size: 0.80rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.parada-miniatura {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,.08);
+}
+
+.parada-detalles {
+    flex: 1 1 0%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.parada-titulo-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.parada-nombre {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--texto-principal);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.badge-expandir {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--acento-tierra);
+    background: rgba(158,91,61,.1);
+    padding: 2px 7px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.parada-clima {
+    font-size: 0.76rem;
+    color: var(--texto-secundario);
+    display: block;
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.parada-acciones {
+    display: flex;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.btn-accion-icono {
+    background: #FFF;
+    border: 1px solid var(--borde-sutil);
+    color: var(--texto-principal);
+    width: 29px;
+    height: 29px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    transition: all 0.2s ease;
+}
+
+    .btn-accion-icono:hover {
+        background: var(--acento-bosque);
+        color: #FFF;
+        border-color: var(--acento-bosque);
+    }
+
+    .btn-accion-icono.btn-quitar:hover {
+        background: #C0392B;
+        border-color: #C0392B;
+        color: #FFF;
+    }
+
+/* ──────────────────────────────────────────
+   BOTÓN AGREGAR MÁS MUNICIPIOS
+   ────────────────────────────────────────── */
+.btn-agregar-municipio {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: none;
+    border: 1.5px dashed var(--borde-sutil);
+    border-radius: 18px;
+    color: var(--acento-bosque);
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 13px 20px;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    margin-top: 4px;
+}
+
+    .btn-agregar-municipio:hover {
+        background: #F4EFEA;
+        border-color: var(--acento-bosque);
+        transform: none;
+    }
+
+.btn-agregar-icono {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--acento-bosque);
+    color: #FFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* ──────────────────────────────────────────
+   CAJA VACÍA
+   ────────────────────────────────────────── */
+.vacio-paradas-box {
+    text-align: center;
+    padding: 36px 20px;
+    background: #FAF8F5;
+    border: 1.5px dashed var(--borde-sutil);
+    border-radius: 18px;
+    margin-bottom: 16px;
+}
+
+    .vacio-paradas-box span {
+        font-size: 2rem;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .vacio-paradas-box p {
+        color: var(--texto-secundario);
+        font-size: 0.90rem;
+        margin: 0;
+    }
+
+/* ──────────────────────────────────────────
+   ACCIONES FINALES
+   ────────────────────────────────────────── */
+.itinerario-footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 16px;
+    margin-top: 32px;
+}
+
+.btn-cancelar-iti {
+    background: none;
+    border: none;
+    color: var(--texto-secundario);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    padding: 12px 20px;
+}
+
+    .btn-cancelar-iti:hover {
+        color: var(--texto-principal);
+    }
+
+.btn-guardar-iti {
+    background: var(--acento-bosque);
+    color: #FFF;
+    border: none;
+    border-radius: 30px;
+    padding: 14px 34px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    letter-spacing: .5px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(33,59,49,.25);
+    transition: all 0.25s ease;
+}
+
+    .btn-guardar-iti:hover:not(:disabled) {
+        background: #13241E;
+        transform: translateY(-1px);
+    }
+
+    .btn-guardar-iti:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+
+/* ══════════════════════════════════════════════════════
+   MODAL BACKDROP (común a los dos modales)
+   ══════════════════════════════════════════════════════ */
+.modal-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 999999 !important;
+    background: rgba(10, 18, 14, 0.72) !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 20px !important;
+    animation: backdropIn 0.25s ease-out !important;
+}
+
+@keyframes backdropIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ══════════════════════════════════════════════════════
+   MODAL DE DETALLE DEL MUNICIPIO
+   ══════════════════════════════════════════════════════ */
+.modal-card-municipio {
+    background: var(--superficie);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 720px;
+    max-height: 88vh;
     overflow-y: auto;
-    border-radius: 8px;
+    box-shadow: 0 32px 80px rgba(0,0,0,.38);
+    animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    scrollbar-width: thin;
+    scrollbar-color: var(--borde-sutil) transparent;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.94) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* BANNER GRANDE */
+.modal-banner-wrap {
+    position: relative;
+    height: 280px;
+    border-radius: 24px 24px 0 0;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.modal-banner-foto {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.78);
+}
+
+.modal-banner-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 30%, rgba(16,26,21,.9) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 28px;
+    color: #FFF;
+}
+
+.modal-banner-tag {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--acento-dorado);
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.modal-banner-nombre {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 2.6rem;
+    font-weight: 600;
+    margin: 0 0 4px;
+    line-height: 1.1;
+    color: #FFF;
+}
+
+.modal-banner-clima {
+    font-size: 0.85rem;
+    color: #EDE9E1;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.modal-btn-cerrar {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(0,0,0,.45);
+    border: none;
+    color: #FFF;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    z-index: 2;
+}
+
+    .modal-btn-cerrar:hover {
+        background: rgba(0,0,0,.7);
+    }
+
+/* CUERPO DEL MODAL */
+.modal-cuerpo {
+    padding: 28px 32px 32px;
+}
+
+.modal-etiquetas-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 22px;
+}
+
+.pill-experiencia {
+    background: #FAF8F5;
+    border: 1px solid var(--borde-sutil);
+    color: var(--texto-principal);
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 20px;
+}
+
+.modal-seccion {
+    margin-bottom: 20px;
+}
+
+.modal-seccion-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .9px;
+    color: var(--acento-tierra);
+    margin-bottom: 6px;
+}
+
+.modal-seccion-texto {
+    font-size: 0.90rem;
+    line-height: 1.65;
+    color: var(--texto-secundario);
+    margin: 0;
+}
+
+.modal-historia {
+    font-style: italic;
+}
+
+.modal-festividades-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+}
+
+.modal-fest-card {
+    background: #FAF8F5;
+    border: 1px solid var(--borde-sutil);
+    border-left: 3px solid var(--acento-tierra);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+    .modal-fest-card strong {
+        font-size: 0.83rem;
+        color: var(--texto-principal);
+    }
+
+    .modal-fest-card span {
+        font-size: 0.73rem;
+        color: var(--texto-secundario);
+    }
+
+.fest-fecha {
+    color: var(--acento-bosque) !important;
+    font-weight: 500 !important;
+}
+
+.modal-footer-acciones {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--borde-divisor);
+}
+
+.enlace-ficha-completa {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--acento-bosque);
+    text-decoration: none;
+}
+
+    .enlace-ficha-completa:hover {
+        text-decoration: underline;
+    }
+
+/* ══════════════════════════════════════════════════════
+   MODAL DE BÚSQUEDA PARA AGREGAR MUNICIPIOS
+   ══════════════════════════════════════════════════════ */
+.modal-agregar-municipio {
+    background: var(--superficie);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 32px 80px rgba(0,0,0,.38);
+    animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-agregar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 24px 16px;
+    border-bottom: 1px solid var(--borde-divisor);
+    flex-shrink: 0;
+}
+
+    .modal-agregar-header h3 {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+        color: var(--texto-principal);
+    }
+
+    .modal-agregar-header .modal-btn-cerrar {
+        position: static;
+        background: #FAF8F5;
+        color: var(--texto-principal);
+        border: 1px solid var(--borde-sutil);
+        width: 32px;
+        height: 32px;
+        font-size: 0.85rem;
+    }
+
+        .modal-agregar-header .modal-btn-cerrar:hover {
+            background: #EDE9E1;
+        }
+
+.modal-agregar-busqueda {
+    padding: 16px 24px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--borde-divisor);
+}
+
+.input-buscar-modal {
+    width: 100%;
+    box-sizing: border-box;
+    background: #FAF8F5;
+    border: 1.5px solid var(--borde-sutil);
+    border-radius: 24px;
+    padding: 11px 20px;
+    font-size: 0.90rem;
+    font-family: inherit;
+    color: var(--texto-principal);
+    outline: none;
+    transition: all 0.22s ease;
+}
+
+    .input-buscar-modal:focus {
+        border-color: var(--acento-bosque);
+        background: #FFF;
+        box-shadow: 0 0 0 3px rgba(33,59,49,.1);
+    }
+
+.modal-agregar-estado {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    color: var(--texto-secundario);
+    font-size: 0.88rem;
+}
+
+.modal-agregar-resultados {
+    overflow-y: auto;
+    max-height: 380px;
+    padding: 8px 0;
+}
+
+.resultado-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: background 0.18s ease;
+}
+
+    .resultado-item:hover {
+        background: #F4EFEA;
+    }
+
+.resultado-item-ya {
+    opacity: 0.6;
+    cursor: default;
+}
+
+    .resultado-item-ya:hover {
+        background: transparent;
+    }
+
+.resultado-miniatura {
+    width: 46px;
+    height: 46px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.resultado-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.resultado-nombre {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--texto-principal);
+}
+
+.resultado-tags {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--texto-secundario);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.resultado-badge-add {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--acento-bosque);
+    background: rgba(33,59,49,.08);
+    padding: 4px 10px;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+.resultado-badge-ya {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #5A6961;
+    background: #EDE9E1;
+    padding: 4px 10px;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+.modal-agregar-sugerencias {
+    padding: 20px 24px;
+}
+
+    .modal-agregar-sugerencias p {
+        font-size: 0.86rem;
+        color: var(--texto-secundario);
+        margin-bottom: 12px;
+    }
+
+.sugerencias-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip-sugerencia {
+    background: #FAF8F5;
+    border: 1px solid var(--borde-sutil);
+    color: var(--texto-principal);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+    .chip-sugerencia:hover {
+        border-color: var(--acento-bosque);
+        background: #F4EFEA;
+    }
+
+/* Spinner compacto para el buscador */
+.spinner-mini {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #E5E0D8;
+    border-top-color: #213B31;
+    border-radius: 50%;
+    animation: girar 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes girar {
+    to {
+        transform: rotate(360deg);
+    }
 }

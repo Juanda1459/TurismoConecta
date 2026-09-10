@@ -1,4 +1,4 @@
-﻿@using TurismoConecta.web.Client.Services
+@using TurismoConecta.web.Client.Services
 @using Microsoft.AspNetCore.Components.Web
 @page "/municipios"
 @layout EmptyLayout
@@ -187,17 +187,20 @@
             }
         }
     </section>
-</div>
 
-@if (seleccionados.Any())
-{
-    <div class="floating-action">
-        <div class="floating-texto">
-            <strong>@seleccionados.Count</strong> municipio@(seleccionados.Count == 1 ? "" : "s") en tu itinerario
+    @if (seleccionados.Any())
+    {
+        <div class="floating-action">
+            <div class="floating-texto">
+                <span class="floating-badge">@seleccionados.Count</span>
+                <span>municipio@(seleccionados.Count == 1 ? "" : "s") en tu itinerario</span>
+            </div>
+            <button class="btn-itinerario" @onclick="IrACrearItinerario">
+                Crear itinerario <span class="btn-itinerario-flecha">→</span>
+            </button>
         </div>
-        <button class="btn-itinerario" @onclick="IrACrearItinerario">Crear itinerario</button>
-    </div>
-}
+    }
+</div>
 
 @code {
     // ---- Vista enriquecida sobre el DTO de la API ----
