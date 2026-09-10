@@ -20,8 +20,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 
+//  ASÍ DEBE QUEDAR:
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions => sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null)
+    ));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -69,10 +76,12 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IMunicipioEtiquetaService, MunicipioEtiquetaService>();
 builder.Services.AddScoped<IFiltroEtiquetasService, FiltroEtiquetasService>();
 builder.Services.AddScoped<IItinerarioService, ItinerarioService>();
-
-
-
 builder.Services.AddScoped<IEtiquetaService, EtiquetaService>();
+builder.Services.AddScoped<INegocioService, NegocioService>();
+builder.Services.AddScoped<IReseñaService, ReseñaService>();
+builder.Services.AddScoped<IFavoritoService, FavoritoService>();
+
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("BlazorPolicy", policy =>

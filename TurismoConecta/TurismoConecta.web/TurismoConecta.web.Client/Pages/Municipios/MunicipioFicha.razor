@@ -1,132 +1,434 @@
-﻿@using TurismoConecta.web.Client.Services 
+@using TurismoConecta.web.Client.Services 
 @page "/municipios/{Id:int}"
 @layout EmptyLayout
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @inject MunicipioApiService ApiService
 @inject NavigationManager Nav
+@inject IJSRuntime JS
 
-@if (cargando)
-{
-    <div class="loading-spinner">Cargando información...</div>
-}
-else if (ficha is null)
-{
-    <div class="alert alert-danger">
-        <p>No se encontró el municipio.</p>
-        <button class="btn btn-secondary" @onclick="Volver">Volver</button>
-    </div>
-}
-else
-{
-    <div class="ficha-container">
-        <div class="ficha-header">
-            <img src="@ObtenerImagenMunicipio(ficha.Nombre, ficha.ImagenUrl)" alt="@ficha.Nombre" class="ficha-imagen" onerror="this.src='https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=1000&auto=format&fit=crop';" />
-            <div class="ficha-overlay">
-                <h2>@ficha.Nombre</h2>
-                <div class="etiquetas-container">
-                    @if (ficha.Etiquetas != null && ficha.Etiquetas.Any())
-                    {
-                        @foreach(var etiqueta in ficha.Etiquetas)
-                        {
-                            <span class="etiqueta-pill">@etiqueta</span>
-                        }
-                    }
-                </div>
-            </div>
-        </div>
+<HeadContent>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</HeadContent>
 
-        <div class="ficha-body">
-            <div class="info-section">
-                <h3>Descripción</h3>
-                <p>@ficha.Descripcion</p>
-            </div>
-
-            <div class="info-grid">
-                <div class="info-card">
-                    <h4>🌤️ Clima</h4>
-                    <p>@ficha.Clima</p>
-                </div>
-                <div class="info-card">
-                    <h4>📅 Fechas Relevantes</h4>
-                    <p>
-                        @(ficha.FechasRelevantes != null && ficha.FechasRelevantes.Any()
-                            ? string.Join(", ", ficha.FechasRelevantes.Select(f => f.NombreFestividad))
-                            : "Sin fechas registradas")
-                    </p>
-                </div>
-            </div>
-
-            <div class="info-section">
-                <h3>📖 Historia</h3>
-                <p>@ficha.Historia</p>
-            </div>
-
-            <div class="ficha-actions">
-                <button class="btn btn-secondary" @onclick="Volver">Volver al Listado</button>
-
-                @* Solo AdminGeneral y AdminMunicipio ven el botón de Editar *@
-                <AuthorizeView Roles="AdminGeneral,AdminMunicipio">
-                    <Authorized>
-                        <button class="btn btn-primary" @onclick='() => Nav.NavigateTo($"/municipios/{Id}/editar")'>Editar Municipio</button>
-                    </Authorized>
-                </AuthorizeView>
-
-                @* Solo AdminGeneral ve el botón de Eliminar *@
-                <AuthorizeView Roles="AdminGeneral">
-                    <Authorized>
-                        <button class="btn btn-danger" @onclick="ConfirmarEliminar">Eliminar Municipio</button>
-                    </Authorized>
-                </AuthorizeView>
-            </div>
-        </div>
-    </div>
-
-    @if (mostrarConfirmacion)
+<div class="selva-container">
+    <!-- PANTALLA DE ESPERA INMERSIVA CON PAISAJE BOYACENSE -->
+    @if (cargando)
     {
-        <div class="modal-overlay">
-            <div class="modal-card">
-                <h3>¿Estás seguro?</h3>
-                <p>Esta acción eliminará el municipio <strong>@ficha.Nombre</strong> de forma permanente.</p>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" @onclick="() => mostrarConfirmacion = false">Cancelar</button>
-                    <button class="btn btn-danger" @onclick="Eliminar">Sí, eliminar</button>
+        <div class="pantalla-espera-inmersiva">
+            <img src="@paisajeEspera.Url" alt="Paisaje de Boyacá" class="espera-bg-img" />
+            <div class="espera-scrim">
+                <div class="espera-contenido">
+                    <span class="espera-eyebrow">Boyacá, Colombia</span>
+                    <h2 class="espera-lugar">@paisajeEspera.Lugar</h2>
+                    <p class="espera-cita">"@paisajeEspera.Frase"</p>
+                    
+                    <div class="espera-indicador">
+                        <div class="spinner-anillo-selva"></div>
+                        <span class="espera-texto-progreso">Descubriendo destino...</span>
+                    </div>
                 </div>
             </div>
         </div>
     }
-}
+    else if (ficha is null)
+    {
+        <div class="selva-error">
+            <h2>Destino no encontrado</h2>
+            <p>No pudimos cargar la información de este lugar.</p>
+            <button class="btn-enlace" @onclick="Volver">Regresar al catálogo</button>
+        </div>
+    }
+    else
+    {
+        <!-- BARRA DE NAVEGACIÓN DISCRETA -->
+        <header class="selva-nav">
+            <button class="nav-back-link" @onclick="Volver">
+                <span class="nav-back-arrow">←</span> Volver
+            </button>
+
+            <div class="nav-actions">
+                <button class="btn-itinerario-minimal @(enItinerario ? "guardado" : "")" @onclick="ToggleItinerario">
+                    @(enItinerario ? "✓ En tu itinerario" : "+ Guardar en itinerario")
+                </button>
+
+                <AuthorizeView Roles="AdminGeneral,AdminMunicipio">
+                    <Authorized>
+                        <button class="btn-admin-minimal" @onclick='() => Nav.NavigateTo($"/municipios/{Id}/editar")'>
+                            Editar
+                        </button>
+                    </Authorized>
+                </AuthorizeView>
+
+                <AuthorizeView Roles="AdminGeneral">
+                    <Authorized>
+                        <button class="btn-admin-minimal btn-admin-danger" @onclick="ConfirmarEliminar">
+                            Eliminar
+                        </button>
+                    </Authorized>
+                </AuthorizeView>
+            </div>
+        </header>
+
+        <!-- PORTADA HERO TRANQUILA Y EDITORIAL -->
+        <section class="selva-hero">
+            <img src="@ObtenerImagenMunicipio(ficha.Nombre, ficha.ImagenUrl)" 
+                 alt="@ficha.Nombre" 
+                 class="selva-hero-img" 
+                 onerror="this.src='https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=1400&auto=format&fit=crop';" />
+            
+            <div class="selva-hero-scrim">
+                <div class="selva-hero-meta">
+                    <div class="hero-subline">
+                        <span>Boyacá, Colombia</span>
+                        @if (!string.IsNullOrWhiteSpace(ficha.Clima))
+                        {
+                            <span class="bullet">•</span>
+                            <span>@FormatearClimaDiscreto(ficha.Clima)</span>
+                        }
+                    </div>
+
+                    <h1 class="selva-hero-title">@ficha.Nombre</h1>
+
+                    @if (ficha.Etiquetas != null && ficha.Etiquetas.Any())
+                    {
+                        <div class="hero-tags">
+                            @foreach (var etiqueta in ficha.Etiquetas)
+                            {
+                                <span class="tag-item">@etiqueta</span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTENIDO PRINCIPAL CON SEPARADORES CLAROS -->
+        <main class="selva-body">
+
+            <!-- SECCIÓN 1: SOBRE EL DESTINO -->
+            <section class="bloque-contenido">
+                <div class="bloque-cabecera">
+                    <span class="bloque-indice">01</span>
+                    <h2 class="bloque-titulo">Sobre el Destino</h2>
+                </div>
+                <p class="parrafo-editorial lead">@ficha.Descripcion</p>
+            </section>
+
+            <div class="divisor-seccion"></div>
+
+            <!-- SECCIÓN 2: LUGARES PARA EXPLORAR -->
+            <section class="bloque-contenido">
+                <div class="bloque-cabecera">
+                    <span class="bloque-indice">02</span>
+                    <h2 class="bloque-titulo">Lugares para Explorar</h2>
+                </div>
+                <div class="atractivos-grid">
+                    @foreach (var atractivo in ObtenerAtractivosPorDefecto(ficha.Nombre))
+                    {
+                        <div class="atractivo-card">
+                            <span class="atractivo-icono">✦</span>
+                            <span class="atractivo-nombre">@atractivo</span>
+                        </div>
+                    }
+                </div>
+            </section>
+
+            <div class="divisor-seccion"></div>
+
+            <!-- SECCIÓN 3: TRADICIONES Y FESTIVIDADES (CARDS ROTATIVAS) -->
+            <section class="bloque-contenido">
+                <div class="bloque-cabecera">
+                    <span class="bloque-indice">03</span>
+                    <div>
+                        <h2 class="bloque-titulo">Tradiciones y Festividades</h2>
+                        <span class="bloque-subtitulo">Pasa el cursor sobre las tarjetas para explorarlas con perspectiva</span>
+                    </div>
+                </div>
+
+                @if (ficha.FechasRelevantes != null && ficha.FechasRelevantes.Any())
+                {
+                    <div class="festividades-rotacion-grid">
+                        @foreach (var fest in ficha.FechasRelevantes)
+                        {
+                            <article class="fest-card-rotacion fest-categoria-@ObtenerClaseBadge(fest.TipoFestividad ?? "")">
+                                <div class="fest-card-header">
+                                    <h3 class="fest-titulo">@fest.NombreFestividad</h3>
+                                    @if (!string.IsNullOrWhiteSpace(fest.TipoFestividad))
+                                    {
+                                        <span class="fest-pill-categoria @ObtenerClaseBadge(fest.TipoFestividad)">
+                                            @fest.TipoFestividad
+                                        </span>
+                                    }
+                                </div>
+
+                                <div class="fest-fecha-row">
+                                    <span class="fest-fecha-icono">📅</span>
+                                    <span class="fest-fecha-texto">
+                                        @if (fest.FechaInicio != default && fest.FechaFin != default && fest.FechaInicio != fest.FechaFin)
+                                        {
+                                            @($"{fest.FechaInicio:dd MMM} al {fest.FechaFin:dd MMM yyyy}")
+                                        }
+                                        else if (fest.FechaInicio != default)
+                                        {
+                                            @($"{fest.FechaInicio:dd MMMM yyyy}")
+                                        }
+                                        else if (fest.MesCelebracion.HasValue && fest.MesCelebracion.Value > 0)
+                                        {
+                                            @($"Mes: {fest.MesCelebracion.Value}")
+                                        }
+                                        else
+                                        {
+                                            @("Celebración tradicional")
+                                        }
+                                    </span>
+                                </div>
+
+                                @if (!string.IsNullOrWhiteSpace(fest.Descripcion))
+                                {
+                                    <p class="fest-descripcion">@fest.Descripcion</p>
+                                }
+                            </article>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="estado-vacio-limpio">
+                        <p>No hay festividades registradas para este municipio actualmente.</p>
+                    </div>
+                }
+            </section>
+
+            <div class="divisor-seccion"></div>
+
+            <!-- SECCIÓN 4: EXPERIENCIAS Y COMERCIO LOCAL -->
+            <section class="bloque-contenido">
+                <div class="bloque-cabecera">
+                    <span class="bloque-indice">04</span>
+                    <h2 class="bloque-titulo">Comer, Beber y Hospedaje</h2>
+                </div>
+
+                @if (cargandoNegocios)
+                {
+                    <p class="nota-ligera">Consultando comercios locales recomendados...</p>
+                }
+                else if (negociosLocales != null && negociosLocales.Any())
+                {
+                    <div class="negocios-cards">
+                        @foreach (var negocio in negociosLocales)
+                        {
+                            <div class="negocio-card-clean">
+                                @if (negocio.Galeria != null && negocio.Galeria.Any())
+                                {
+                                    <div class="negocio-img-container">
+                                        <img src="@negocio.Galeria.First()" alt="@negocio.Nombre" class="negocio-img-cover" />
+                                    </div>
+                                }
+                                <div class="negocio-info-clean">
+                                    <div class="negocio-row-top">
+                                        <h4>@negocio.Nombre</h4>
+                                        @if (negocio.PromedioCalificacion.HasValue && negocio.PromedioCalificacion.Value > 0)
+                                        {
+                                            <span class="negocio-rating">★ @negocio.PromedioCalificacion.Value.ToString("0.0")</span>
+                                        }
+                                    </div>
+                                    <p class="negocio-meta">@(negocio.Direccion ?? "Ubicación central")</p>
+                                    @if (!string.IsNullOrWhiteSpace(negocio.Descripcion))
+                                    {
+                                        <p class="negocio-desc">@negocio.Descripcion</p>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="nota-tranquila">
+                        <p>Descubre los cafés tradicionales, amasijos boyacenses y posadas rurales en el centro histórico de @ficha.Nombre.</p>
+                    </div>
+                }
+            </section>
+
+            <div class="divisor-seccion"></div>
+
+            <!-- SECCIÓN 5: UBICACIÓN GEOGRÁFICA -->
+            <section class="bloque-contenido">
+                <div class="bloque-cabecera-flex">
+                    <div class="bloque-titulo-agrupado">
+                        <span class="bloque-indice">05</span>
+                        <h2 class="bloque-titulo">Ubicación Geográfica</h2>
+                    </div>
+                    <a href="@ObtenerUrlGoogleMaps(ficha.Nombre, ficha.Latitud, ficha.Longitud)" 
+                       target="_blank" 
+                       rel="noopener noreferrer" 
+                       class="enlace-mapa-discreto">
+                        Abrir en Google Maps ↗
+                    </a>
+                </div>
+
+                <div class="mapa-frame-container">
+                    <iframe class="mapa-frame"
+                            src="@ObtenerUrlIframeMaps(ficha.Nombre, ficha.Latitud, ficha.Longitud)"
+                            loading="lazy"
+                            allowfullscreen
+                            referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </section>
+
+            @if (!string.IsNullOrWhiteSpace(ficha.Historia))
+            {
+                <div class="divisor-seccion"></div>
+
+                <!-- SECCIÓN 6: HISTORIA Y MEMORIA -->
+                <section class="bloque-contenido">
+                    <div class="bloque-cabecera">
+                        <span class="bloque-indice">06</span>
+                        <h2 class="bloque-titulo">Historia y Memoria</h2>
+                    </div>
+                    <p class="parrafo-editorial">@ficha.Historia</p>
+                </section>
+            }
+        </main>
+
+        <!-- FOOTER DISCRETO -->
+        <footer class="selva-footer">
+            <p>TurismoConecta Boyacá — Guía de Destinos</p>
+        </footer>
+
+        <!-- MODAL DE CONFIRMACIÓN -->
+        @if (mostrarConfirmacion)
+        {
+            <div class="selva-modal-backdrop">
+                <div class="selva-modal-window">
+                    <h3>Confirmar eliminación</h3>
+                    <p>¿Deseas remover a <strong>@ficha.Nombre</strong> del catálogo?</p>
+                    <div class="selva-modal-actions">
+                        <button class="btn-modal-cancel" @onclick="() => mostrarConfirmacion = false">Cancelar</button>
+                        <button class="btn-modal-delete" @onclick="Eliminar">Remover</button>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
 
 @code {
     [Parameter] public int Id { get; set; }
     private MunicipioFichaDto? ficha;
+    private List<NegocioResumenDto>? negociosLocales;
     private bool cargando = true;
+    private bool cargandoNegocios = true;
     private bool mostrarConfirmacion = false;
+    private bool enItinerario = false;
+
+    // Colección de paisajes fotográficos de Boyacá para pantalla de espera
+    private record PaisajeBoyaca(string Lugar, string Frase, string Url);
+
+    private static readonly PaisajeBoyaca[] PaisajesBoyaca = new[]
+    {
+        new PaisajeBoyaca("Páramo de Ocetá", "Uno de los páramos más hermosos del mundo, cubierto de frailejones y silencio.", "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1600&auto=format&fit=crop"),
+        new PaisajeBoyaca("Laguna de Tota", "Espejo de agua andino a más de 3.000 metros de altura sobre la cordillera.", "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=1600&auto=format&fit=crop"),
+        new PaisajeBoyaca("Pueblos de Piedra y Barro", "Calles empedradas, balcones de madera y tejas de barro centenarias.", "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=1600&auto=format&fit=crop"),
+        new PaisajeBoyaca("Valle del Sugamuxi", "Tierras fértiles donde habitaron los sabios del imperio Muisca.", "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=1600&auto=format&fit=crop")
+    };
+
+    private PaisajeBoyaca paisajeEspera = PaisajesBoyaca[Random.Shared.Next(PaisajesBoyaca.Length)];
 
     protected override async Task OnInitializedAsync()
     {
         ficha = await ApiService.ObtenerFichaAsync(Id);
         cargando = false;
+
+        negociosLocales = await ApiService.ObtenerNegociosPorMunicipioAsync(Id);
+        cargandoNegocios = false;
     }
 
-    private void Volver() => Nav.NavigateTo("/municipios");
+    private async Task Volver()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("history.back");
+        }
+        catch
+        {
+            Nav.NavigateTo("/municipios");
+        }
+    }
+
+    private void ToggleItinerario() => enItinerario = !enItinerario;
 
     private void ConfirmarEliminar() => mostrarConfirmacion = true;
 
-    private async Task Eliminar()
-    {
-        // TODO: Cuando tengas el método EliminarAsync en tu ApiService, descomenta:
-        // var eliminado = await ApiService.EliminarAsync(Id);
-        // if (eliminado) Nav.NavigateTo("/municipios");
-        
-        mostrarConfirmacion = false;
-    }
+    private async Task Eliminar() => mostrarConfirmacion = false;
 
     private string ObtenerImagenMunicipio(string nombre, string? imagenUrl)
     {
         if (!string.IsNullOrWhiteSpace(imagenUrl) && imagenUrl.StartsWith("http")) return imagenUrl;
-        if (string.IsNullOrWhiteSpace(nombre)) return "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=1000&auto=format&fit=crop";
+        if (string.IsNullOrWhiteSpace(nombre)) return "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=1400&auto=format&fit=crop";
 
         string nombreLimpio = nombre.Replace(" de ", "").Replace("á", "a").Replace("Á", "A").Replace("é", "e").Replace("É", "E").Replace("í", "i").Replace("Í", "I").Replace("ó", "o").Replace("Ó", "O").Replace("ú", "u").Replace("Ú", "U").Replace(" ", "");
         return $"https://localhost:7078/images/municipios/{nombreLimpio}ImgPerfil.jpg";
+    }
+
+    private string FormatearClimaDiscreto(string clima)
+    {
+        if (string.IsNullOrWhiteSpace(clima)) return "Clima templado";
+        var match = System.Text.RegularExpressions.Regex.Match(clima, @"\d+(\s*°\s*C|\s*°C|\s*°)");
+        if (match.Success)
+        {
+            string g = match.Value.Replace(" ", "");
+            if (!g.Contains("°C")) g += "C";
+            return g;
+        }
+        return clima.Length > 20 ? clima[..18] + "..." : clima;
+    }
+
+    private List<string> ObtenerAtractivosPorDefecto(string nombre)
+    {
+        if (nombre.Contains("Gámeza", StringComparison.OrdinalIgnoreCase))
+        {
+            return new List<string> { "Cañón de Gámeza", "Laguna Negra", "Piedra Pintada Muisca", "Parque Minero Tradicional" };
+        }
+        if (nombre.Contains("Ráquira", StringComparison.OrdinalIgnoreCase))
+        {
+            return new List<string> { "Plaza de Cerámica", "Monasterio La Candelaria", "Talleres de Alfarería Tradicional" };
+        }
+        return new List<string> { "Plaza Principal", "Templo Colonial", "Senderos Ecoturísticos", "Mirador del Valle" };
+    }
+
+    private string ObtenerClaseBadge(string tipo)
+    {
+        return tipo.ToLowerInvariant() switch
+        {
+            "patronal" => "patronal",
+            "cultural" => "cultural",
+            "gastronómica" or "gastronomica" => "gastronomica",
+            "artesanal" => "artesanal",
+            "deportiva" => "deportiva",
+            "religiosa" => "religiosa",
+            _ => "general"
+        };
+    }
+
+    private string ObtenerUrlGoogleMaps(string nombre, decimal? lat, decimal? lon)
+    {
+        if (lat.HasValue && lon.HasValue && lat != 0 && lon != 0)
+        {
+            return $"https://www.google.com/maps/search/?api=1&query={lat.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)},{lon.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+        }
+        return $"https://www.google.com/maps/search/?api=1&query={Uri.EscapeDataString(nombre + ", Boyacá, Colombia")}";
+    }
+
+    private string ObtenerUrlIframeMaps(string nombre, decimal? lat, decimal? lon)
+    {
+        if (lat.HasValue && lon.HasValue && lat != 0 && lon != 0)
+        {
+            return $"https://maps.google.com/maps?q={lat.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)},{lon.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}&hl=es&z=14&output=embed";
+        }
+        return $"https://maps.google.com/maps?q={Uri.EscapeDataString(nombre + ", Boyacá, Colombia")}&hl=es&z=13&output=embed";
     }
 }

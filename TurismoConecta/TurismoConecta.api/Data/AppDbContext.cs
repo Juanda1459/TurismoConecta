@@ -48,8 +48,7 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Server=tcp:juliaacevvarast.database.windows.net,1433;Initial Catalog=TurismoConectaDB_Azure;Persist Security Info=False;User ID=CloudSAaf8747fc;Password=Astrid22168*;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
+    
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

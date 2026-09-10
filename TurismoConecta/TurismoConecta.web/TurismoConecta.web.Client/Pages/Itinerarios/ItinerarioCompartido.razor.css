@@ -1,31 +1,274 @@
-﻿.hero-itinerario {
-    background-color: #f8f9fa;
-    padding: 40px 20px;
-    border-radius: 12px;
+.compartido-page {
+    --fondo: #FBF9F5;
+    --superficie: #FFFFFF;
+    --texto-principal: #1E2B25;
+    --texto-secundario: #5A6961;
+    --acento-bosque: #213B31;
+    --acento-tierra: #9E5B3D;
+    --acento-dorado: #E0A94D;
+    --borde-sutil: #E5E0D8;
+    font-family: 'Montserrat', -apple-system, sans-serif;
+    background: var(--fondo);
+    min-height: 100vh;
+    color: var(--texto-principal);
+}
+
+/* ── HERO ── */
+.compartido-hero {
+    background: linear-gradient(160deg, #213B31 0%, #1A2E25 60%, #111E18 100%);
+    padding: 60px 24px 68px;
     text-align: center;
-    border: 1px solid #e9ecef;
+    color: #FFF;
 }
 
-.hero-titulo {
-    color: #0d6efd;
+.compartido-hero-contenido { max-width: 720px; margin: 0 auto; }
+
+.compartido-eyebrow {
+    display: block;
+    font-size: 0.73rem;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    color: #E0A94D;
     font-weight: 700;
-    margin-bottom: 15px;
+    margin-bottom: 14px;
 }
 
-.numero-parada-publico {
-    font-weight: bold;
-    color: #ffffff;
-    background-color: #198754; /* Verde para diferenciar del detalle privado */
+.compartido-nombre {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 3.2rem;
+    font-weight: 600;
+    margin: 0 0 22px;
+    line-height: 1.1;
+    color: #FFF;
+}
+
+.compartido-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+}
+
+.hero-dato {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,.75);
+}
+
+/* ── BANNER CTA ── */
+.banner-cta {
+    background: #E0A94D;
+    padding: 14px 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.banner-cta p {
+    margin: 0;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: #1E2B25;
+}
+
+.btn-cta-registro {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    background: #213B31;
+    padding: 8px 18px;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.btn-cta-registro:hover { background: #13241E; }
+
+/* ── CONTENEDOR PRINCIPAL ── */
+.compartido-container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 44px 24px 80px;
+}
+
+/* ── SECCIONES ── */
+.compartido-seccion { margin-bottom: 40px; }
+
+.compartido-seccion-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--acento-tierra);
+    margin-bottom: 14px;
+}
+
+.compartido-cita {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.15rem;
+    font-style: italic;
+    color: var(--texto-secundario);
+    border-left: 3px solid var(--acento-tierra);
+    margin: 0;
+    padding: 4px 0 4px 18px;
+    line-height: 1.7;
+}
+
+/* ── GRID DE DÍAS ── */
+.compartido-dias-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+}
+
+.compartido-dia-card {
+    background: var(--superficie);
+    border: 1px solid var(--borde-sutil);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,.04);
+}
+
+.dia-card-header {
+    background: var(--acento-bosque);
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dia-card-label {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #FFF;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.dia-card-count {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,.65);
+}
+
+.dia-card-lista {
+    list-style: none;
+    margin: 0;
+    padding: 8px 0;
+}
+
+.dia-card-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 18px;
+    border-bottom: 1px dashed #EDE9E1;
+    transition: background 0.15s;
+}
+
+.dia-card-item:last-child { border-bottom: none; }
+.dia-card-item:hover { background: #FAF8F5; }
+
+.item-num {
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
-    width: 32px;
-    height: 32px;
+    background: #F4EFEA;
+    border: 1px solid var(--borde-sutil);
+    font-size: 0.70rem;
+    font-weight: 700;
+    color: var(--texto-secundario);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 15px;
+    flex-shrink: 0;
 }
 
-.parada-item-publico {
-    display: flex;
-    align-items: center;
+.item-nombre {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--texto-principal);
+    text-decoration: none;
+    transition: color 0.2s;
 }
+
+.item-nombre:hover { color: var(--acento-bosque); text-decoration: underline; }
+
+/* ── FOOTER CTA ── */
+.compartido-footer-cta {
+    text-align: center;
+    padding: 44px 24px;
+    background: var(--superficie);
+    border: 1px solid var(--borde-sutil);
+    border-radius: 20px;
+    margin-top: 20px;
+}
+
+.compartido-footer-cta h3 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--texto-principal);
+    margin: 0 0 8px;
+}
+
+.compartido-footer-cta p {
+    font-size: 0.88rem;
+    color: var(--texto-secundario);
+    margin: 0 0 22px;
+}
+
+.btn-footer-cta {
+    display: inline-block;
+    background: var(--acento-bosque);
+    color: #FFF;
+    text-decoration: none;
+    border-radius: 30px;
+    padding: 14px 32px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(33,59,49,.22);
+    transition: all 0.22s ease;
+}
+
+.btn-footer-cta:hover { background: #13241E; transform: translateY(-1px); }
+
+/* ── ERROR ── */
+.compartido-error {
+    text-align: center;
+    padding: 80px 24px;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+.compartido-error span { font-size: 3rem; display: block; margin-bottom: 16px; }
+
+.compartido-error h2 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.9rem;
+    margin: 0 0 10px;
+    color: var(--texto-principal);
+}
+
+.compartido-error p {
+    font-size: 0.90rem;
+    color: var(--texto-secundario);
+    margin: 0 0 28px;
+}
+
+.btn-ir-inicio {
+    background: var(--acento-bosque);
+    color: #FFF;
+    border: none;
+    border-radius: 30px;
+    padding: 13px 30px;
+    font-size: 0.90rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(33,59,49,.22);
+    transition: all 0.22s ease;
+}
+
+.btn-ir-inicio:hover { background: #13241E; }

@@ -1,98 +1,411 @@
-﻿@using TurismoConecta.web.Client.Services 
+@using TurismoConecta.web.Client.Services 
 @page "/municipios/crear"
 @layout EmptyLayout
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @inject MunicipioApiService ApiService
 @inject NavigationManager Nav
 
+<HeadContent>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</HeadContent>
+
 <AuthorizeView Roles="AdminGeneral">
     <Authorized Context="authContext">
-        <div class="form-wrapper">
-            <div class="form-header">
-                <h2>Crear Nuevo Municipio</h2>
-                <p>Agrega un nuevo destino turístico al catálogo.</p>
-            </div>
-
-            <div class="form-card">
-                <EditForm Model="dto" OnValidSubmit="Guardar">
-                    <DataAnnotationsValidator />
-                    
-                    <div class="form-group">
-                        <label>Nombre del Municipio</label>
-                        <InputText @bind-Value="dto.Nombre" class="form-control" placeholder="Ej. Monguí" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Descripción General</label>
-                        <InputTextArea @bind-Value="dto.Descripcion" class="form-control" rows="3" placeholder="Describe los atractivos principales..." />
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group half">
-                            <label>Clima</label>
-                            <InputText @bind-Value="dto.Clima" class="form-control" placeholder="Ej. Frío, 12°C" />
-                        </div>
-                        <div class="form-group half">
-                            <label>Fechas Relevantes</label>
-                            <InputText @bind-Value="dto.FechasRelevantes" class="form-control" placeholder="Ej. Ferias en Enero" />
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Historia</label>
-                        <InputTextArea @bind-Value="dto.Historia" class="form-control" rows="4" placeholder="Breve reseña histórica..." />
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
-                        <button type="submit" class="btn btn-success" disabled="@guardando">
-                            @(guardando ? "Creando..." : "Crear Municipio")
-                        </button>
-                    </div>
-                </EditForm>
-            </div>
-
-            @if (mensaje is not null)
+        <div class="selva-form-page">
+            @if (cargando || guardando)
             {
-                <div class="toast-message @(exito ? "toast-success" : "toast-error")">
-                    @mensaje
+                <div class="pantalla-espera-inmersiva">
+                    <img src="@paisajeEspera.Url" alt="Paisaje de Boyacá" class="espera-bg-img" />
+                    <div class="espera-scrim">
+                        <div class="espera-contenido">
+                            <span class="espera-eyebrow">Boyacá, Colombia</span>
+                            <h2 class="espera-lugar">@paisajeEspera.Lugar</h2>
+                            <p class="espera-cita">"@paisajeEspera.Frase"</p>
+                            
+                            <div class="espera-indicador">
+                                <div class="spinner-anillo-selva"></div>
+                                <span class="espera-texto-progreso">@(guardando ? "Publicando destino en Boyacá..." : "Preparando creador de destinos...")</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             }
+
+            <header class="selva-form-nav">
+                <button class="nav-back-link" @onclick="Cancelar">
+                    <span class="nav-back-arrow">←</span> Catálogo de Pueblos
+                </button>
+                <span class="nav-label-admin">Panel de Administración</span>
+            </header>
+
+            <div class="form-container-editorial">
+                <div class="form-header-editorial">
+                    <span class="form-eyebrow">Nuevo Destino</span>
+                    <h1 class="form-titulo-editorial">Crear Municipio</h1>
+                    <p class="form-subtitulo-editorial">Registra un nuevo pueblo mágico de Boyacá con su patrimonio, portada, tradiciones y etiquetas turísticas.</p>
+                </div>
+
+                <div class="form-card-clean">
+                    <EditForm Model="dto" OnValidSubmit="Guardar">
+                        <DataAnnotationsValidator />
+                        
+                        <!-- SECCIÓN 01: INFORMACIÓN ESENCIAL -->
+                        <div class="form-section-clean">
+                            <div class="section-badge-title">
+                                <span class="badge-number">01</span>
+                                <h3>Información Esencial</h3>
+                            </div>
+
+                            <div class="form-group-clean">
+                                <label>Nombre del Municipio *</label>
+                                <InputText @bind-Value="dto.Nombre" class="input-editorial w-100" placeholder="Ej. Monguí, Villa de Leyva, Gámeza..." />
+                            </div>
+
+                            <div class="form-group-clean">
+                                <label>Descripción General</label>
+                                <InputTextArea @bind-Value="dto.Descripcion" class="textarea-editorial w-100" rows="3" placeholder="Describe la atmósfera, sus paisajes y vocación turística..." />
+                            </div>
+
+                            <div class="form-grid-dos">
+                                <div class="form-group-clean">
+                                    <label>Clima</label>
+                                    <InputText @bind-Value="dto.Clima" class="input-editorial w-100" placeholder="Ej. Frío de montaña, 12°C a 16°C" />
+                                </div>
+                                <div class="form-group-clean">
+                                    <label>Historia y Origen</label>
+                                    <InputText @bind-Value="dto.Historia" class="input-editorial w-100" placeholder="Reseña prehispánica o colonial..." />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-divider"></div>
+
+                        <!-- SECCIÓN 02: FOTOGRAFÍA DE PORTADA -->
+                        <div class="form-section-clean">
+                            <div class="section-badge-title">
+                                <span class="badge-number">02</span>
+                                <h3>Fotografía de Portada</h3>
+                            </div>
+
+                            <div class="form-grid-dos">
+                                <div class="form-group-clean">
+                                    <label>Opción 1: Subir archivo desde tu equipo</label>
+                                    <div class="file-upload-box">
+                                        <InputFile OnChange="OnArchivoSeleccionado" accept="image/*" class="file-input-hidden" id="inputFileUpload" />
+                                        <label for="inputFileUpload" class="file-upload-label">
+                                            <span class="file-upload-icon">📸</span>
+                                            <span class="file-upload-text">Seleccionar foto (JPG, PNG, WebP)</span>
+                                        </label>
+                                    </div>
+                                    @if (subiendoImagen)
+                                    {
+                                        <span class="loading-state-text">⏳ Optimizando y subiendo fotografía...</span>
+                                    }
+                                </div>
+                                <div class="form-group-clean">
+                                    <label>Opción 2: O ingresar enlace web (URL)</label>
+                                    <InputText @bind-Value="dto.ImagenUrl" class="input-editorial w-100" placeholder="https://ejemplo.com/portada.jpg" />
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(errorImagen))
+                            {
+                                <div class="alerta-error-sutil">@errorImagen</div>
+                            }
+
+                            <!-- VISTA PREVIA ELEGANTE -->
+                            <div class="preview-box-clean">
+                                @if (!string.IsNullOrWhiteSpace(dto.ImagenUrl))
+                                {
+                                    <div class="preview-img-wrapper">
+                                        <img src="@dto.ImagenUrl" alt="Vista previa de portada" class="preview-img-display" onerror="this.src='https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=1200&auto=format&fit=crop';" />
+                                        <button type="button" class="btn-quitar-preview" @onclick="QuitarImagen">
+                                            Remover fotografía
+                                        </button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="preview-empty-clean">
+                                        <span class="preview-empty-icon">🖼️</span>
+                                        <p>Selecciona una foto o pega una URL para previsualizar la portada del destino.</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="form-divider"></div>
+
+                        <!-- SECCIÓN 03: ETIQUETAS TURÍSTICAS -->
+                        <div class="form-section-clean">
+                            <div class="section-badge-title">
+                                <span class="badge-number">03</span>
+                                <div>
+                                    <h3>Etiquetas y Vocación</h3>
+                                    <span class="section-subtitle">Selecciona los ejes turísticos que representan al municipio:</span>
+                                </div>
+                            </div>
+
+                            <div class="pills-container-clean">
+                                @foreach (var tag in etiquetasSugeridas)
+                                {
+                                    bool activa = dto.Etiquetas.Any(e => e.Equals(tag, StringComparison.OrdinalIgnoreCase));
+                                    <button type="button" class="pill-tag-editorial @(activa ? "activa" : "")" @onclick="() => ToggleEtiqueta(tag)">
+                                        @(activa ? "✓ " : "+ ")@tag
+                                    </button>
+                                }
+                                @foreach (var tag in dto.Etiquetas.Where(e => !etiquetasSugeridas.Contains(e, StringComparer.OrdinalIgnoreCase)))
+                                {
+                                    <button type="button" class="pill-tag-editorial activa" @onclick="() => ToggleEtiqueta(tag)">
+                                        ✓ @tag ✕
+                                    </button>
+                                }
+                            </div>
+
+                            <div class="custom-tag-row">
+                                <input type="text" class="input-editorial inline-input" placeholder="Agregar otra etiqueta personalizada..." @bind="nuevaEtiqueta" @bind:event="oninput" @onkeydown="@(e => { if (e.Key == "Enter") AgregarNuevaEtiqueta(); })" />
+                                <button type="button" class="btn-secundario-clean" @onclick="AgregarNuevaEtiqueta">
+                                    + Añadir
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-divider"></div>
+
+                        <!-- SECCIÓN 04: FESTIVIDADES Y TRADICIONES -->
+                        <div class="form-section-clean">
+                            <div class="section-header-flex">
+                                <div class="section-badge-title">
+                                    <span class="badge-number">04</span>
+                                    <div>
+                                        <h3>Festividades y Ferias</h3>
+                                        <span class="section-subtitle">Tradiciones patronales, festivales y encuentros anuales</span>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn-secundario-clean" @onclick="AgregarFestividad">
+                                    + Añadir Festividad
+                                </button>
+                            </div>
+
+                            @if (!dto.FechasRelevantes.Any())
+                            {
+                                <div class="festividades-empty-clean">
+                                    <p>No se han registrado festividades aún. Haz clic en <strong>"+ Añadir Festividad"</strong> para incluir las celebraciones del pueblo.</p>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="festividades-list-clean">
+                                    @foreach (var fest in dto.FechasRelevantes)
+                                    {
+                                        <div class="festividad-card-form">
+                                            <button type="button" class="btn-remover-fest" @onclick="() => EliminarFestividad(fest)" title="Eliminar celebración">
+                                                ✕
+                                            </button>
+
+                                            <div class="form-grid-dos">
+                                                <div class="form-group-clean">
+                                                    <label>Nombre de la Celebración *</label>
+                                                    <InputText @bind-Value="fest.NombreFestividad" class="input-editorial w-100" placeholder="Ej. Festival del Barro y la Cerámica" />
+                                                </div>
+                                                <div class="form-group-clean">
+                                                    <label>Categoría</label>
+                                                    <div class="select-pill">
+                                                        <InputSelect @bind-Value="fest.TipoFestividad" class="input-editorial w-100">
+                                                            <option value="Cultural">Cultural</option>
+                                                            <option value="Patronal">Patronal</option>
+                                                            <option value="Gastronómica">Gastronómica</option>
+                                                            <option value="Artesanal">Artesanal</option>
+                                                            <option value="Folclórico">Folclórico</option>
+                                                            <option value="Deportiva">Deportiva</option>
+                                                            <option value="Religiosa">Religiosa</option>
+                                                        </InputSelect>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-grid-dos">
+                                                <div class="form-group-clean">
+                                                    <label>Fecha de Inicio</label>
+                                                    <InputDate @bind-Value="fest.FechaInicio" class="input-editorial w-100" />
+                                                </div>
+                                                <div class="form-group-clean">
+                                                    <label>Fecha de Finalización</label>
+                                                    <InputDate @bind-Value="fest.FechaFin" class="input-editorial w-100" />
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group-clean no-margin">
+                                                <label>Descripción Breve</label>
+                                                <InputText @bind-Value="fest.Descripcion" class="input-editorial w-100" placeholder="Resumen del evento, actividades principales o comparsas..." />
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <!-- ACCIONES DEL FORMULARIO -->
+                        <div class="form-actions-clean">
+                            <button type="button" class="btn-cancelar-clean" @onclick="Cancelar">
+                                Descartar
+                            </button>
+                            <button type="submit" class="btn-primario-clean" disabled="@guardando">
+                                @(guardando ? "Creando destino..." : "Publicar Municipio")
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
         </div>
     </Authorized>
     <NotAuthorized>
-        <div class="acceso-denegado">
-            <h3>⛔ Acceso Denegado</h3>
-            <p>No tienes permisos para crear municipios. Solo el <strong>Administrador General</strong> puede hacerlo.</p>
-            <button class="btn btn-secondary" @onclick='() => Nav.NavigateTo("/municipios")'>Volver al listado</button>
+        <div class="acceso-denegado-clean">
+            <h2>Acceso Restringido</h2>
+            <p>Se requieren privilegios de Administrador General para registrar municipios.</p>
+            <button class="btn-secundario-clean" @onclick='() => Nav.NavigateTo("/municipios")'>Regresar al catálogo</button>
         </div>
     </NotAuthorized>
 </AuthorizeView>
 
+@if (!string.IsNullOrEmpty(mensaje))
+{
+    <div class="floating-toast-clean @(exito ? "toast-success" : "toast-error")">
+        <div class="toast-indicator"></div>
+        <div class="toast-content">
+            <span class="toast-title">@(exito ? "Destino Registrado" : "Aviso del Sistema")</span>
+            <p class="toast-desc">@mensaje</p>
+        </div>
+    </div>
+}
+
 @code {
-    private MunicipioEditarDto dto = new(); 
-    
+    private MunicipioCrearDto dto = new();
+    private bool cargando = true;
     private bool guardando;
     private string? mensaje;
     private bool exito;
+    private bool subiendoImagen = false;
+    private string? errorImagen;
+
+    private record PaisajeBoyaca(string Lugar, string Frase, string Url);
+
+    private static readonly PaisajeBoyaca[] PaisajesBoyaca = new[]
+    {
+        new PaisajeBoyaca("Páramo de Ocetá", "Uno de los páramos más hermosos del mundo, cubierto de frailejones y silencio.", "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1600&auto=format&fit=crop"),
+        new PaisajeBoyaca("Laguna de Tota", "Espejo de agua andino a más de 3.000 metros de altura sobre la cordillera.", "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=1600&auto=format&fit=crop"),
+        new PaisajeBoyaca("Pueblos de Piedra y Barro", "Calles empedradas, balcones de madera y tejas de barro centenarias.", "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=1600&auto=format&fit=crop"),
+        new PaisajeBoyaca("Valle del Sugamuxi", "Tierras fértiles donde habitaron los sabios del imperio Muisca.", "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=1600&auto=format&fit=crop")
+    };
+
+    private PaisajeBoyaca paisajeEspera = PaisajesBoyaca[Random.Shared.Next(PaisajesBoyaca.Length)];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(350);
+        cargando = false;
+    }
+
+    private readonly List<string> etiquetasSugeridas = new()
+    {
+        "Ecoturismo", "Historia & Colonial", "Gastronomía", "Artesanías",
+        "Aventura", "Termales & Salud", "Religioso", "Páramo & Lagunas", "Ferias & Tradición"
+    };
+    private string nuevaEtiqueta = "";
+
+    private void ToggleEtiqueta(string nombre)
+    {
+        var encontrada = dto.Etiquetas.FirstOrDefault(e => e.Equals(nombre, StringComparison.OrdinalIgnoreCase));
+        if (encontrada != null)
+        {
+            dto.Etiquetas.Remove(encontrada);
+        }
+        else
+        {
+            dto.Etiquetas.Add(nombre);
+        }
+    }
+
+    private void AgregarNuevaEtiqueta()
+    {
+        if (!string.IsNullOrWhiteSpace(nuevaEtiqueta))
+        {
+            var limpia = nuevaEtiqueta.Trim().Replace("#", "");
+            if (!dto.Etiquetas.Any(e => e.Equals(limpia, StringComparison.OrdinalIgnoreCase)))
+            {
+                dto.Etiquetas.Add(limpia);
+            }
+            nuevaEtiqueta = "";
+        }
+    }
+
+    private async Task OnArchivoSeleccionado(InputFileChangeEventArgs e)
+    {
+        var archivo = e.File;
+        if (archivo == null) return;
+
+        if (!archivo.ContentType.StartsWith("image/"))
+        {
+            errorImagen = "Por favor selecciona una imagen en formato JPG, PNG o WebP.";
+            return;
+        }
+
+        subiendoImagen = true;
+        errorImagen = null;
+
+        var (resultadoSubida, url, error) = await ApiService.SubirImagenAsync(archivo);
+        if (resultadoSubida && !string.IsNullOrWhiteSpace(url))
+        {
+            dto.ImagenUrl = url;
+        }
+        else
+        {
+            errorImagen = error ?? "No se pudo subir la fotografía. Intenta de nuevo.";
+        }
+
+        subiendoImagen = false;
+    }
+
+    private void QuitarImagen() => dto.ImagenUrl = null;
+
+    private void AgregarFestividad()
+    {
+        dto.FechasRelevantes.Add(new FechaRelevanteDto
+        {
+            NombreFestividad = "",
+            FechaInicio = DateOnly.FromDateTime(DateTime.Today),
+            FechaFin = DateOnly.FromDateTime(DateTime.Today),
+            TipoFestividad = "Cultural",
+            EsRecurrente = true
+        });
+    }
+
+    private void EliminarFestividad(FechaRelevanteDto fest) => dto.FechasRelevantes.Remove(fest);
 
     private async Task Guardar()
     {
         guardando = true;
         mensaje = null;
-        
-        // TODO: Descomentar cuando tengas el método en el ApiService:
-        // exito = await ApiService.CrearAsync(dto);
-        
-        exito = false; 
-        mensaje = exito ? "Municipio creado exitosamente." : "Método CrearAsync pendiente de implementar.";
-        
-        guardando = false;
-        
+
+        var (resultadoExito, idCreado, error) = await ApiService.CrearAsync(dto);
+        exito = resultadoExito;
+
         if (exito)
         {
-            await Task.Delay(1500);
-            Nav.NavigateTo("/municipios");
+            mensaje = "El municipio ha sido publicado exitosamente. Redirigiendo a su ficha...";
+            guardando = false;
+            StateHasChanged();
+
+            await Task.Delay(2000);
+            Nav.NavigateTo($"/municipios/{idCreado}");
+        }
+        else
+        {
+            mensaje = error ?? "No se pudo registrar el municipio. Por favor verifica los campos.";
+            guardando = false;
+            StateHasChanged();
         }
     }
 

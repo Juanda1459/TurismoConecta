@@ -41,7 +41,7 @@ namespace TurismoConecta.api.Controllers
 
         /// <summary>Edita la ficha de un municipio. Solo el AdminMunicipal asignado a ese municipio.</summary>
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "AdminMunicipio")]
+        [Authorize(Roles = "AdminGeneral,AdminMunicipio")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -76,5 +76,42 @@ namespace TurismoConecta.api.Controllers
                 return BadRequest(new { mensaje = ex.Message });
             }
         }
+
+
+        /// <summary>Sube una imagen de portada para un municipio.</summary>
+        [HttpPost("subir-imagen")]
+        [Authorize(Roles = "AdminGeneral,AdminMunicipio")]
+        public async Task<IActionResult> SubirImagen(IFormFile archivo, [FromServices] IWebHostEnvironment env)
+        {
+            if (archivo == null || archivo.Length == 0)
+                return BadRequest(new { mensaje = "No se seleccionó ningún archivo." });
+
+            if (!archivo.ContentType.StartsWith("image/"))
+                return BadRequest(new { mensaje = "El archivo debe ser una imagen válida (JPG, PNG, WebP)." });
+
+            // Carpeta destino dentro de la API
+            var folderPath = Path.Combine(env.WebRootPath, "images", "municipios");
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            // Generamos un nombre único para evitar sobrescribir otras fotos
+            var extension = Path.GetExtension(archivo.FileName).ToLower();
+            var fileName = $"mun_{Guid.NewGuid():N}{extension}";
+            var fullPath = Path.Combine(folderPath, fileName);
+
+            using (var stream = new FileStream(fullPath, FileMode.Create))
+            {
+                await archivo.CopyToAsync(stream);
+            }
+
+            // Devolvemos la URL pública accesible
+            var urlPublica = $"https://localhost:7078/images/municipios/{fileName}";
+            return Ok(new { url = urlPublica });
+        }
+
+
+
     }
 }
