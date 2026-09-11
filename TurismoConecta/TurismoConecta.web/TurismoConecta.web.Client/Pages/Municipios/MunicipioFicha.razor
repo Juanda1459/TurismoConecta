@@ -45,7 +45,7 @@
         <!-- BARRA DE NAVEGACIÓN DISCRETA -->
         <header class="selva-nav">
             <button class="nav-back-link" @onclick="Volver">
-                <span class="nav-back-arrow">←</span> Volver
+                <span class="nav-back-arrow">←</span> Catálogo de Pueblos
             </button>
 
             <div class="nav-actions">
@@ -347,17 +347,7 @@
         cargandoNegocios = false;
     }
 
-    private async Task Volver()
-    {
-        try
-        {
-            await JS.InvokeVoidAsync("history.back");
-        }
-        catch
-        {
-            Nav.NavigateTo("/municipios");
-        }
-    }
+    private void Volver() => Nav.NavigateTo("/municipios");
 
     private void ToggleItinerario() => enItinerario = !enItinerario;
 

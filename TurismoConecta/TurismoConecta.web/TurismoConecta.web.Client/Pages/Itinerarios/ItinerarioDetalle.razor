@@ -237,21 +237,44 @@
 
                         @if (itinerario.Compartido)
                         {
+                            var urlCompartir = Nav.BaseUri.TrimEnd('/') + $"/itinerarios/compartido/{itinerario.CodigoCompartir}";
+                            var textoWhatsapp = Uri.EscapeDataString($"¡Hola! Mira mi itinerario '{itinerario.Nombre}' por Boyacá en TurismoConecta:\n{urlCompartir}");
+                            var whatsappLink = $"https://api.whatsapp.com/send?text={textoWhatsapp}";
+
                             <div class="compartir-estado publico">
                                 <div class="compartir-icono">🌐</div>
                                 <div class="compartir-texto">
                                     <strong>Este itinerario es público</strong>
-                                    <p>Cualquiera con el enlace puede verlo.</p>
-                                    <a href="/itinerarios/compartido/@itinerario.CodigoCompartir"
-                                       target="_blank" class="enlace-compartido">
-                                        Ver vista pública ↗
-                                    </a>
+                                    <p>Copia el enlace o envíalo directamente por WhatsApp a tus compañeros de viaje.</p>
                                 </div>
                             </div>
+
+                            <!-- ENLACE PARA COPIAR -->
+                            <div class="compartir-box-link">
+                                <label class="compartir-label-link">Enlace de tu itinerario:</label>
+                                <div class="compartir-input-group">
+                                    <input type="text" readonly value="@urlCompartir" class="compartir-input-url" />
+                                    <button type="button" class="btn-copiar-link @(enlaceCopiado ? "copiado" : "")"
+                                            @onclick="() => CopiarEnlace(urlCompartir)">
+                                        @(enlaceCopiado ? "✓ ¡Copiado!" : "Copiar")
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- BOTONES DE COMPARTIR -->
+                            <div class="compartir-botones-fila">
+                                <a href="@whatsappLink" target="_blank" class="btn-share-whatsapp" title="Compartir en WhatsApp">
+                                    <span class="wa-icono">💬</span> Compartir por WhatsApp
+                                </a>
+                                <a href="@urlCompartir" target="_blank" class="enlace-compartido-preview">
+                                    Ver vista pública ↗
+                                </a>
+                            </div>
+
                             <button class="btn-toggle-compartir privado"
                                     @onclick="ToggleCompartir"
                                     disabled="@cambiandoCompartir">
-                                @(cambiandoCompartir ? "Procesando..." : "🔒 Hacer privado")
+                                @(cambiandoCompartir ? "Procesando..." : "🔒 Dejar de compartir (Hacer privado)")
                             </button>
                         }
                         else
@@ -330,5 +353,24 @@
         }
         else await JS.InvokeVoidAsync("alert", "Error al cambiar el estado de visibilidad.");
         cambiandoCompartir = false;
+    }
+
+    private bool enlaceCopiado = false;
+
+    private async Task CopiarEnlace(string url)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", url);
+            enlaceCopiado = true;
+            StateHasChanged();
+            await Task.Delay(2500);
+            enlaceCopiado = false;
+            StateHasChanged();
+        }
+        catch
+        {
+            await JS.InvokeVoidAsync("prompt", "Copia el siguiente enlace para compartir:", url);
+        }
     }
 }

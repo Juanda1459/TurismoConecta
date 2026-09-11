@@ -446,7 +446,7 @@
             StateHasChanged();
 
             await Task.Delay(2000);
-            Nav.NavigateTo($"/municipios/{Id}");
+            Nav.NavigateTo($"/municipios/{Id}", replace: true);
         }
         else
         {
@@ -456,5 +456,5 @@
         }
     }
 
-    private void Cancelar() => Nav.NavigateTo($"/municipios/{Id}");
+    private void Cancelar() => Nav.NavigateTo($"/municipios/{Id}", replace: true);
 }
