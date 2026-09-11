@@ -1,0 +1,660 @@
+﻿.pagina-home {
+    --crema: #F7F3EC;
+    --tinta: #1C2B24;
+    --tinta-suave: #4B5A52;
+    --terracota: #C1502E;
+    --terracota-oscuro: #A13F22;
+    --ocre: #E0A94D;
+    --teal: #2F5D50;
+    --teal-suave: #E7EEEA;
+    --piedra: #DCD3C0;
+    --blanco: #FFFFFF;
+    --radio: 14px;
+    --sombra: 0 10px 30px rgba(28, 43, 36, 0.08);
+    font-family: "Inter", sans-serif;
+    color: var(--tinta);
+    background: var(--crema);
+    overflow-x: hidden;
+}
+
+/* ============================== 1) HERO ============================== */
+.hero-home {
+    position: relative;
+    min-height: 82vh;
+    display: flex;
+    align-items: center;
+    padding: 0 8vw;
+    overflow: hidden;
+}
+
+.hero-home-fondo {
+    position: absolute;
+    inset: 0;
+    /* Degradado tinta -> teal, igual criterio visual que el hero de Municipios,
+       para que ambas páginas se sientan parte del mismo sitio */
+    background: linear-gradient(160deg, #16241D 0%, var(--teal) 60%, #3C6B5A 100%);
+    z-index: 0;
+}
+
+    /* Textura sutil de montañas de fondo, hecha solo con gradientes (cero peso extra de imagen) */
+    .hero-home-fondo::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(circle at 20% 100%, rgba(224,169,77,0.18), transparent 45%), radial-gradient(circle at 85% 20%, rgba(193,80,46,0.15), transparent 40%);
+    }
+
+.hero-home-contenido {
+    position: relative;
+    z-index: 1;
+    max-width: 640px;
+    color: var(--crema);
+}
+
+.hero-eyebrow {
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    color: var(--ocre);
+    margin-bottom: 0.75rem;
+}
+
+.hero-titulo {
+    font-family: "Fraunces", serif;
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
+    font-weight: 600;
+    line-height: 1.1;
+    margin: 0 0 1.1rem;
+}
+
+.hero-bajada {
+    font-size: 1.05rem;
+    color: rgba(247,243,236,0.85);
+    line-height: 1.55;
+    margin-bottom: 2rem;
+    max-width: 520px;
+}
+
+/* ---- Buscador grande del hero ---- */
+.buscador-home {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--blanco);
+    border-radius: 999px;
+    padding: 0.55rem 0.55rem 0.55rem 1.25rem;
+    box-shadow: var(--sombra);
+    max-width: 560px;
+}
+
+.icono-buscar {
+    width: 20px;
+    height: 20px;
+    color: var(--tinta-suave);
+    flex-shrink: 0;
+}
+
+.buscador-home-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 0.95rem;
+    color: var(--tinta);
+    background: transparent;
+    min-width: 0; /* evita que el input empuje el layout en pantallas chicas */
+}
+
+.btn-buscar {
+    white-space: nowrap;
+}
+
+.hero-cta-secundarios {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.hero-link {
+    color: var(--crema);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(247,243,236,0.4);
+    padding-bottom: 2px;
+    transition: border-color 0.2s;
+}
+
+    .hero-link:hover {
+        border-color: var(--ocre);
+        color: var(--ocre);
+    }
+
+.hero-horizonte {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+    width: 100%;
+    height: 90px;
+    fill: var(--crema);
+    z-index: 1;
+}
+
+/* ======================= BOTONES REUTILIZABLES ======================= */
+.btn-primario {
+    background: var(--terracota);
+    color: var(--crema);
+    border: none;
+    border-radius: 999px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+}
+
+    .btn-primario:hover {
+        background: var(--terracota-oscuro);
+        transform: translateY(-1px);
+    }
+
+.btn-secundario {
+    background: transparent;
+    color: var(--teal);
+    border: 1.5px solid var(--teal);
+    border-radius: 999px;
+    padding: 0.7rem 1.4rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.2s, color 0.2s;
+}
+
+    .btn-secundario:hover {
+        background: var(--teal);
+        color: var(--crema);
+    }
+
+.btn-grande {
+    padding: 1rem 2.2rem;
+    font-size: 1rem;
+}
+
+/* ========================== SECCIONES GENERALES ========================== */
+.seccion-encabezado {
+    text-align: center;
+    max-width: 560px;
+    margin: 0 auto 2.5rem;
+}
+
+    .seccion-encabezado h2 {
+        font-family: "Fraunces", serif;
+        font-size: clamp(1.5rem, 3vw, 2rem);
+        margin-bottom: 0.5rem;
+    }
+
+    .seccion-encabezado p {
+        color: var(--tinta-suave);
+        font-size: 0.95rem;
+    }
+
+.intereses, .destinos, .valor, .cta-final {
+    padding: 5rem 8vw;
+}
+
+/* ============================ 2) INTERESES ============================ */
+.intereses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.interes-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--blanco);
+    border: 1px solid var(--piedra);
+    border-radius: var(--radio);
+    padding: 1.75rem 1rem;
+    text-decoration: none;
+    color: var(--tinta);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: center;
+    transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+}
+
+    .interes-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--sombra);
+        border-color: var(--teal);
+    }
+
+.interes-icono {
+    font-size: 1.8rem;
+}
+
+.interes-esqueleto {
+    height: 108px;
+    background: var(--piedra);
+    border: none;
+}
+
+/* ============================ 3) DESTINOS ============================ */
+.destinos {
+    background: var(--teal-suave);
+}
+
+.destinos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.destino-card {
+    background: var(--blanco);
+    border-radius: var(--radio);
+    overflow: hidden;
+    box-shadow: var(--sombra);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+    .destino-card:hover {
+        transform: translateY(-4px);
+    }
+
+.destino-img {
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--piedra);
+}
+
+.destino-info {
+    padding: 1rem 1.1rem 1.25rem;
+}
+
+    .destino-info h3 {
+        font-family: "Fraunces", serif;
+        font-size: 1.1rem;
+        margin: 0 0 0.5rem;
+    }
+
+.destino-badges {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.badge {
+    background: var(--teal-suave);
+    color: var(--teal);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+}
+
+.destinos-cta {
+    text-align: center;
+    margin-top: 2.5rem;
+}
+
+.destino-esqueleto .esqueleto-img {
+    height: 180px;
+}
+
+.esqueleto-img, .esqueleto-linea {
+    background: var(--piedra);
+}
+
+.esqueleto-linea {
+    height: 14px;
+    border-radius: 6px;
+    margin: 0.9rem 1.1rem;
+}
+
+/* Animación de "cargando" reutilizada en varios esqueletos de la página */
+.shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+    .shimmer::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        transform: translateX(-100%);
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+        animation: shimmer-mov 1.4s infinite;
+    }
+
+@keyframes shimmer-mov {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* ============================ 4) VALOR ============================ */
+.valor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.75rem;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.valor-card {
+    text-align: center;
+    padding: 1.5rem 1rem;
+}
+
+.valor-icono {
+    font-size: 2.2rem;
+    display: block;
+    margin-bottom: 0.75rem;
+}
+
+.valor-card h3 {
+    font-family: "Fraunces", serif;
+    font-size: 1.05rem;
+    margin: 0 0 0.5rem;
+}
+
+.valor-card p {
+    color: var(--tinta-suave);
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+/* ============================ 5) CTA FINAL ============================ */
+.cta-final {
+    text-align: center;
+    background: var(--tinta);
+    color: var(--crema);
+    border-radius: var(--radio);
+    margin: 0 8vw 3rem;
+    padding: 4rem 2rem;
+}
+
+    .cta-final h2 {
+        font-family: "Fraunces", serif;
+        font-size: clamp(1.5rem, 3vw, 2.1rem);
+        margin-bottom: 0.6rem;
+    }
+
+    .cta-final p {
+        color: rgba(247,243,236,0.8);
+        margin-bottom: 1.75rem;
+    }
+
+.footer-home {
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--tinta-suave);
+    font-size: 0.8rem;
+}
+
+/* ============================ ESTADOS (error) ============================ */
+.estado {
+    text-align: center;
+    padding: 2rem;
+}
+
+.estado-titulo {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+
+.estado-texto {
+    color: var(--tinta-suave);
+    font-size: 0.88rem;
+    margin-bottom: 1rem;
+}
+
+/* ==========================================================================
+   6) MASCOTA / CHATBOT — "Torito"
+   ========================================================================== */
+.torito-widget {
+    position: fixed;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    z-index: 40; /* por encima del contenido, pero no exagerado */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.75rem;
+}
+
+.torito-burbuja {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--terracota);
+    border: 3px solid var(--crema);
+    box-shadow: 0 8px 20px rgba(28,43,36,0.25);
+    cursor: pointer;
+    padding: 8px;
+    /* Animación sutil tipo "respiración" para llamar la atención sin ser molesta */
+    animation: torito-float 3s ease-in-out infinite;
+    transition: transform 0.15s;
+}
+
+    .torito-burbuja:hover {
+        transform: scale(1.08);
+    }
+
+    .torito-burbuja svg {
+        width: 100%;
+        height: 100%;
+    }
+
+@keyframes torito-float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+.torito-panel {
+    width: min(320px, 85vw);
+    height: 420px;
+    background: var(--blanco);
+    border-radius: var(--radio);
+    box-shadow: 0 16px 40px rgba(28,43,36,0.28);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: torito-panel-in 0.2s ease-out;
+}
+
+@keyframes torito-panel-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.torito-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--teal);
+    color: var(--crema);
+    padding: 0.75rem 1rem;
+}
+
+.torito-avatar-chico {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+}
+
+.torito-panel-header strong {
+    display: block;
+    font-size: 0.9rem;
+    line-height: 1.1;
+}
+
+.torito-panel-header span {
+    font-size: 0.72rem;
+    color: rgba(247,243,236,0.75);
+}
+
+.torito-cerrar {
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    color: var(--crema);
+    font-size: 1rem;
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+    .torito-cerrar:hover {
+        opacity: 1;
+    }
+
+.torito-mensajes {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    background: var(--crema);
+}
+
+.torito-mensaje {
+    max-width: 85%;
+    padding: 0.55rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.torito-mensaje-bot {
+    align-self: flex-start;
+    background: var(--blanco);
+    border: 1px solid var(--piedra);
+    border-bottom-left-radius: 2px;
+}
+
+.torito-mensaje-usuario {
+    align-self: flex-end;
+    background: var(--teal);
+    color: var(--crema);
+    border-bottom-right-radius: 2px;
+}
+
+/* Tres puntitos animados mientras "Torito" responde */
+.torito-escribiendo {
+    display: flex;
+    gap: 4px;
+    padding: 0.7rem 0.9rem;
+}
+
+    .torito-escribiendo span {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--tinta-suave);
+        animation: torito-dot 1s infinite;
+    }
+
+        .torito-escribiendo span:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .torito-escribiendo span:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+@keyframes torito-dot {
+    0%, 60%, 100% {
+        opacity: 0.3;
+        transform: translateY(0);
+    }
+
+    30% {
+        opacity: 1;
+        transform: translateY(-3px);
+    }
+}
+
+.torito-input-form {
+    display: flex;
+    border-top: 1px solid var(--piedra);
+    padding: 0.6rem;
+    gap: 0.5rem;
+}
+
+    .torito-input-form input {
+        flex: 1;
+        border: 1px solid var(--piedra);
+        border-radius: 999px;
+        padding: 0.5rem 0.9rem;
+        font-size: 0.85rem;
+        outline: none;
+    }
+
+        .torito-input-form input:focus {
+            border-color: var(--teal);
+        }
+
+    .torito-input-form button {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: none;
+        background: var(--terracota);
+        color: var(--crema);
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+
+/* ============================ RESPONSIVE ============================ */
+@media (max-width: 720px) {
+    .hero-home {
+        padding: 0 6vw;
+        min-height: 76vh;
+    }
+
+    .intereses, .destinos, .valor, .cta-final {
+        padding: 3.5rem 6vw;
+    }
+
+    .cta-final {
+        margin: 0 6vw 2.5rem;
+    }
+
+    .torito-widget {
+        right: 1rem;
+        bottom: 1rem;
+    }
+
+    .torito-panel {
+        width: min(300px, 88vw);
+        height: 380px;
+    }
+}

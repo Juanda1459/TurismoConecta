@@ -67,7 +67,7 @@ namespace TurismoConecta.api.Services
             return (true, null);
         }
 
-        public async Task<(bool exito, string? error)> CambiarEstadoAsync(int idNegocio, int idAdminMunicipal, string nuevoEstado)
+        public async Task<(bool exito, string? error)> CambiarEstadoAsync(int idNegocio, int idAdminMunicipio, string nuevoEstado)
         {
             if (nuevoEstado != "Aprobado" && nuevoEstado != "Rechazado")
                 return (false, "Estado inválido. Use 'Aprobado' o 'Rechazado'.");
@@ -75,7 +75,7 @@ namespace TurismoConecta.api.Services
             var negocio = await _context.Negocios.FindAsync(idNegocio);
             if (negocio is null) return (false, "Negocio no encontrado.");
 
-            var admin = await _context.Usuarios.FindAsync(idAdminMunicipal);
+            var admin = await _context.Usuarios.FindAsync(idAdminMunicipio);
             if (admin is null || admin.MunicipioAsignadoId != negocio.IdMunicipio)
                 return (false, "No tienes permiso sobre este municipio.");
 
