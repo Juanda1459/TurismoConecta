@@ -33,7 +33,7 @@ namespace TurismoConecta.api.Controllers
         }
 
         [HttpPatch("{id:int}/estado")]
-        [Authorize(Roles = "AdminMunicipal")]
+        [Authorize(Roles = "AdminMunicipio")]
         public async Task<IActionResult> CambiarEstado(int id, [FromBody] string nuevoEstado)
         {
             var (exito, error) = await _negocioService.CambiarEstadoAsync(id, UsuarioActual, nuevoEstado);
@@ -43,7 +43,7 @@ namespace TurismoConecta.api.Controllers
 
         // HU-24: bandeja de pendientes del admin municipal
         [HttpGet("pendientes")]
-        [Authorize(Roles = "AdminMunicipal")]
+        [Authorize(Roles = "AdminMunicipio")]
         public async Task<IActionResult> Pendientes() =>
             Ok(await _negocioService.ListarPendientesAsync(UsuarioActual));
 

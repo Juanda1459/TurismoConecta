@@ -34,7 +34,7 @@ namespace TurismoConecta.api.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        [Authorize(Roles = "AdminMunicipal")]
+        [Authorize(Roles = "AdminMunicipio")]
         public async Task<IActionResult> Eliminar(int id)
         {
             var (exito, error) = await _reseñaService.EliminarAsync(id, UsuarioActual);

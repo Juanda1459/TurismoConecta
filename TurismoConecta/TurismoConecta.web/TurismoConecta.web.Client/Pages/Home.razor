@@ -1,0 +1,423 @@
+﻿@using TurismoConecta.web.Client.Services
+@using Microsoft.AspNetCore.Components.Web
+@page "/"
+@layout EmptyLayout
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@inject MunicipioApiService ApiService
+@inject NavigationManager Nav
+@implements IDisposable
+
+<HeadContent>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <title>TurismoConecta-Boyacá — Vive los pueblos de Boyacá</title>
+</HeadContent>
+
+<div class="pagina-home">
+
+    @* ============================================================
+       1) HERO — franja grande de bienvenida, estilo colombia.travel
+       ============================================================ *@
+    <section class="hero-home">
+        <div class="hero-home-fondo" aria-hidden="true"></div>
+        <div class="hero-home-contenido">
+            <p class="hero-eyebrow">Boyacá, Colombia</p>
+            <h1 class="hero-titulo">
+                Descubre, planea y vive<br />los pueblos de Boyacá
+            </h1>
+            <p class="hero-bajada">
+                123 municipios, un solo lugar para encontrarlos: catálogo turístico,
+                itinerarios personalizados y negocios locales verificados.
+            </p>
+
+            @* Buscador grande, igual que el de colombia.travel: es la puerta de entrada
+               principal del sitio. Al escribir y dar Enter, mandamos al usuario a la
+               página de Municipios ya con el texto de búsqueda en la URL. *@
+            <form class="buscador-home" @onsubmit="BuscarYNavegar" @onsubmit:preventDefault>
+                <svg class="icono-buscar" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" />
+                    <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                <input class="buscador-home-input" @bind="textoBusqueda" @bind:event="oninput"
+                       placeholder="¿Qué pueblo quieres conocer? Villa de Leyva, Monguí, Ráquira..." />
+                <button type="submit" class="btn-primario btn-buscar">Buscar</button>
+            </form>
+
+            <div class="hero-cta-secundarios">
+                <a class="hero-link" href="/municipios">Ver todos los municipios →</a>
+                <a class="hero-link" href="/itinerarios">Planear un itinerario →</a>
+            </div>
+        </div>
+
+        @* La misma "línea de montañas" en SVG que usa MunicipiosLista.razor,
+           para que se sienta continuidad visual entre el Home y el resto del sitio. *@
+        <svg class="hero-horizonte" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0,80 L120,40 L260,65 L400,20 L560,55 L720,15 L900,60 L1060,30 L1220,58 L1440,25 L1440,90 L0,90 Z" />
+        </svg>
+    </section>
+
+    @* ============================================================
+       2) EXPLORA POR INTERÉS — grid de categorías (tomado de la
+          sección "¿Qué quieres hacer?" de colombia.travel), pero
+          alimentado con las Etiquetas reales de tu base de datos.
+       ============================================================ *@
+    <section class="intereses">
+        <div class="seccion-encabezado">
+            <h2>¿Qué te gustaría vivir en Boyacá?</h2>
+            <p>Filtra el catálogo por el tipo de experiencia que buscas.</p>
+        </div>
+
+        @if (cargandoEtiquetas)
+        {
+            <div class="intereses-grid">
+                @for (int i = 0; i < 6; i++)
+                {
+                    <div class="interes-card interes-esqueleto shimmer"></div>
+                }
+            </div>
+        }
+        else if (etiquetas.Any())
+        {
+            <div class="intereses-grid">
+                @foreach (var etiqueta in etiquetas.Take(6))
+                {
+                    <a class="interes-card" href="@($"/municipios?idEtiqueta={etiqueta.IdEtiqueta}")">
+                        <span class="interes-icono">@ObtenerIconoInteres(etiqueta.Nombre)</span>
+                        <span class="interes-nombre">@etiqueta.Nombre</span>
+                    </a>
+                }
+            </div>
+        }
+        else
+        {
+            @* Si la API de etiquetas falla o aún no hay datos, no rompemos la página:
+               mostramos categorías de respaldo (fallback) fijas. Esto es una buena
+               práctica: la interfaz nunca debe quedar "en blanco" por un error de red. *@
+            <div class="intereses-grid">
+                @foreach (var nombre in new[] { "Naturaleza", "Gastronomía", "Religioso", "Artesanías", "Aventura", "Histórico" })
+                {
+                    <a class="interes-card" href="/municipios">
+                        <span class="interes-icono">@ObtenerIconoInteres(nombre)</span>
+                        <span class="interes-nombre">@nombre</span>
+                    </a>
+                }
+            </div>
+        }
+    </section>
+
+    @* ============================================================
+       3) DESTINOS DESTACADOS — datos REALES desde tu API
+          (MunicipioApiService.ListarAsync), no imágenes de relleno.
+       ============================================================ *@
+    <section class="destinos">
+        <div class="seccion-encabezado">
+            <h2>Pueblos para empezar tu recorrido</h2>
+            <p>Algunos de los municipios ya disponibles en la plataforma.</p>
+        </div>
+
+        @if (cargandoMunicipios)
+        {
+            <div class="destinos-grid">
+                @for (int i = 0; i < 3; i++)
+                {
+                    <div class="destino-card destino-esqueleto">
+                        <div class="esqueleto-img shimmer"></div>
+                        <div class="esqueleto-linea shimmer" style="width:60%"></div>
+                    </div>
+                }
+            </div>
+        }
+        else if (huboErrorMunicipios)
+        {
+            <div class="estado estado-error">
+                <p class="estado-titulo">No se pudo cargar el catálogo</p>
+                <p class="estado-texto">Verifica que la API esté corriendo e inténtalo de nuevo.</p>
+                <button class="btn-secundario" @onclick="CargarMunicipios">Reintentar</button>
+            </div>
+        }
+        else if (destinos.Any())
+        {
+            <div class="destinos-grid">
+                @foreach (var m in destinos)
+                {
+                    <article class="destino-card" @onclick='() => Nav.NavigateTo($"/municipios/{m.IdMunicipio}")'>
+                        <div class="destino-img" style="background-image:url('@ObtenerImagen(m.Nombre, m.ImagenUrl)')"></div>
+                        <div class="destino-info">
+                            <h3>@m.Nombre</h3>
+                            @if (m.Etiquetas.Any())
+                            {
+                                <div class="destino-badges">
+                                    @foreach (var e in m.Etiquetas.Take(2))
+                                    {
+                                        <span class="badge">@e</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+            <div class="destinos-cta">
+                <a class="btn-secundario" href="/municipios">Ver los 123 municipios →</a>
+            </div>
+        }
+    </section>
+
+    @* ============================================================
+       4) POR QUÉ TURISMOCONECTA — propuesta de valor (estático)
+       ============================================================ *@
+    <section class="valor">
+        <div class="valor-grid">
+            <div class="valor-card">
+                <span class="valor-icono">🗺️</span>
+                <h3>Catálogo completo</h3>
+                <p>Información verificada de los municipios: historia, clima, fechas y actividades.</p>
+            </div>
+            <div class="valor-card">
+                <span class="valor-icono">🧭</span>
+                <h3>Itinerarios a tu medida</h3>
+                <p>Arma tu recorrido entre varios pueblos y compártelo con quien quieras viajar contigo.</p>
+            </div>
+            <div class="valor-card">
+                <span class="valor-icono">🏨</span>
+                <h3>Negocios verificados</h3>
+                <p>Hoteles, restaurantes y artesanos aprobados por la administración de cada municipio.</p>
+            </div>
+            <div class="valor-card">
+                <span class="valor-icono">⭐</span>
+                <h3>Reseñas reales</h3>
+                <p>Opiniones de otros viajeros para que decidas con información de primera mano.</p>
+            </div>
+        </div>
+    </section>
+
+    @* ============================================================
+       5) CTA FINAL — invitación a registrarse
+       ============================================================ *@
+    <section class="cta-final">
+        <h2>Tu próximo viaje por Boyacá empieza aquí</h2>
+        <p>Crea tu cuenta gratis y guarda tus municipios y negocios favoritos.</p>
+        <a class="btn-primario btn-grande" href="/register">Crear cuenta gratis</a>
+    </section>
+
+    <footer class="footer-home">
+        <p>TurismoConecta-Boyacá · Proyecto académico SENA — Análisis y Desarrollo de Software</p>
+    </footer>
+</div>
+
+@* ================================================================
+   6) MASCOTA / CHATBOT — "El Torito de Ráquira"
+   ----------------------------------------------------------------
+   Es un widget flotante fijo en la esquina inferior derecha, visible
+   en toda la página. Por ahora es solo interfaz (front-end): las
+   respuestas del bot son simuladas. Cuando el módulo de Motor de
+   Recomendación (ML.NET) esté listo, solo hay que reemplazar el
+   método SimularRespuesta() por una llamada real a la API.
+   ================================================================ *@
+<div class="torito-widget">
+    @if (chatAbierto)
+    {
+        <div class="torito-panel">
+            <div class="torito-panel-header">
+                <div class="torito-avatar-chico">
+                    @((MarkupString)ToritoSvg)
+                </div>
+                <div>
+                    <strong>Torito</strong>
+                    <span>Tu guía de Boyacá</span>
+                </div>
+                <button class="torito-cerrar" @onclick="() => chatAbierto = false" aria-label="Cerrar chat">✕</button>
+            </div>
+
+            <div class="torito-mensajes">
+                @foreach (var msg in mensajes)
+                {
+                    <div class="torito-mensaje @(msg.EsBot ? "torito-mensaje-bot" : "torito-mensaje-usuario")">
+                        @msg.Texto
+                    </div>
+                }
+                @if (escribiendo)
+                {
+                    <div class="torito-mensaje torito-mensaje-bot torito-escribiendo">
+                        <span></span><span></span><span></span>
+                    </div>
+                }
+            </div>
+
+            <form class="torito-input-form" @onsubmit="EnviarMensaje" @onsubmit:preventDefault>
+                <input @bind="textoMensaje" @bind:event="oninput" placeholder="Pregúntame por un pueblo..." />
+                <button type="submit" aria-label="Enviar">➤</button>
+            </form>
+        </div>
+    }
+
+    <button class="torito-burbuja" @onclick="ToggleChat" aria-label="Abrir chat de recomendaciones">
+        @((MarkupString)ToritoSvg)
+    </button>
+</div>
+
+@code {
+    // ---------------------------------------------------------------
+    // ESTADO: buscador del hero
+    // ---------------------------------------------------------------
+    private string textoBusqueda = "";
+
+    private void BuscarYNavegar()
+    {
+        if (string.IsNullOrWhiteSpace(textoBusqueda))
+        {
+            Nav.NavigateTo("/municipios");
+            return;
+        }
+        // Codificamos el texto para que caracteres especiales (tildes, espacios)
+        // no rompan la URL, y navegamos a Municipios pasándolo por query string.
+        Nav.NavigateTo($"/municipios?texto={Uri.EscapeDataString(textoBusqueda)}");
+    }
+
+    // ---------------------------------------------------------------
+    // ESTADO: etiquetas (sección "Explora por interés")
+    // ---------------------------------------------------------------
+    private List<EtiquetaDto> etiquetas = new();
+    private bool cargandoEtiquetas = true;
+
+    private async Task CargarEtiquetas()
+    {
+        cargandoEtiquetas = true;
+        var resultado = await ApiService.ListarEtiquetasAsync();
+        etiquetas = resultado ?? new List<EtiquetaDto>();
+        cargandoEtiquetas = false;
+    }
+
+    // Mapa simple nombre de etiqueta -> emoji. Es una forma barata (sin librerías
+    // de íconos adicionales) de dar identidad visual rápida a cada categoría.
+    private string ObtenerIconoInteres(string nombre) => nombre.ToLowerInvariant() switch
+    {
+        var n when n.Contains("natur") || n.Contains("eco") => "🌿",
+        var n when n.Contains("gastro") => "🍲",
+        var n when n.Contains("relig") => "⛪",
+        var n when n.Contains("artesan") => "🏺",
+        var n when n.Contains("aventura") => "🧗",
+        var n when n.Contains("histor") || n.Contains("patrim") => "🏛️",
+        _ => "📍"
+    };
+
+    // ---------------------------------------------------------------
+    // ESTADO: destinos destacados (datos reales de la API)
+    // ---------------------------------------------------------------
+    private List<MunicipioListadoDto> destinos = new();
+    private bool cargandoMunicipios = true;
+    private bool huboErrorMunicipios;
+
+    private async Task CargarMunicipios()
+    {
+        cargandoMunicipios = true;
+        huboErrorMunicipios = false;
+
+        // Pedimos la página 1 con tamaño 6: solo necesitamos una vitrina pequeña,
+        // no el catálogo completo (eso ya lo hace la página /municipios).
+        var resultado = await ApiService.ListarAsync(1, 6);
+
+        if (resultado is null)
+        {
+            huboErrorMunicipios = true;
+        }
+        else
+        {
+            destinos = resultado.Items;
+        }
+        cargandoMunicipios = false;
+    }
+
+    // Misma lógica de imagen de respaldo que usa MunicipiosLista.razor, para que
+    // un municipio sin foto propia no se vea "roto" en el Home.
+    private string ObtenerImagen(string nombre, string? imagenUrl)
+    {
+        if (!string.IsNullOrWhiteSpace(imagenUrl) && imagenUrl.StartsWith("http"))
+            return imagenUrl;
+
+        if (string.IsNullOrWhiteSpace(nombre))
+            return "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=500&auto=format&fit=crop";
+
+        string nombreLimpio = nombre.Replace(" de ", "")
+                                    .Replace("á", "a").Replace("Á", "A")
+                                    .Replace("é", "e").Replace("É", "E")
+                                    .Replace("í", "i").Replace("Í", "I")
+                                    .Replace("ó", "o").Replace("Ó", "O")
+                                    .Replace("ú", "u").Replace("Ú", "U")
+                                    .Replace(" ", "");
+
+        return $"https://localhost:7078/images/municipios/{nombreLimpio}ImgPerfil.jpg";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Lanzamos las dos cargas en paralelo (Task.WhenAll) en vez de una tras otra:
+        // así el usuario espera el tiempo de la más lenta, no la suma de las dos.
+        await Task.WhenAll(CargarEtiquetas(), CargarMunicipios());
+    }
+
+    // ---------------------------------------------------------------
+    // MASCOTA / CHATBOT "Torito"
+    // ---------------------------------------------------------------
+    private record MensajeChat(string Texto, bool EsBot);
+
+    private bool chatAbierto = false;
+    private string textoMensaje = "";
+    private bool escribiendo = false;
+    private List<MensajeChat> mensajes = new()
+    {
+        new MensajeChat("¡Muuu! Soy Torito 🐂, tu guía por Boyacá. ¿Qué tipo de plan buscas: naturaleza, gastronomía o cultura?", EsBot: true)
+    };
+
+    private void ToggleChat() => chatAbierto = !chatAbierto;
+
+    private async Task EnviarMensaje()
+    {
+        if (string.IsNullOrWhiteSpace(textoMensaje)) return;
+
+        mensajes.Add(new MensajeChat(textoMensaje, EsBot: false));
+        var pregunta = textoMensaje;
+        textoMensaje = "";
+        escribiendo = true;
+        StateHasChanged();
+
+        // NOTA PEDAGÓGICA: esta espera y la respuesta fija son un MOCK (simulación).
+        // Cuando el Motor de Recomendación (ML.NET) esté integrado, este bloque se
+        // reemplaza por: var respuesta = await ApiService.PreguntarBotAsync(pregunta);
+        await Task.Delay(700);
+        mensajes.Add(new MensajeChat(SimularRespuesta(pregunta), EsBot: true));
+        escribiendo = false;
+    }
+
+    private string SimularRespuesta(string pregunta)
+    {
+        var p = pregunta.ToLowerInvariant();
+        if (p.Contains("gastro") || p.Contains("comer"))
+            return "Te recomiendo probar la gastronomía de Tunja o Sogamoso. ¿Quieres que te muestre negocios de comida verificados?";
+        if (p.Contains("natur") || p.Contains("paramo") || p.Contains("páramo"))
+            return "El páramo de Ocetá y la laguna de Tota son ideales para naturaleza. ¿Te agrego alguno a un itinerario?";
+        if (p.Contains("artesan") || p.Contains("raquira") || p.Contains("ráquira"))
+            return "¡Ráquira es el lugar! Cuna de la cerámica y los toritos de barro como yo 🐂. ¿Vamos a su ficha?";
+        return "Buena pregunta. Explora el catálogo completo de municipios y filtra por lo que más te interese.";
+    }
+
+    // Avatar de Torito en SVG (sin dependencias externas de imágenes).
+    // Es deliberadamente simple: un torito estilizado en tonos terracota,
+    // inspirado en la cerámica artesanal de Ráquira (Boyacá).
+    private const string ToritoSvg = """
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="48" fill="#C1502E" />
+            <path d="M20 35 L10 15 L30 28 Z" fill="#F7F3EC" />
+            <path d="M80 35 L90 15 L70 28 Z" fill="#F7F3EC" />
+            <ellipse cx="50" cy="58" rx="30" ry="26" fill="#E0A94D" />
+            <circle cx="38" cy="52" r="5" fill="#1C2B24" />
+            <circle cx="62" cy="52" r="5" fill="#1C2B24" />
+            <ellipse cx="50" cy="68" rx="12" ry="8" fill="#F7F3EC" />
+            <circle cx="44" cy="68" r="2.4" fill="#1C2B24" />
+            <circle cx="56" cy="68" r="2.4" fill="#1C2B24" />
+        </svg>
+        """;
+
+    public void Dispose() { }
+}

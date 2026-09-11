@@ -83,7 +83,7 @@ namespace TurismoConecta.api.Services
                 }).ToListAsync();
         }
 
-        public async Task<(bool exito, string? error)> EliminarAsync(int idReseña, int idAdminMunicipal)
+        public async Task<(bool exito, string? error)> EliminarAsync(int idReseña, int idAdminMunicipio)
         {
             var reseña = await _context.Reseñas
                 .Include(r => r.IdNegocioNavigation)
@@ -93,7 +93,7 @@ namespace TurismoConecta.api.Services
             // La reseña pertenece a un municipio directo, o a un municipio a través de su negocio
             var idMunicipioDeLaResena = reseña.IdMunicipio ?? reseña.IdNegocioNavigation?.IdMunicipio;
 
-            var admin = await _context.Usuarios.FindAsync(idAdminMunicipal);
+            var admin = await _context.Usuarios.FindAsync(idAdminMunicipio);
             if (admin is null || admin.MunicipioAsignadoId != idMunicipioDeLaResena)
                 return (false, "No tienes permiso sobre esta reseña.");
 
