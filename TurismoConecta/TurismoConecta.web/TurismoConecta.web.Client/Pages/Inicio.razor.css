@@ -1,0 +1,383 @@
+﻿* { box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+h1, h2, .nav-marca { font-family: 'Cormorant Garamond', serif; }
+
+.pagina-inicio { min-height: 100vh; background: #FBF8F1; overflow-x: hidden; }
+
+/* ---------- NAV ---------- */
+.nav-inicio {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.5rem 3rem; position: relative; z-index: 4;
+}
+.nav-marca-grupo { display: flex; align-items: center; gap: 0.6rem; }
+.nav-logo { width: 28px; height: 28px; }
+.nav-logo-forma { fill: #F7F1E3; opacity: 0.9; }
+.nav-marca { font-size: 1.5rem; font-style: italic; font-weight: 600; color: #F7F1E3; }
+
+.nav-enlaces { display: flex; align-items: center; gap: 2rem; }
+.nav-enlaces a {
+    color: #F7F1E3; text-decoration: none; font-size: 0.9rem; letter-spacing: 0.02em;
+    position: relative; padding-bottom: 4px; transition: color 0.2s ease;
+}
+.nav-enlaces a::after {
+    content: ""; position: absolute; left: 0; bottom: 0; width: 0; height: 2px;
+    background: #D9A441; transition: width 0.25s ease;
+}
+.nav-enlaces a:hover::after { width: 100%; }
+
+.nav-iconos { display: flex; align-items: center; gap: 1rem; }
+.icono-nav {
+    background: none; border: none; color: #F7F1E3; font-size: 1.15rem;
+    cursor: pointer; display: flex; align-items: center; text-decoration: none;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+.icono-nav:hover { color: #D9A441; transform: translateY(-2px); }
+
+.nav-busqueda-desplegable {
+    position: relative; z-index: 5; display: flex; justify-content: center;
+    margin-top: -1px; padding: 0.75rem;
+}
+.nav-busqueda-desplegable input {
+    width: 100%; max-width: 420px; border: none; border-radius: 999px;
+    padding: 0.6rem 1.25rem; font-size: 0.9rem; outline: none;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.2);
+}
+
+/* ---------- HERO ---------- */
+.hero {
+    position: relative; padding: 3rem 3rem 5rem; min-height: 580px; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: -5.5rem; padding-top: 8rem;
+}
+.hero-foto { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 0; }
+.hero-oscurecido {
+    position: absolute; inset: 0; z-index: 0;
+    background: linear-gradient(180deg, rgba(22,48,28,0.55) 0%, rgba(22,48,28,0.75) 60%, rgba(22,48,28,0.92) 100%);
+}
+.hero-centro { position: relative; z-index: 3; text-align: center; max-width: 560px; animation: hero-aparecer 0.9s ease both; }
+@keyframes hero-aparecer { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+.hero-eyebrow { display: block; color: #D9A441; font-size: 0.8rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.75rem; font-weight: 600; }
+.hero-centro h1 { font-size: 3.6rem; font-style: italic; color: #F7F1E3; margin: 0 0 0.75rem; font-weight: 600; text-shadow: 0 4px 20px rgba(0,0,0,0.35); }
+.hero-frase { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.3rem; color: #D9A441; margin: 0 0 0.6rem; }
+.hero-descripcion { color: #EFE9D6; font-size: 1rem; margin: 0 0 2rem; }
+
+.buscador-flotante {
+    display: flex; align-items: center; gap: 0.75rem; background: #F7F1E3; border-radius: 999px;
+    padding: 0.6rem 0.6rem 0.6rem 1.25rem; max-width: 460px; margin: 0 auto;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.35); transition: box-shadow 0.25s ease;
+}
+.buscador-flotante:focus-within { box-shadow: 0 0 0 4px rgba(217,164,65,0.4), 0 20px 40px rgba(0,0,0,0.35); }
+.buscador-flotante i { color: #6B6B5F; font-size: 1.1rem; }
+.buscador-flotante input { flex: 1; border: none; outline: none; background: transparent; font-size: 0.95rem; color: #22281F; }
+.buscador-flotante button {
+    background: #B4432D; color: #F7F1E3; border: none; border-radius: 999px;
+    padding: 0.6rem 1.4rem; font-weight: 600; cursor: pointer; transition: background 0.2s ease, transform 0.2s ease;
+}
+.buscador-flotante button:hover { background: #9c3a26; transform: scale(1.04); }
+
+/* ---------- VESTUARIO ---------- */
+.hero-vestuario { position: absolute; left: 3%; bottom: -1rem; width: 220px; z-index: 2; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.35)); animation: subir-suave 1s ease both; }
+@keyframes subir-suave { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+.svg-ruana { width: 130px; }
+.franja-dorada { stroke: #D9A441; stroke-width: 10; }
+.franja-terracota { stroke: #B4432D; stroke-width: 8; }
+.fleco-ruana { stroke: #DED5BB; stroke-width: 3; stroke-linecap: round; }
+.svg-sombrero { width: 120px; margin: -1.5rem 0 0 40px; display: block; }
+.ala-sombrero { fill: #D9A441; }
+.banda-sombrero { fill: #B4432D; }
+.svg-alpargatas { width: 150px; margin: 0.5rem 0 0 10px; display: block; }
+.suela-alpargata { fill: #E4DEC8; }
+.tira-alpargata { fill: none; stroke: #B4432D; stroke-width: 3; stroke-linecap: round; }
+
+/* ---------- MAPA ---------- */
+.svg-mapa { position: absolute; right: 4%; top: 50%; transform: translateY(-50%); width: 240px; z-index: 1; filter: drop-shadow(0 8px 20px rgba(0,0,0,0.3)); animation: subir-suave 1.2s ease both; }
+.silueta-mapa { fill: #E4DEC8; stroke: #16301C; stroke-width: 2; opacity: 0.92; }
+.ruta-mapa { fill: none; stroke: #B4432D; stroke-width: 2.5; stroke-dasharray: 6 5; }
+.punto-mapa { fill: #D9A441; stroke: #16301C; stroke-width: 1.5; }
+.pin-ubicacion path { fill: #F7F1E3; stroke: #16301C; stroke-width: 1.5; }
+.pin-punto { fill: #B4432D; }
+
+/* ---------- MARIPOSAS ---------- */
+.mariposas-esquina { position: absolute; display: flex; gap: 0.5rem; z-index: 2; }
+.esquina-superior { top: 5.5rem; right: 2rem; }
+.esquina-inferior { bottom: 1.5rem; left: 2rem; }
+.mariposa { width: 40px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); animation: aletear 3.2s ease-in-out infinite; }
+.mariposa:nth-child(2) { animation-delay: 0.4s; }
+.mariposa:nth-child(3) { animation-delay: 0.8s; }
+@keyframes aletear { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+.m-amarilla .ala-izq, .m-amarilla .ala-der { fill: #D9A441; }
+.m-roja .ala-izq, .m-roja .ala-der { fill: #B4432D; }
+.m-azul .ala-izq, .m-azul .ala-der { fill: #3E6B8F; }
+.cuerpo-mariposa { fill: #22281F; }
+
+/* ---------- STATS ---------- */
+.seccion-stats { display: flex; align-items: center; justify-content: center; gap: 3rem; background: #16301C; padding: 2rem 1.5rem; flex-wrap: wrap; }
+.stat-item { text-align: center; }
+.stat-numero { display: block; font-family: 'Cormorant Garamond', serif; font-size: 2.4rem; font-style: italic; color: #D9A441; font-weight: 600; }
+.stat-etiqueta { display: block; font-size: 0.8rem; color: #E4DEC8; letter-spacing: 0.03em; }
+.stat-divisor { width: 1px; height: 40px; background: rgba(247,241,227,0.25); }
+
+/* ---------- CATEGORÍAS ---------- */
+.seccion-categorias { padding: 3rem 3rem 0; }
+.seccion-categorias h2, .seccion-pueblos h2, .seccion-testimonios h2 { font-size: 2rem; font-style: italic; color: #22281F; margin: 0 0 1.5rem; font-weight: 500; }
+.fila-categorias { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.chip-categoria {
+    display: flex; align-items: center; gap: 0.5rem; background: #F1EEE3; border: 1px solid transparent;
+    border-radius: 999px; padding: 0.6rem 1.1rem; font-size: 0.9rem; color: #22281F; cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+.chip-categoria:hover { background: #2E6B36; color: #F7F1E3; transform: translateY(-2px); border-color: #D9A441; }
+
+/* ---------- PUEBLOS ---------- */
+.seccion-pueblos { padding: 3.5rem 3rem 4rem; }
+.estado-texto { color: #6B6B5F; }
+.carrusel-pueblos { display: flex; gap: 1.5rem; overflow-x: auto; padding-bottom: 1rem; }
+.tarjeta-pueblo {
+    flex: 0 0 220px; background: #ffffff; border-radius: 14px; overflow: hidden; cursor: pointer;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.08); transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.tarjeta-pueblo:hover { transform: translateY(-6px); box-shadow: 0 18px 34px rgba(0,0,0,0.16); }
+.tarjeta-imagen-wrapper { overflow: hidden; height: 150px; }
+.tarjeta-pueblo img { width: 100%; height: 150px; object-fit: cover; display: block; transition: transform 0.4s ease; }
+.tarjeta-pueblo:hover img { transform: scale(1.1); }
+.imagen-respaldo { width: 100%; height: 150px; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; color: #ffffff; background: linear-gradient(160deg, #2E5F35, #3F7D46); }
+.tarjeta-info { padding: 0.9rem 1rem 1.1rem; }
+.tarjeta-info h3 { margin: 0 0 0.4rem; font-size: 1rem; color: #22281F; font-family: 'Montserrat', sans-serif; font-weight: 600; }
+.tarjeta-etiqueta { font-size: 0.75rem; color: #6B6B5F; background: #F1EEE3; padding: 0.2rem 0.6rem; border-radius: 999px; }
+
+/* ---------- ITINERARIO ---------- */
+.seccion-itinerario { padding: 1rem 3rem 3rem; }
+.tarjeta-itinerario {
+    background: linear-gradient(120deg, #2E5F35, #16301C); border-radius: 20px; padding: 2.5rem 3rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 2rem; flex-wrap: wrap;
+}
+.tarjeta-itinerario h2 { color: #F7F1E3; margin: 0 0 0.5rem; font-size: 1.9rem; font-style: italic; }
+.tarjeta-itinerario p { color: #E4DEC8; margin: 0; max-width: 40ch; }
+.boton-itinerario {
+    background: #D9A441; color: #22281F; border: none; border-radius: 999px; padding: 0.85rem 1.75rem;
+    font-weight: 600; cursor: pointer; white-space: nowrap; transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.boton-itinerario:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(217,164,65,0.35); }
+
+.mapa-story-section {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(280px, .8fr) minmax(0, 1.4fr);
+    gap: 55px;
+    min-height: 900px;
+    padding: 120px clamp(24px, 8vw, 120px);
+    background: #164b23;
+    color: #fffdf4;
+}
+
+.mapa-story-copy {
+    position: sticky;
+    top: 150px;
+    align-self: start;
+    max-width: 440px;
+}
+
+.mapa-story-copy h2 {
+    margin: 12px 0 25px;
+    font-family: "Cormorant Garamond", serif;
+    font-size: clamp(48px, 6vw, 82px);
+    line-height: .92;
+}
+
+.mapa-story-copy h2 em {
+    display: block;
+    color: #f4c542;
+    font-style: italic;
+}
+
+.mapa-story-copy p {
+    max-width: 390px;
+    color: rgba(255, 253, 244, .78);
+    font-size: 16px;
+    line-height: 1.75;
+}
+
+.mapa-story-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    margin-top: 32px;
+    padding: 18px 0;
+    border-top: 1px solid rgba(255, 255, 255, .22);
+}
+
+.mapa-story-step > span {
+    color: #f4c542;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.mapa-story-step strong,
+.mapa-story-step small {
+    display: block;
+}
+
+.mapa-story-step strong {
+    font-size: 15px;
+}
+
+.mapa-story-step small {
+    max-width: 255px;
+    margin-top: 5px;
+    color: rgba(255, 253, 244, .68);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.mapa-interactivo-wrapper {
+    position: sticky;
+    top: 90px;
+    height: calc(100vh - 130px);
+    min-height: 600px;
+    overflow: hidden;
+    border: 9px solid #f4c542;
+    border-radius: 32px;
+    background: #d9ead2;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, .28);
+}
+
+.mapa-interactivo {
+    width: 100%;
+    height: 100%;
+}
+
+.mapa-floating-label {
+    position: absolute;
+    z-index: 500;
+    top: 22px;
+    left: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 14px 18px;
+    border-radius: 15px;
+    background: rgba(16, 62, 36, .92);
+    color: white;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .2);
+}
+
+.mapa-floating-label span {
+    color: #f4c542;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.mapa-floating-label strong {
+    font-family: "Cormorant Garamond", serif;
+    font-size: 27px;
+}
+
+.mapa-zoom-hint {
+    position: absolute;
+    z-index: 500;
+    right: 22px;
+    bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 15px;
+    border-radius: 999px;
+    background: rgba(255, 253, 244, .92);
+    color: #164b23;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.popup-municipio {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    min-width: 140px;
+}
+
+.popup-municipio strong {
+    color: #164b23;
+    font-size: 15px;
+}
+
+.popup-municipio button {
+    border: 0;
+    border-radius: 999px;
+    padding: 8px 11px;
+    background: #d4365c;
+    color: white;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+@media (max-width: 850px) {
+    .mapa-story-section {
+        grid-template-columns: 1fr;
+        min-height: auto;
+        padding: 75px 20px;
+    }
+
+    .mapa-story-copy,
+    .mapa-interactivo-wrapper {
+        position: relative;
+        top: auto;
+    }
+
+    .mapa-interactivo-wrapper {
+        height: 570px;
+        min-height: 570px;
+    }
+}
+
+/* ---------- TESTIMONIOS ---------- */
+.seccion-testimonios { padding: 1rem 3rem 3.5rem; }
+.fila-testimonios { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.tarjeta-testimonio { background: #ffffff; border-radius: 14px; padding: 1.5rem; box-shadow: 0 10px 24px rgba(0,0,0,0.06); transition: transform 0.25s ease; }
+.tarjeta-testimonio:hover { transform: translateY(-4px); }
+.estrellas { color: #D9A441; letter-spacing: 2px; margin-bottom: 0.75rem; }
+.comentario { color: #3D3D38; font-size: 0.95rem; line-height: 1.5; margin: 0 0 0.75rem; }
+.autor { color: #6B6B5F; font-size: 0.85rem; margin: 0; }
+
+/* ---------- FOOTER ---------- */
+.footer-inicio { background: #16301C; padding: 3rem; display: flex; gap: 4rem; flex-wrap: wrap; }
+.footer-columna .nav-marca { display: block; margin-bottom: 0.5rem; }
+.footer-columna p { color: #A9A492; font-size: 0.85rem; max-width: 26ch; }
+.footer-columna h4 { color: #F7F1E3; font-size: 0.85rem; margin: 0 0 0.75rem; font-family: 'Montserrat', sans-serif; }
+.footer-columna a { display: block; color: #E4DEC8; text-decoration: none; font-size: 0.9rem; margin-bottom: 0.5rem; transition: color 0.2s ease; }
+.footer-columna a:hover { color: #D9A441; }
+
+/* ---------- ANIMACIÓN DE SCROLL ---------- */
+.tarjeta-animada { opacity: 0; transform: translateY(28px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.tarjeta-animada.visible { opacity: 1; transform: translateY(0); }
+.tarjeta-animada:nth-child(2) { transition-delay: 0.08s; }
+.tarjeta-animada:nth-child(3) { transition-delay: 0.16s; }
+.tarjeta-animada:nth-child(4) { transition-delay: 0.24s; }
+.tarjeta-animada:nth-child(5) { transition-delay: 0.32s; }
+.tarjeta-animada:nth-child(6) { transition-delay: 0.4s; }
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 900px) {
+    .hero-vestuario, .svg-mapa, .mariposas-esquina { display: none; }
+    .hero { min-height: auto; padding: 4rem 1.5rem; margin-top: -3rem; padding-top: 5rem; }
+    .hero-centro h1 { font-size: 2.6rem; }
+    .nav-enlaces { display: none; }
+    .fila-testimonios { grid-template-columns: 1fr 1fr; }
+    .seccion-stats { gap: 1.5rem; }
+}
+
+@media (max-width: 600px) {
+    .nav-inicio { padding: 1.25rem 1.5rem; }
+    .hero-centro h1 { font-size: 2.1rem; }
+    .hero-descripcion { font-size: 0.95rem; }
+    .buscador-flotante { flex-wrap: wrap; border-radius: 20px; padding: 0.75rem; }
+    .buscador-flotante input { flex-basis: 100%; order: 1; }
+    .buscador-flotante button { flex: 1; order: 2; }
+    .seccion-categorias, .seccion-pueblos, .seccion-testimonios, .seccion-itinerario { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .fila-testimonios { grid-template-columns: 1fr; }
+    .tarjeta-itinerario { padding: 2rem 1.5rem; text-align: center; justify-content: center; }
+    .stat-numero { font-size: 1.9rem; }
+    .footer-inicio { padding: 2rem 1.5rem; gap: 2rem; }
+}

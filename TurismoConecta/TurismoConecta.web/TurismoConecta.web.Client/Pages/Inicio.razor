@@ -1,0 +1,590 @@
+﻿@page "/"
+
+@using System.Linq
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
+@using TurismoConecta.web.Client.Services
+
+@layout EmptyLayout
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+@inject MunicipioApiService ApiService
+@inject EtiquetaApiService EtiquetaService
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<PageTitle>Turismo Conecta | Descubre Colombia</PageTitle>
+
+<HeadContent>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="Pages/inicio.razor.css" />
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          crossorigin="anonymous" />
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+<script src="js/mapa-colombia.js"></script></HeadContent>
+
+<div class="inicio-page">
+
+    <header class="inicio-navbar">
+        <a href="/" class="inicio-logo">
+            <img src="images/turismo-conecta-logo.png"
+                 alt="Turismo Conecta" />
+        </a>
+
+        <nav class="inicio-navigation" aria-label="Navegación principal">
+            <a href="#quienes-somos">Quiénes somos</a>
+            <a href="#donde-ir">Dónde ir</a>
+            <a href="#gustos">Gustos y preferencias</a>
+            <a href="#recomendaciones">Recomendaciones</a>
+        </nav>
+
+        <div class="inicio-actions">
+            <button type="button"
+                    class="nav-button"
+                    aria-label="Buscar"
+                    @onclick="MostrarBuscador">
+                <span>⌕</span>
+            </button>
+
+            <a href="/login"
+               class="nav-button"
+               aria-label="Iniciar sesión">
+                <span>●</span>
+            </a>
+
+            <a href="/registro"
+               class="nav-button nav-power"
+               aria-label="Registrarse">
+                <span>↗</span>
+            </a>
+        </div>
+    </header>
+
+    @if (mostrarBuscador)
+    {
+        <div class="buscador-navegacion">
+            <input @bind="textoBusqueda"
+                   @bind:event="oninput"
+                   @onkeyup="DetectarEnterBusqueda"
+                   placeholder="Busca un municipio, destino o experiencia..."
+                   autofocus />
+
+            <button type="button" @onclick="Buscar">
+                Explorar
+            </button>
+        </div>
+    }
+
+    <main>
+
+        <section class="hero-inicio">
+            <div class="hero-overlay"></div>
+            <div class="hero-decoracion hero-decoracion-superior"></div>
+            <div class="hero-decoracion hero-decoracion-inferior"></div>
+
+            <div class="hero-contenido">
+                <span class="hero-etiqueta">
+                    Turismo Conecta · Colombia
+                </span>
+
+                <h1>
+                    Donde cada camino
+                    <em>cuenta una historia.</em>
+                </h1>
+
+                <p>
+                    Conecta con pueblos llenos de color, páramos que respiran,
+                    sabores tradicionales y experiencias auténticas.
+                </p>
+
+                <form class="hero-buscador"
+                      @onsubmit="Buscar"
+                      @onsubmit:preventDefault>
+
+                    <span class="hero-buscador-icono">⌕</span>
+
+                    <input @bind="textoBusqueda"
+                           @bind:event="oninput"
+                           placeholder="¿Qué pueblo quieres conocer?" />
+
+                    <button type="submit">
+                        Buscar
+                    </button>
+                </form>
+
+                <div class="hero-enlaces">
+                    <a href="#donde-ir">Explorar destinos</a>
+                    <a href="#gustos">Ver experiencias</a>
+                </div>
+            </div>
+
+            <div class="hero-mapa-resumen">
+                <div class="hero-mapa-titulo">
+                    <span>Comenzamos en</span>
+                    <strong>@zonaMapa</strong>
+                </div>
+
+                <div class="hero-mapa-contenedor">
+                    <div id="mapa-colombia"
+                         class="mapa-colombia">
+                    </div>
+
+                    <div class="hero-mapa-indicador">
+                        <span></span>
+                        Desliza para acercarte a Boyacá
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="historia-section" id="quienes-somos">
+            <div class="historia-grid">
+                <div>
+                    <span class="section-eyebrow">
+                        Nuestra esencia
+                    </span>
+
+                    <h2>
+                        Colombia se descubre
+                        <em>pueblo a pueblo.</em>
+                    </h2>
+                </div>
+
+                <div class="historia-texto">
+                    <p>
+                        Turismo Conecta es un espacio para encontrar municipios,
+                        paisajes, tradiciones, negocios y experiencias locales.
+                    </p>
+
+                    <p>
+                        Nuestro recorrido comienza en Boyacá, una región de
+                        páramos, arquitectura colonial, gastronomía y cultura.
+                    </p>
+
+                    <a href="/quienes-somos" class="enlace-destacado">
+                        Conoce nuestra historia →
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="estadisticas-section">
+            <article>
+                <strong>@(totalMunicipios?.ToString() ?? "0")</strong>
+                <span>Municipios registrados</span>
+            </article>
+
+            <article>
+                <strong>@etiquetas.Count</strong>
+                <span>Formas de viajar</span>
+            </article>
+
+            <article>
+                <strong>Boyacá</strong>
+                <span>Primer territorio conectado</span>
+            </article>
+        </section>
+
+        <section class="destinos-section" id="donde-ir">
+            <div class="section-heading">
+                <div>
+                    <span class="section-eyebrow">
+                        Descubre Boyacá
+                    </span>
+
+                    <h2>
+                        ¿Dónde quieres ir?
+                    </h2>
+                </div>
+
+                <p>
+                    Explora los municipios registrados y encuentra el destino
+                    ideal para tu próxima aventura.
+                </p>
+            </div>
+
+            @if (cargandoMunicipios)
+            {
+                <div class="destinos-grid">
+                    @for (var i = 0; i < 6; i++)
+                    {
+                        <div class="destino-skeleton"></div>
+                    }
+                </div>
+            }
+            else if (municipios.Count == 0)
+            {
+                <div class="estado-vacio">
+                    <h3>No hay municipios disponibles</h3>
+                    <p>
+                        Cuando existan municipios activos aparecerán aquí.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="destinos-grid">
+                    @foreach (var municipio in municipios)
+                    {
+                        <article class="destino-card"
+                                 @onclick="() => AbrirMunicipio(municipio.IdMunicipio)"
+                                 tabindex="0"
+                                 role="button">
+
+                            <div class="destino-imagen">
+                                @if (!string.IsNullOrWhiteSpace(municipio.ImagenUrl))
+                                {
+                                    <img src="@municipio.ImagenUrl"
+                                         alt="@municipio.Nombre" />
+                                }
+                                else
+                                {
+                                    <div class="destino-imagen-respaldo">
+                                        @municipio.Nombre.Substring(0, 1)
+                                    </div>
+                                }
+
+                                <span class="destino-numero">
+                                    @municipio.IdMunicipio.ToString("D2")
+                                </span>
+                            </div>
+
+                            <div class="destino-contenido">
+                                <h3>@municipio.Nombre</h3>
+
+                                @if (municipio.Etiquetas is not null &&
+                                     municipio.Etiquetas.Any())
+                                {
+                                    <div class="destino-etiquetas">
+                                        @foreach (var etiqueta in municipio.Etiquetas.Take(3))
+                                        {
+                                            <span>@etiqueta</span>
+                                        }
+                                    </div>
+                                }
+
+                                <span class="destino-enlace">
+                                    Ver municipio →
+                                </span>
+                            </div>
+                        </article>
+                    }
+                </div>
+
+                <div class="centrar-boton">
+                    <a href="/municipios"
+                       class="boton-principal">
+                        Ver todos los municipios
+                    </a>
+                </div>
+            }
+        </section>
+
+        <section class="gustos-section" id="gustos">
+            <div class="section-heading gustos-heading">
+                <div>
+                    <span class="section-eyebrow">
+                        Personaliza tu recorrido
+                    </span>
+
+                    <h2>
+                        ¿Qué te gusta?
+                    </h2>
+                </div>
+
+                <p>
+                    Elige una categoría y descubre municipios relacionados
+                    con tus intereses.
+                </p>
+            </div>
+
+            @if (cargandoEtiquetas)
+            {
+                <div class="gustos-grid">
+                    @for (var i = 0; i < 6; i++)
+                    {
+                        <div class="gusto-skeleton"></div>
+                    }
+                </div>
+            }
+            else if (etiquetas.Count == 0)
+            {
+                <p class="estado-vacio-oscuro">
+                    No hay categorías disponibles.
+                </p>
+            }
+            else
+            {
+                <div class="gustos-grid">
+                    @foreach (var etiqueta in etiquetas)
+                    {
+                        <button type="button"
+                                class="gusto-card"
+                                @onclick="() => FiltrarPorEtiqueta(etiqueta.IdEtiqueta)">
+
+                            <span class="gusto-icono">
+                                @(string.IsNullOrWhiteSpace(etiqueta.Icono)
+                                    ? "✦"
+                                    : etiqueta.Icono)
+                            </span>
+
+                            <strong>@etiqueta.Nombre</strong>
+
+                            <span class="gusto-flecha">↗</span>
+                        </button>
+                    }
+                </div>
+            }
+        </section>
+
+        <section class="recomendaciones-section"
+                 id="recomendaciones">
+
+            <div class="recomendaciones-intro">
+                <span class="section-eyebrow">
+                    Antes de viajar
+                </span>
+
+                <h2>
+                    Recomendaciones
+                    <em>de viaje.</em>
+                </h2>
+
+                <p>
+                    Prepárate para disfrutar cada destino con respeto,
+                    curiosidad y tranquilidad.
+                </p>
+            </div>
+
+            <div class="recomendaciones-grid">
+                <article>
+                    <span>01</span>
+                    <h3>Lleva tu ruana</h3>
+                    <p>
+                        El clima de montaña puede cambiar rápidamente.
+                        Lleva prendas cómodas y abrigadas.
+                    </p>
+                </article>
+
+                <article>
+                    <span>02</span>
+                    <h3>Prueba lo local</h3>
+                    <p>
+                        Apoya la gastronomía, los artesanos y los negocios
+                        de cada municipio.
+                    </p>
+                </article>
+
+                <article>
+                    <span>03</span>
+                    <h3>Cuida el territorio</h3>
+                    <p>
+                        Respeta los páramos, los senderos, las comunidades
+                        y el patrimonio.
+                    </p>
+                </article>
+
+                <article>
+                    <span>04</span>
+                    <h3>Planea tu recorrido</h3>
+                    <p>
+                        Consulta las rutas, los horarios y las condiciones
+                        antes de viajar.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <section class="itinerario-section">
+            <div>
+                <span class="section-eyebrow">
+                    Planea tu aventura
+                </span>
+
+                <h2>
+                    Arma tu itinerario
+                    <em>por Colombia.</em>
+                </h2>
+
+                <p>
+                    Guarda municipios, organiza tus paradas y construye
+                    un recorrido pensado para ti.
+                </p>
+            </div>
+
+            <button type="button"
+                    class="boton-oscuro"
+                    @onclick='() => Nav.NavigateTo("/itinerarios/crear")'>
+                Crear itinerario
+            </button>
+        </section>
+    </main>
+
+    <footer class="inicio-footer">
+        <div>
+            <img src="images/turismo-conecta-logo.png"
+                 alt="Turismo Conecta" />
+
+            <p>
+                Descubre Colombia, municipio a municipio.
+            </p>
+        </div>
+
+        <div class="footer-links">
+            <a href="#quienes-somos">Quiénes somos</a>
+            <a href="#donde-ir">Dónde ir</a>
+            <a href="#gustos">Preferencias</a>
+            <a href="/itinerarios">Itinerarios</a>
+        </div>
+    </footer>
+
+    <CondorChat />
+</div>
+
+@code {
+    private string textoBusqueda = string.Empty;
+    private string zonaMapa = "Colombia";
+
+    private bool mostrarBuscador;
+    private bool cargandoMunicipios = true;
+    private bool cargandoEtiquetas = true;
+
+    private int? totalMunicipios;
+
+    private List<MunicipioListadoDto> municipios = new();
+    private List<EtiquetaDto> etiquetas = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarMunicipios();
+        await CargarEtiquetas();
+    }
+
+    private async Task CargarMunicipios()
+    {
+        cargandoMunicipios = true;
+
+        try
+        {
+            var resultado = await ApiService.ListarAsync(1, 200);
+
+            municipios = resultado?.Items?.ToList()
+                ?? new List<MunicipioListadoDto>();
+
+            totalMunicipios = resultado?.Total;
+        }
+        catch
+        {
+            municipios = new List<MunicipioListadoDto>();
+            totalMunicipios = 0;
+        }
+        finally
+        {
+            cargandoMunicipios = false;
+        }
+    }
+
+    private async Task CargarEtiquetas()
+    {
+        cargandoEtiquetas = true;
+
+        try
+        {
+            var resultado = await EtiquetaService.ListarAsync();
+
+            etiquetas = resultado?.ToList()
+                ?? new List<EtiquetaDto>();
+        }
+        catch
+        {
+            etiquetas = new List<EtiquetaDto>();
+        }
+        finally
+        {
+            cargandoEtiquetas = false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        var municipiosParaMapa = municipios
+            .Where(municipio =>
+                municipio.Latitud.HasValue &&
+                municipio.Longitud.HasValue)
+            .Select(municipio => new
+            {
+                id = municipio.IdMunicipio,
+                nombre = municipio.Nombre,
+                latitud = municipio.Latitud.Value,
+                longitud = municipio.Longitud.Value
+            })
+            .ToList();
+
+        await JS.InvokeVoidAsync(
+            "TurismoConectaMapa.inicializar",
+            municipiosParaMapa,
+            DotNetObjectReference.Create(this));
+
+        await JS.InvokeVoidAsync(
+            "TurismoConectaMapa.activarScroll");
+    }
+
+    private void MostrarBuscador()
+    {
+        mostrarBuscador = !mostrarBuscador;
+    }
+
+    private void DetectarEnterBusqueda(KeyboardEventArgs evento)
+    {
+        if (evento.Key == "Enter")
+        {
+            Buscar();
+        }
+    }
+
+    private void Buscar()
+    {
+        if (string.IsNullOrWhiteSpace(textoBusqueda))
+        {
+            Nav.NavigateTo("/municipios");
+            return;
+        }
+
+        Nav.NavigateTo(
+            $"/municipios?texto={Uri.EscapeDataString(textoBusqueda.Trim())}");
+    }
+
+    private void AbrirMunicipio(int idMunicipio)
+    {
+        Nav.NavigateTo($"/municipios/{idMunicipio}");
+    }
+
+    private void FiltrarPorEtiqueta(int idEtiqueta)
+    {
+        Nav.NavigateTo($"/municipios?idEtiqueta={idEtiqueta}");
+    }
+
+    [JSInvokable]
+    public void ActualizarZonaMapa(string zona)
+    {
+        zonaMapa = zona;
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void AbrirMunicipioDesdeMapa(int idMunicipio)
+    {
+        AbrirMunicipio(idMunicipio);
+    }
+}

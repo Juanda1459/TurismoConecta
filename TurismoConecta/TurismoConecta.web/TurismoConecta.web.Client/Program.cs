@@ -23,6 +23,17 @@ builder.Services.AddHttpClient<ItinerarioApiService>(client =>
     client.BaseAddress = new Uri("https://localhost:7078");
 })
 .AddHttpMessageHandler<AuthorizationMessageHandler>();
+builder.Services.AddHttpClient<EtiquetaApiService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7078");
+})
+.AddHttpMessageHandler<AuthorizationMessageHandler>();
+
+builder.Services.AddHttpClient<AsistenteApiService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7078");
+})
+.AddHttpMessageHandler<AuthorizationMessageHandler>();
 
 //Servicios clave para que <AuthorizeView> no se congele:
 builder.Services.AddAuthorizationCore();
