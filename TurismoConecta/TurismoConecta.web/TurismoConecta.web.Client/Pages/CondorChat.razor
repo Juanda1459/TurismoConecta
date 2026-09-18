@@ -1,0 +1,71 @@
+﻿@using TurismoConecta.web.Client.Pages
+@using TurismoConecta.web.Client.Services
+@inject AsistenteApiService Asistente
+
+<div class="condor-widget">
+    @if (abierto)
+    {
+        <div class="condor-panel">
+            <div class="condor-header">
+                <svg viewBox="0 0 100 100" class="condor-icono-chico">
+                    <circle cx="50" cy="50" r="48" class="condor-fondo" />
+                    <path d="M50 25 L65 55 L50 48 L35 55 Z" class="condor-pico" />
+                    <path d="M15 50 Q35 30 50 40 Q65 30 85 50 Q65 45 50 55 Q35 45 15 50" class="condor-alas" />
+                </svg>
+                <div>
+                    <strong>Cóndor Guía</strong>
+                    <span>Tu asistente de Boyacá</span>
+                </div>
+                <button class="condor-cerrar" @onclick="() => abierto = false">✕</button>
+            </div>
+
+            <div class="condor-mensajes">
+                @foreach (var m in mensajes)
+                {
+                    <div class="burbuja @(m.Rol == "user" ? "burbuja-usuario" : "burbuja-condor")">@m.Contenido</div>
+                }
+                @if (cargando)
+                {
+                    <div class="burbuja burbuja-condor burbuja-cargando">Volando por el páramo...</div>
+                }
+            </div>
+
+            <form class="condor-form" @onsubmit="Enviar">
+                <input @bind="entrada" @bind:event="oninput" placeholder="Pregúntame por un pueblo o plan..." />
+                <button type="submit" disabled="@cargando">➤</button>
+            </form>
+        </div>
+    }
+
+    <button class="condor-boton" @onclick="() => abierto = !abierto">
+        <svg viewBox="0 0 100 100" class="condor-icono">
+            <circle cx="50" cy="50" r="48" class="condor-fondo" />
+            <path d="M50 25 L65 55 L50 48 L35 55 Z" class="condor-pico" />
+            <path d="M15 50 Q35 30 50 40 Q65 30 85 50 Q65 45 50 55 Q35 45 15 50" class="condor-alas" />
+        </svg>
+    </button>
+</div>
+
+@code {
+    private bool abierto = false;
+    private bool cargando = false;
+    private string entrada = "";
+    private List<TurnoChat> mensajes = new()
+    {
+        new TurnoChat { Rol = "assistant", Contenido = "¡Buenas! Soy el Cóndor Guía. ¿Qué tipo de plan buscas en Boyacá: naturaleza, historia, gastronomía?" }
+    };
+
+    private async Task Enviar()
+    {
+        if (string.IsNullOrWhiteSpace(entrada) || cargando) return;
+
+        var textoUsuario = entrada.Trim();
+        mensajes.Add(new TurnoChat { Rol = "user", Contenido = textoUsuario });
+        entrada = "";
+        cargando = true;
+
+        var respuesta = await Asistente.EnviarMensajeAsync(textoUsuario, mensajes.SkipLast(1).ToList());
+        mensajes.Add(new TurnoChat { Rol = "assistant", Contenido = respuesta });
+        cargando = false;
+    }
+}

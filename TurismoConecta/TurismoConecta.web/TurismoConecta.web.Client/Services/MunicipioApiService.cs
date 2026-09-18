@@ -136,7 +136,11 @@ namespace TurismoConecta.web.Client.Services
     public class EtiquetaDto
     {
         public int IdEtiqueta { get; set; }
-        public string Nombre { get; set; } = "";
+        public string Nombre { get; set; } = string.Empty;
+        public string? Descripcion { get; set; }
+        public string? Icono { get; set; }
+        public string? Categoria { get; set; }
+        public bool Activo { get; set; }
     }
 
     public class MunicipioListadoDto
@@ -145,6 +149,8 @@ namespace TurismoConecta.web.Client.Services
         public string Nombre { get; set; } = "";
         public string? ImagenUrl { get; set; }
         public List<string> Etiquetas { get; set; } = new();
+        public decimal? Latitud { get; set; }
+        public decimal? Longitud { get; set; }
     }
 
     public class MunicipioFichaDto : MunicipioListadoDto
@@ -152,9 +158,8 @@ namespace TurismoConecta.web.Client.Services
         public string? Descripcion { get; set; }
         public string? Clima { get; set; }
         public string? Historia { get; set; }
-        public decimal? Latitud { get; set; }
-        public decimal? Longitud { get; set; }
-        public List<FechaRelevanteDto> FechasRelevantes { get; set; } = new();
+        public List<FechaRelevanteDto> FechasRelevantes { get; set; } = new();    
+
     }
 
     public class FechaRelevanteDto

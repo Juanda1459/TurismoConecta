@@ -1,0 +1,636 @@
+﻿* {
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+}
+
+h1, h2 {
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.inicio-page {
+    min-height: 100vh;
+    background: #FBF8F1;
+    overflow-x: hidden;
+}
+
+/* ---------- NAVBAR ---------- */
+.inicio-navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 3rem;
+    position: relative;
+    z-index: 4;
+    background: #16301C;
+}
+
+.inicio-logo img {
+    height: 35px;
+    width: auto;
+}
+
+.inicio-navigation {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+    .inicio-navigation a {
+        color: #F7F1E3;
+        text-decoration: none;
+        font-size: 0.9rem;
+        letter-spacing: 0.02em;
+        position: relative;
+        padding-bottom: 4px;
+        transition: color 0.2s ease;
+    }
+
+        .inicio-navigation a::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 2px;
+            background: #D9A441;
+            transition: width 0.25s ease;
+        }
+
+        .inicio-navigation a:hover::after {
+            width: 100%;
+        }
+
+.inicio-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.nav-button {
+    background: none;
+    border: none;
+    color: #F7F1E3;
+    font-size: 1.15rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+    .nav-button:hover {
+        color: #D9A441;
+        transform: translateY(-2px);
+    }
+
+.buscador-navegacion {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: #16301C;
+}
+
+    .buscador-navegacion input {
+        width: 100%;
+        max-width: 420px;
+        border: none;
+        border-radius: 999px;
+        padding: 0.6rem 1.25rem;
+        font-size: 0.9rem;
+        outline: none;
+        box-shadow: 0 10px 24px rgba(0,0,0,0.2);
+    }
+
+    .buscador-navegacion button {
+        background: #B4432D;
+        color: #F7F1E3;
+        border: none;
+        border-radius: 999px;
+        padding: 0.6rem 1.25rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+/* ---------- HERO ---------- */
+.hero-inicio {
+    position: relative;
+    padding: 3rem 3rem 5rem;
+    min-height: 580px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    background: linear-gradient(180deg, #16301C 0%, rgba(22,48,28,0.92) 100%);
+}
+
+.hero-contenido {
+    position: relative;
+    z-index: 3;
+    max-width: 560px;
+    color: #F7F1E3;
+}
+
+.hero-etiqueta {
+    display: block;
+    color: #D9A441;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.hero-contenido h1 {
+    font-size: 3.6rem;
+    font-style: italic;
+    color: #F7F1E3;
+    margin: 0 0 0.75rem;
+    font-weight: 600;
+}
+
+    .hero-contenido h1 em {
+        color: #D9A441;
+        font-style: italic;
+    }
+
+.hero-contenido p {
+    color: #EFE9D6;
+    font-size: 1rem;
+    margin: 0 0 2rem;
+}
+
+.hero-buscador {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: #F7F1E3;
+    border-radius: 999px;
+    padding: 0.6rem 0.6rem 0.6rem 1.25rem;
+    max-width: 460px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+}
+
+.hero-buscador-icono {
+    color: #6B6B5F;
+    font-size: 1.1rem;
+}
+
+.hero-buscador input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.95rem;
+    color: #22281F;
+}
+
+.hero-buscador button {
+    background: #B4432D;
+    color: #F7F1E3;
+    border: none;
+    border-radius: 999px;
+    padding: 0.6rem 1.4rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+    .hero-buscador button:hover {
+        background: #9c3a26;
+        transform: scale(1.04);
+    }
+
+.hero-enlaces {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+    .hero-enlaces a {
+        color: #D9A441;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+/* ---------- MAPA RESUMEN ---------- */
+.hero-mapa-resumen {
+    position: relative;
+    z-index: 3;
+    flex: 1;
+    max-width: 500px;
+}
+
+.hero-mapa-titulo span {
+    display: block;
+    color: #EFE9D6;
+    font-size: 0.85rem;
+}
+
+.hero-mapa-titulo strong {
+    color: #D9A441;
+    font-size: 1.5rem;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.hero-mapa-contenedor {
+    position: relative;
+    height: 380px;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 4px solid #D9A441;
+    margin-top: 0.75rem;
+}
+
+.mapa-colombia {
+    width: 100%;
+    height: 100%;
+}
+
+.hero-mapa-indicador {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    z-index: 400;
+    background: rgba(22,48,28,0.85);
+    color: #F7F1E3;
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+}
+
+/* ---------- HISTORIA ---------- */
+.historia-section {
+    padding: 4rem 3rem;
+    background: #FBF8F1;
+}
+
+.historia-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+}
+
+.section-eyebrow {
+    display: block;
+    color: #B4432D;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.historia-grid h2 {
+    font-size: 2.8rem;
+    color: #22281F;
+    margin: 0;
+    line-height: 1.1;
+}
+
+    .historia-grid h2 em {
+        color: #2E6B36;
+        font-style: italic;
+    }
+
+.historia-texto p {
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.enlace-destacado {
+    color: #B4432D;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+/* ---------- ESTADÍSTICAS ---------- */
+.estadisticas-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4rem;
+    background: #16301C;
+    padding: 2.5rem 1.5rem;
+    flex-wrap: wrap;
+}
+
+    .estadisticas-section article {
+        text-align: center;
+    }
+
+    .estadisticas-section strong {
+        display: block;
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2.8rem;
+        font-style: italic;
+        color: #D9A441;
+        font-weight: 600;
+        line-height: 1;
+    }
+
+    .estadisticas-section span {
+        display: block;
+        font-size: 0.85rem;
+        color: #E4DEC8;
+        margin-top: 0.4rem;
+    }
+
+/* ---------- DESTINOS ---------- */
+.destinos-section {
+    padding: 4rem 3rem;
+}
+
+.section-heading {
+    margin-bottom: 2.5rem;
+}
+
+    .section-heading h2 {
+        font-size: 2.5rem;
+        color: #22281F;
+        margin: 0.2rem 0;
+    }
+
+.destinos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
+}
+
+.destino-card {
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    position: relative;
+}
+
+    .destino-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 18px 34px rgba(0,0,0,0.12);
+    }
+
+.destino-imagen {
+    position: relative;
+    height: 180px;
+    background: #2E5F35;
+}
+
+    .destino-imagen img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.destino-imagen-respaldo {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem;
+    color: #ffffff;
+}
+
+.destino-numero {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0,0,0,0.4);
+    color: #fff;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+}
+
+.destino-contenido {
+    padding: 1.2rem;
+}
+
+    .destino-contenido h3 {
+        margin: 0 0 0.5rem;
+        font-size: 1.2rem;
+        color: #22281F;
+    }
+
+.destino-etiquetas {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+    .destino-etiquetas span {
+        font-size: 0.75rem;
+        background: #F1EEE3;
+        color: #555;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+    }
+
+.destino-enlace {
+    font-size: 0.85rem;
+    color: #B4432D;
+    font-weight: 700;
+}
+
+.centrar-boton {
+    text-align: center;
+    margin-top: 3rem;
+}
+
+.boton-principal {
+    background: #B4432D;
+    color: #fff;
+    padding: 0.8rem 2rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-block;
+}
+
+/* ---------- GUSTOS ---------- */
+.gustos-section {
+    padding: 4rem 3rem;
+    background: #16301C;
+    color: #F7F1E3;
+}
+
+.gustos-heading h2 {
+    color: #F7F1E3;
+}
+
+.gustos-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-top: 2rem;
+}
+
+.gusto-card {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 999px;
+    padding: 0.7rem 1.3rem;
+    color: #F7F1E3;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .gusto-card:hover {
+        background: #D9A441;
+        color: #16301C;
+        border-color: #D9A441;
+        transform: translateY(-2px);
+    }
+
+.gusto-icono {
+    font-size: 1.1rem;
+}
+
+.gusto-flecha {
+    opacity: 0.6;
+    font-size: 0.8rem;
+}
+
+/* ---------- RECOMENDACIONES ---------- */
+.recomendaciones-section {
+    padding: 4rem 3rem;
+}
+
+.recomendaciones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+}
+
+    .recomendaciones-grid article {
+        background: #fff;
+        padding: 1.8rem;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+    }
+
+        .recomendaciones-grid article span {
+            color: #D9A441;
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .recomendaciones-grid article h3 {
+            margin: 0 0 0.5rem;
+            color: #22281F;
+        }
+
+        .recomendaciones-grid article p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+/* ---------- ITINERARIO ---------- */
+.itinerario-section {
+    padding: 3rem;
+    background: linear-gradient(120deg, #2E5F35, #16301C);
+    margin: 0 3rem 4rem;
+    border-radius: 24px;
+    color: #F7F1E3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+    .itinerario-section h2 {
+        color: #F7F1E3;
+        font-size: 2.2rem;
+        margin: 0.3rem 0;
+    }
+
+        .itinerario-section h2 em {
+            color: #D9A441;
+        }
+
+.boton-oscuro {
+    background: #D9A441;
+    color: #16301C;
+    border: none;
+    border-radius: 999px;
+    padding: 0.9rem 2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+    .boton-oscuro:hover {
+        transform: scale(1.05);
+    }
+
+/* ---------- FOOTER ---------- */
+.inicio-footer {
+    background: #112415;
+    color: #E4DEC8;
+    padding: 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+    .inicio-footer img {
+        height: 30px;
+        margin-bottom: 0.5rem;
+    }
+
+.footer-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+    .footer-links a {
+        color: #E4DEC8;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+        .footer-links a:hover {
+            color: #D9A441;
+        }
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 850px) {
+    .inicio-navbar, .hero-inicio, .historia-grid, .itinerario-section {
+        flex-direction: column;
+        padding: 2rem 1.5rem;
+    }
+
+    .historia-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-mapa-resumen {
+        width: 100%;
+    }
+
+    .itinerario-section {
+        margin: 0 1.5rem 3rem;
+    }
+}
