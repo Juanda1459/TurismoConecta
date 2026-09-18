@@ -331,7 +331,7 @@
             }
             else
             {
-                var resultado = await ApiService.BuscarAsync(textoBusqueda, _ctsBusqueda.Token);
+                var resultado = await ApiService.BuscarAsync(textoBusqueda, null, _ctsBusqueda.Token);
                 ActualizarVistas(resultado);
                 huboError = resultado is null;
             }

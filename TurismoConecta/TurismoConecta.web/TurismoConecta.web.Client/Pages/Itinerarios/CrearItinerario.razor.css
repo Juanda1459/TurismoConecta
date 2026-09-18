@@ -967,3 +967,177 @@
         transform: rotate(360deg);
     }
 }
+
+/* ──────────────────────────────────────────
+   ALERTAS DE AUTENTICACIÓN Y VALIDACIÓN
+   ────────────────────────────────────────── */
+
+/* Banner persistente cuando no está logueado */
+.alerta-auth-aviso {
+    max-width: 1120px;
+    margin: 0 auto 28px;
+    background: #FFFDF9;
+    border: 1px solid var(--borde-sutil);
+    border-left: 4px solid var(--acento-tierra);
+    border-radius: 6px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 8px rgba(33, 59, 49, 0.04);
+}
+
+.alerta-auth-icono {
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
+.alerta-auth-contenido {
+    flex: 1;
+}
+
+.alerta-auth-titulo {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--texto-principal);
+    display: block;
+    margin-bottom: 3px;
+}
+
+.alerta-auth-desc {
+    font-size: 0.82rem;
+    color: var(--texto-secundario);
+    margin: 0;
+    line-height: 1.45;
+}
+
+.alerta-auth-botones {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+}
+
+.btn-auth-iti-login {
+    background: var(--acento-bosque);
+    color: #FFFFFF;
+    text-decoration: none;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+    .btn-auth-iti-login:hover {
+        background: #162820;
+        color: #FFFFFF;
+        transform: translateY(-1px);
+    }
+
+/* Botón sutil de registro */
+.btn-auth-iti-registro {
+    background: transparent;
+    border: none;
+    color: var(--texto-secundario);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    transition: color 0.18s;
+    white-space: nowrap;
+}
+
+    .btn-auth-iti-registro:hover {
+        color: var(--acento-tierra);
+    }
+
+/* Alerta de error en formulario */
+.alerta-error-itinerario {
+    background: #FFF9F7;
+    border: 1px solid #F2D5C9;
+    border-left: 4px solid #C0392B;
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.alerta-error-icono {
+    font-size: 1.2rem;
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+.alerta-error-cuerpo {
+    flex: 1;
+}
+
+.alerta-error-texto {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #8A261A;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.alerta-error-acciones {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 10px;
+}
+
+.btn-alerta-login {
+    display: inline-block;
+    background: var(--acento-bosque);
+    color: #FFFFFF;
+    text-decoration: none;
+    font-size: 0.76rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 7px 15px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+    .btn-alerta-login:hover {
+        background: #162820;
+        color: #FFFFFF;
+    }
+
+.btn-alerta-registro-sutil {
+    background: transparent;
+    border: none;
+    color: var(--texto-secundario);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    transition: color 0.18s;
+}
+
+    .btn-alerta-registro-sutil:hover {
+        color: var(--acento-tierra);
+    }
+
+@media (max-width: 768px) {
+    .alerta-auth-aviso {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .alerta-auth-botones {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}

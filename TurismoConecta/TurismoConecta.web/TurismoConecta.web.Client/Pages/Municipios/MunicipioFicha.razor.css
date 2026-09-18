@@ -1,38 +1,60 @@
-﻿/* ==========================================================================
-   ESTÉTICA SELVA MINCA + CARDS ROTATIVAS Y DIVISORES CLAROS
+/* ==========================================================================
+   MunicipioFicha.razor.css
+   Design system: Cormorant Garamond + Montserrat · Verde Selva · Tierra Boyacá
    ========================================================================== */
+
 .selva-container {
-    --fondo: #FBF9F5; /* Lino suave natural */
-    --superficie: #FFFFFF;
-    --texto-principal: #1E2B25; /* Carbón botánico */
-    --texto-secundario: #5A6961; /* Verde salvia suave */
-    --acento-bosque: #213B31; /* Verde bosque profundo */
-    --acento-tierra: #9E5B3D; /* Arcilla cálida suave */
-    --borde-divisor: #E4DFD5; /* Separador nítido */
-    --borde-card: #EAE6DF;
+    --fondo:             #FBF9F5;
+    --superficie:        #FFFFFF;
+    --txt-principal:     #1E2B25;
+    --txt-secundario:    #5A6961;
+    --acento-bosque:     #213B31;
+    --acento-tierra:     #9E5B3D;
+    --borde-divisor:     #E4DFD5;
+    --borde-card:        #EAE6DF;
+
     font-family: 'Montserrat', -apple-system, sans-serif;
-    color: var(--texto-principal);
+    color: var(--txt-principal);
     background-color: var(--fondo);
     min-height: 100vh;
+}
+
+/* ==========================================================================
+   ERROR STATE
+   ========================================================================== */
+.selva-error {
+    max-width: 600px;
+    margin: 120px auto;
+    text-align: center;
+    padding: 0 24px;
+}
+
+.btn-enlace {
+    background: none;
+    border: none;
+    color: var(--acento-bosque);
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
 }
 
 /* ==========================================================================
    BARRA DE NAVEGACIÓN
    ========================================================================== */
 .selva-nav {
-    max-width: 1080px;
+    max-width: 1100px;
     margin: 0 auto;
     padding: 22px 32px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: transparent;
 }
 
 .nav-back-link {
     background: none;
     border: none;
-    color: var(--texto-principal);
+    color: var(--txt-principal);
     font-size: 0.82rem;
     font-weight: 500;
     text-transform: uppercase;
@@ -42,21 +64,17 @@
     align-items: center;
     gap: 8px;
     padding: 0;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.2s;
 }
 
-    .nav-back-link:hover {
-        opacity: 0.6;
-    }
+    .nav-back-link:hover { opacity: 0.6; }
 
 .nav-back-arrow {
     font-size: 1.1rem;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s;
 }
 
-.nav-back-link:hover .nav-back-arrow {
-    transform: translateX(-3px);
-}
+.nav-back-link:hover .nav-back-arrow { transform: translateX(-3px); }
 
 .nav-actions {
     display: flex;
@@ -66,7 +84,7 @@
 
 .btn-itinerario-minimal {
     background: var(--acento-bosque);
-    color: #FFFFFF;
+    color: #FFF;
     border: 1px solid var(--acento-bosque);
     padding: 9px 20px;
     border-radius: 4px;
@@ -75,7 +93,7 @@
     text-transform: uppercase;
     letter-spacing: 1px;
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: all 0.25s;
 }
 
     .btn-itinerario-minimal:hover {
@@ -92,119 +110,160 @@
 .btn-admin-minimal {
     background: none;
     border: none;
-    color: var(--texto-secundario);
+    color: var(--txt-secundario);
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 1px;
     cursor: pointer;
     padding: 6px 12px;
-    transition: color 0.2s ease;
+    transition: color 0.2s;
 }
 
-    .btn-admin-minimal:hover {
-        color: var(--texto-principal);
-    }
-
-.btn-admin-danger:hover {
-    color: #C0392B;
-}
+    .btn-admin-minimal:hover   { color: var(--txt-principal); }
+    .btn-danger-subtle:hover   { color: #C0392B; }
 
 /* ==========================================================================
-   HERO / PORTADA
+   HERO — foto de portada + overlay
    ========================================================================== */
 .selva-hero {
     position: relative;
-    max-width: 1080px;
+    max-width: 1100px;
     margin: 0 auto;
     height: 520px;
     border-radius: 6px;
     overflow: hidden;
-    background-color: var(--acento-bosque);
+    background: var(--acento-bosque);
 }
 
-.selva-hero-img {
+.hero-imagen-wrapper {
+    position: absolute;
+    inset: 0;
+}
+
+.hero-imagen {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-    filter: brightness(0.92);
+    filter: brightness(0.88);
 }
 
-.selva-hero-scrim {
+.hero-sombra-suave {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(20,30,25,0.78) 100%);
+    background: linear-gradient(180deg,
+        rgba(0,0,0,0.08) 0%,
+        rgba(20,30,25,0.80) 100%);
+}
+
+/* Contenido centrado sobre la foto */
+.hero-contenido-centrado {
+    position: absolute;
+    inset: 0;
     display: flex;
-    align-items: flex-end;
-    padding: 48px 44px;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 44px 48px;
+    max-width: 820px;
 }
 
-.selva-hero-meta {
-    max-width: 760px;
-    color: #FFFFFF;
-}
-
-.hero-subline {
-    font-size: 0.82rem;
+.hero-categoria-badge {
+    font-size: 0.74rem;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    color: rgba(255, 255, 255, 0.85);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    letter-spacing: 2.5px;
+    color: rgba(255,255,255,0.82);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 10px;
 }
 
-.bullet {
-    opacity: 0.5;
-}
-
-.selva-hero-title {
+.hero-titulo {
     font-family: 'Cormorant Garamond', Georgia, serif;
     font-size: 4rem;
     font-weight: 600;
+    color: #FFF;
     line-height: 1.05;
-    margin: 0 0 16px 0;
+    margin: 0 0 14px 0;
     letter-spacing: -0.5px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
 
-.hero-tags {
+/* Metadatos: clima + país */
+.hero-meta-discreta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    color: rgba(255,255,255,0.82);
+    font-size: 0.84rem;
+}
+
+.icono-clima    { font-size: 1rem; }
+.meta-separador { opacity: 0.45; }
+.meta-item-clima,
+.meta-item-pais { font-weight: 500; }
+
+/* Pills de etiquetas */
+.hero-etiquetas-pills {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
 }
 
-.tag-item {
+.pill-experiencia {
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    padding: 5px 12px;
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 5px 13px;
+    border: 1px solid rgba(255,255,255,0.4);
     border-radius: 2px;
-    color: rgba(255, 255, 255, 0.95);
-    background: rgba(0, 0, 0, 0.15);
+    color: rgba(255,255,255,0.95);
+    background: rgba(0,0,0,0.15);
     backdrop-filter: blur(4px);
 }
 
 /* ==========================================================================
-   CUERPO EDITORIAL Y ESTRUCTURA DE BLOQUES
+   CUERPO DEL ARTÍCULO
    ========================================================================== */
-.selva-body {
-    max-width: 860px;
-    margin: 50px auto 80px auto;
+.selva-articulo {
+    max-width: 880px;
+    margin: 52px auto 80px auto;
     padding: 0 24px;
 }
 
-.bloque-contenido {
-    padding: 10px 0;
+/* Bloque de introducción editorial */
+.bloque-introduccion {
+    padding: 8px 0 0;
 }
 
-/* CABECERAS DE SECCIÓN CON ÍNDICE NUMÉRICO EDITORIAL */
+.parrafo-destacado {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.42rem;
+    line-height: 1.78;
+    color: var(--txt-principal);
+    margin: 0;
+}
+
+/* Divisor entre secciones */
+.divisor-seccion {
+    height: 1px;
+    background: linear-gradient(to right,
+        transparent,
+        var(--borde-divisor) 15%,
+        var(--borde-divisor) 85%,
+        transparent);
+    margin: 50px 0;
+}
+
+/* Bloque genérico de contenido */
+.bloque-contenido { padding: 10px 0; }
+
+/* Cabeceras de sección con índice editorial */
 .bloque-cabecera {
     display: flex;
     align-items: baseline;
     gap: 16px;
-    margin-bottom: 24px;
+    margin-bottom: 26px;
 }
 
 .bloque-cabecera-flex {
@@ -212,7 +271,7 @@
     justify-content: space-between;
     align-items: baseline;
     gap: 16px;
-    margin-bottom: 24px;
+    margin-bottom: 26px;
     flex-wrap: wrap;
 }
 
@@ -224,8 +283,8 @@
 
 .bloque-indice {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 1.15rem;
-    font-weight: 600;
+    font-size: 1.1rem;
+    font-weight: 700;
     color: var(--acento-tierra);
     letter-spacing: 1px;
 }
@@ -234,87 +293,51 @@
     font-family: 'Cormorant Garamond', Georgia, serif;
     font-size: 1.95rem;
     font-weight: 600;
-    color: var(--texto-principal);
+    color: var(--txt-principal);
     margin: 0;
     letter-spacing: -0.3px;
 }
 
-.bloque-subtitulo {
-    font-size: 0.78rem;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: var(--texto-secundario);
-    display: block;
-    margin-top: 4px;
-}
-
+/* Párrafo largo (historia) */
 .parrafo-editorial {
     font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 1.35rem;
+    font-size: 1.32rem;
     line-height: 1.8;
-    color: var(--texto-principal);
+    color: var(--txt-principal);
     margin: 0;
 }
 
-    .parrafo-editorial.lead {
-        font-size: 1.48rem;
-        line-height: 1.75;
-        color: #1B2620;
-    }
-
 /* ==========================================================================
-   LÍNEAS DIVISORIAS ENTRE SECCIONES
-   ========================================================================== */
-.divisor-seccion {
-    height: 1px;
-    background: linear-gradient(to right, transparent, var(--borde-divisor) 15%, var(--borde-divisor) 85%, transparent);
-    margin: 50px 0;
-    width: 100%;
-}
-
-/* ==========================================================================
-   SECCIÓN 2: ATRACTIVOS EN CARDS MINIMALISTAS
+   SECCIÓN 2 — ATRACTIVOS
    ========================================================================== */
 .atractivos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px 14px;
 }
 
-.atractivo-card {
-    background: var(--superficie);
-    border: 1px solid var(--borde-card);
-    border-radius: 6px;
-    padding: 16px 20px;
+.atractivo-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-    transition: transform 0.2s ease, border-color 0.2s ease;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: var(--txt-principal);
 }
 
-    .atractivo-card:hover {
-        transform: translateY(-2px);
-        border-color: var(--acento-tierra);
-    }
-
-.atractivo-icono {
+.atractivo-bullet {
     color: var(--acento-tierra);
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+    flex-shrink: 0;
 }
 
-.atractivo-nombre {
-    font-size: 0.92rem;
-    font-weight: 500;
-    color: var(--texto-principal);
-}
+.atractivo-nombre { font-weight: 500; }
 
 /* ==========================================================================
-   SECCIÓN 3: CARDS DINÁMICAS CON ROTACIÓN 3D Y DISTINCIÓN DE CATEGORÍA
+   SECCIÓN 3 — FESTIVIDADES (cards con rotación 3D)
    ========================================================================== */
 .festividades-rotacion-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 22px;
     perspective: 1000px;
 }
@@ -323,68 +346,49 @@
     background: var(--superficie);
     border: 1px solid var(--borde-card);
     border-radius: 8px;
-    padding: 24px;
-    box-shadow: 0 4px 14px rgba(32, 41, 36, 0.04);
+    padding: 22px;
+    box-shadow: 0 4px 14px rgba(33,59,49,0.04);
     display: flex;
     flex-direction: column;
     position: relative;
-    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
     border-top: 3.5px solid var(--acento-bosque);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s;
 }
 
-    /* EFECTO DE ROTACIÓN 3D INTERACTIVA */
     .fest-card-rotacion:hover {
         transform: translateY(-8px) rotate(1.4deg) scale(1.02);
-        box-shadow: 0 16px 32px rgba(32, 41, 36, 0.12);
+        box-shadow: 0 16px 32px rgba(33,59,49,0.12);
     }
 
     .fest-card-rotacion:nth-child(even):hover {
         transform: translateY(-8px) rotate(-1.4deg) scale(1.02);
     }
 
-/* Colores de distinción sutil en la línea superior según categoría */
-.fest-categoria-patronal {
-    border-top-color: #C07D2B;
-}
-
-.fest-categoria-cultural {
-    border-top-color: #2D6A82;
-}
-
-.fest-categoria-gastronomica {
-    border-top-color: #A34836;
-}
-
-.fest-categoria-artesanal {
-    border-top-color: #6C4378;
-}
-
-.fest-categoria-religiosa {
-    border-top-color: #55487B;
-}
-
-.fest-categoria-deportiva {
-    border-top-color: #2D7A52;
-}
+/* Colores de franja superior por tipo */
+.fest-categoria-patronal    { border-top-color: #C07D2B; }
+.fest-categoria-cultural    { border-top-color: #2D6A82; }
+.fest-categoria-gastronomica { border-top-color: #A34836; }
+.fest-categoria-artesanal   { border-top-color: #6C4378; }
+.fest-categoria-religiosa   { border-top-color: #55487B; }
+.fest-categoria-deportiva   { border-top-color: #2D7A52; }
 
 .fest-card-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .fest-titulo {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 1.35rem;
+    font-size: 1.3rem;
     font-weight: 700;
     margin: 0;
-    color: var(--texto-principal);
+    color: var(--txt-principal);
     line-height: 1.25;
 }
 
-/* Píldoras de Categoría discretas */
 .fest-pill-categoria {
     font-size: 0.68rem;
     font-weight: 600;
@@ -395,40 +399,13 @@
     white-space: nowrap;
 }
 
-    .fest-pill-categoria.patronal {
-        background: #FEF3C7;
-        color: #92400E;
-    }
-
-    .fest-pill-categoria.cultural {
-        background: #E0F2FE;
-        color: #0369A1;
-    }
-
-    .fest-pill-categoria.gastronomica {
-        background: #FEE2E2;
-        color: #991B1B;
-    }
-
-    .fest-pill-categoria.artesanal {
-        background: #F3E8FF;
-        color: #6B21A8;
-    }
-
-    .fest-pill-categoria.religiosa {
-        background: #EDE9FE;
-        color: #5B21B6;
-    }
-
-    .fest-pill-categoria.deportiva {
-        background: #DCFCE7;
-        color: #166534;
-    }
-
-    .fest-pill-categoria.general {
-        background: #F3F4F6;
-        color: #374151;
-    }
+.fest-pill-categoria.patronal     { background: #FEF3C7; color: #92400E; }
+.fest-pill-categoria.cultural     { background: #E0F2FE; color: #0369A1; }
+.fest-pill-categoria.gastronomica { background: #FEE2E2; color: #991B1B; }
+.fest-pill-categoria.artesanal    { background: #F3E8FF; color: #6B21A8; }
+.fest-pill-categoria.religiosa    { background: #EDE9FE; color: #5B21B6; }
+.fest-pill-categoria.deportiva    { background: #DCFCE7; color: #166534; }
+.fest-pill-categoria.general      { background: #F3F4F6; color: #374151; }
 
 .fest-fecha-row {
     display: flex;
@@ -440,10 +417,12 @@
     margin-bottom: 10px;
 }
 
+.fest-fecha-icono { font-size: 0.95rem; }
+
 .fest-descripcion {
-    font-size: 0.88rem;
+    font-size: 0.87rem;
     line-height: 1.6;
-    color: var(--texto-secundario);
+    color: var(--txt-secundario);
     margin: 0;
 }
 
@@ -453,92 +432,258 @@
     border-radius: 6px;
     padding: 24px;
     text-align: center;
-    color: var(--texto-secundario);
+    color: var(--txt-secundario);
     font-style: italic;
+    font-size: 0.9rem;
 }
 
 /* ==========================================================================
-   SECCIÓN 4: COMERCIOS Y EXPERIENCIAS LOCALES
+   SECCIÓN 4 — ESTABLECIMIENTOS
+   Contador · Pills de categoría · Grid editorial · Modal
    ========================================================================== */
-.negocios-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px;
-}
 
-.negocio-card-clean {
-    background: var(--superficie);
-    border: 1px solid var(--borde-card);
-    border-radius: 6px;
-    overflow: hidden;
-    transition: transform 0.25s ease;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.02);
-}
-
-    .negocio-card-clean:hover {
-        transform: translateY(-3px);
-    }
-
-.negocio-img-container {
-    height: 160px;
-    width: 100%;
-}
-
-.negocio-img-cover {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.negocio-info-clean {
-    padding: 20px;
-}
-
-.negocio-row-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 6px;
-}
-
-    .negocio-row-top h4 {
-        font-family: 'Cormorant Garamond', serif;
-        font-size: 1.25rem;
-        font-weight: 600;
-        margin: 0;
-    }
-
-.negocio-rating {
-    font-size: 0.8rem;
-    color: #D48806;
-    font-weight: 600;
-}
-
-.negocio-meta {
+/* ── Contador ──────────────────────────────────────────────────────────── */
+.contador-establecimientos {
     font-size: 0.78rem;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--texto-secundario);
-    margin: 0 0 8px 0;
+    letter-spacing: 1.2px;
+    color: var(--txt-secundario);
+    font-weight: 500;
 }
 
-.negocio-desc {
-    font-size: 0.86rem;
-    color: var(--texto-secundario);
-    line-height: 1.5;
+/* ── Loading ───────────────────────────────────────────────────────────── */
+.negocios-loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 32px 0;
+    color: var(--txt-secundario);
+}
+
+.spinner-mini-selva {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(33,59,49,0.2);
+    border-top: 2px solid var(--acento-bosque);
+    border-radius: 50%;
+    animation: girar 0.75s linear infinite;
+    flex-shrink: 0;
+}
+
+.nota-ligera {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--txt-secundario);
     margin: 0;
 }
 
-.nota-tranquila, .nota-ligera {
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-size: 1.2rem;
-    color: var(--texto-secundario);
-    line-height: 1.6;
+/* ── Pills de categoría ────────────────────────────────────────────────── */
+.pildoras-categorias-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 30px;
 }
 
+.btn-pildora-silueta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    border: 1.5px solid var(--borde-card);
+    border-radius: 30px;
+    background: var(--superficie);
+    color: var(--txt-secundario);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    font-family: 'Montserrat', sans-serif;
+}
+
+    .btn-pildora-silueta:hover {
+        border-color: var(--acento-bosque);
+        color: var(--acento-bosque);
+        background: rgba(33,59,49,0.04);
+    }
+
+    .btn-pildora-silueta.activa {
+        background: var(--acento-bosque);
+        border-color: var(--acento-bosque);
+        color: #FFF;
+        box-shadow: 0 4px 12px rgba(33,59,49,0.25);
+    }
+
+.silueta-svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* SVG stroke blanco cuando pildora está activa */
+.btn-pildora-silueta.activa .silueta-svg path,
+.btn-pildora-silueta.activa .silueta-svg polyline,
+.btn-pildora-silueta.activa .silueta-svg circle,
+.btn-pildora-silueta.activa .silueta-svg rect,
+.btn-pildora-silueta.activa .silueta-svg polygon {
+    stroke: #FFFFFF;
+}
+
+/* ── Grid editorial de negocios ────────────────────────────────────────── */
+.negocios-grid-editorial {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 20px;
+}
+
+.negocio-card-editorial {
+    background: var(--superficie);
+    border: 1px solid var(--borde-card);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1),
+                box-shadow 0.28s ease,
+                border-color 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+    .negocio-card-editorial:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 28px rgba(33,59,49,0.1);
+        border-color: rgba(33,59,49,0.25);
+    }
+
+/* Portada */
+.negocio-portada-wrap {
+    position: relative;
+    height: 175px;
+    overflow: hidden;
+    background: #E8E4DD;
+}
+
+.negocio-portada-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+.negocio-card-editorial:hover .negocio-portada-img { transform: scale(1.04); }
+
+.negocio-badge-cat {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(33,59,49,0.88);
+    color: #FFF;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 2px;
+    backdrop-filter: blur(4px);
+}
+
+.badge-booking-pill {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: #003B95;
+    color: #FFF;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 4px 9px;
+    border-radius: 3px;
+}
+
+/* Cuerpo de la card */
+.negocio-cuerpo-card {
+    padding: 18px 18px 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.negocio-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.negocio-nombre {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--txt-principal);
+    line-height: 1.2;
+}
+
+.negocio-estrellas {
+    font-size: 0.78rem;
+    color: #D48806;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding-top: 2px;
+}
+
+.negocio-direccion {
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--txt-secundario);
+    margin: 0 0 10px 0;
+}
+
+.negocio-extracto {
+    font-size: 0.86rem;
+    line-height: 1.55;
+    color: var(--txt-secundario);
+    margin: 0 0 14px 0;
+    flex: 1;
+}
+
+.negocio-footer-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--borde-card);
+    padding-top: 10px;
+    margin-top: auto;
+}
+
+.enlace-ver-mas {
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 1.1px;
+    font-weight: 600;
+    color: var(--acento-tierra);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    font-family: 'Montserrat', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: gap 0.2s, opacity 0.2s;
+}
+
+    .enlace-ver-mas:hover { gap: 8px; opacity: 0.8; }
+
 /* ==========================================================================
-   SECCIÓN 5: MAPA ELEGANTE
+   SECCIÓN 5 — MAPA
    ========================================================================== */
 .enlace-mapa-discreto {
     font-size: 0.78rem;
@@ -548,11 +693,10 @@
     text-decoration: none;
     border-bottom: 1px solid var(--acento-bosque);
     padding-bottom: 2px;
+    transition: opacity 0.2s;
 }
 
-    .enlace-mapa-discreto:hover {
-        opacity: 0.7;
-    }
+    .enlace-mapa-discreto:hover { opacity: 0.7; }
 
 .mapa-frame-container {
     height: 340px;
@@ -560,17 +704,13 @@
     border-radius: 6px;
     overflow: hidden;
     border: 1px solid var(--borde-card);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.03);
 }
 
-.mapa-frame {
-    width: 100%;
-    height: 100%;
-    border: none;
-}
+.mapa-frame { width: 100%; height: 100%; border: none; }
 
 /* ==========================================================================
-   FOOTER, LOADING Y MODAL
+   FOOTER
    ========================================================================== */
 .selva-footer {
     text-align: center;
@@ -579,21 +719,18 @@
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 2px;
-    color: var(--texto-secundario);
+    color: var(--txt-secundario);
+    max-width: 1100px;
+    margin: 0 auto;
 }
 
-.selva-loading {
-    text-align: center;
-    padding: 120px 20px;
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.3rem;
-    color: var(--texto-secundario);
-}
-
+/* ==========================================================================
+   MODAL DE CONFIRMACIÓN DE ELIMINACIÓN
+   ========================================================================== */
 .selva-modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(25, 35, 30, 0.6);
+    background: rgba(25,35,30,0.6);
     backdrop-filter: blur(3px);
     display: flex;
     align-items: center;
@@ -602,7 +739,7 @@
 }
 
 .selva-modal-window {
-    background: #FFFFFF;
+    background: #FFF;
     padding: 36px 40px;
     border-radius: 6px;
     max-width: 400px;
@@ -618,15 +755,11 @@
 
     .selva-modal-window p {
         font-size: 0.9rem;
-        color: var(--texto-secundario);
+        color: var(--txt-secundario);
         margin-bottom: 24px;
     }
 
-.selva-modal-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-}
+.selva-modal-actions { display: flex; gap: 12px; justify-content: center; }
 
 .btn-modal-cancel {
     background: none;
@@ -640,7 +773,7 @@
 
 .btn-modal-delete {
     background: #C0392B;
-    color: #FFFFFF;
+    color: #FFF;
     border: none;
     padding: 8px 18px;
     border-radius: 4px;
@@ -650,13 +783,406 @@
 }
 
 /* ==========================================================================
-   PANTALLA DE ESPERA INMERSIVA CON PAISAJES DE BOYACÁ
+   MODAL INMERSIVO — DETALLE DEL NEGOCIO
+   ========================================================================== */
+.modal-backdrop-negocio {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(15,22,18,0.75);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 32px 16px 48px;
+    animation: fadeInModal 0.25s ease;
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.modal-card-negocio {
+    background: var(--fondo, #FBF9F5);
+    border-radius: 10px;
+    width: 100%;
+    max-width: 760px;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.35);
+    animation: slideUpModal 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+}
+
+@keyframes slideUpModal {
+    from { transform: translateY(20px); opacity: 0.5; }
+    to   { transform: translateY(0);    opacity: 1;   }
+}
+
+.modal-btn-cerrar-negocio {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 10;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.92);
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    transition: background 0.2s, transform 0.2s;
+}
+
+    .modal-btn-cerrar-negocio:hover {
+        background: #FFF;
+        transform: scale(1.08);
+    }
+
+/* ── Galería ──────────────────────────────────────────────────────────── */
+.modal-negocio-galeria { position: relative; }
+
+.modal-foto-principal-wrap {
+    position: relative;
+    height: 320px;
+    overflow: hidden;
+    background: #1E2B25;
+}
+
+.modal-foto-principal {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.modal-foto-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.05) 40%, rgba(20,30,25,0.70) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 22px 24px;
+}
+
+.modal-negocio-cat-tag {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.8);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.modal-negocio-titulo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #FFF;
+    margin: 0;
+    line-height: 1.1;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.3);
+}
+
+/* Tira de miniaturas */
+.modal-tira-miniaturas {
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px;
+    overflow-x: auto;
+    background: #1A2320;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.25) transparent;
+}
+
+.miniatura-item {
+    flex-shrink: 0;
+    width: 58px;
+    height: 42px;
+    border-radius: 3px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s, opacity 0.2s;
+    opacity: 0.65;
+}
+
+    .miniatura-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .miniatura-item.activa,
+    .miniatura-item:hover {
+        border-color: var(--acento-tierra);
+        opacity: 1;
+    }
+
+/* ── Cuerpo del modal ─────────────────────────────────────────────────── */
+.modal-negocio-cuerpo { padding: 28px 32px 20px; }
+
+.modal-negocio-seccion { margin-bottom: 22px; }
+
+.modal-subtitulo-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--acento-tierra);
+    font-weight: 700;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.modal-texto-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    line-height: 1.75;
+    color: var(--txt-principal);
+    margin: 0;
+}
+
+/* Grid de datos de contacto */
+.modal-datos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.modal-dato-card {
+    background: var(--superficie);
+    border: 1px solid var(--borde-card);
+    border-radius: 6px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.dato-icono {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.modal-dato-card strong {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--txt-secundario);
+    display: block;
+    margin-bottom: 3px;
+    font-weight: 600;
+}
+
+.modal-dato-card p {
+    font-size: 0.86rem;
+    font-weight: 500;
+    color: var(--txt-principal);
+    margin: 0;
+    word-break: break-word;
+}
+
+/* ── Bloque Booking ───────────────────────────────────────────────────── */
+.caja-booking-integracion {
+    background: #EEF3FF;
+    border: 1px solid #C2D2F3;
+    border-radius: 8px;
+    padding: 20px 22px;
+    margin-bottom: 22px;
+}
+
+.booking-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.booking-logo-text {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #003B95;
+    letter-spacing: -0.3px;
+}
+
+.booking-badge-disponibilidad {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.booking-desc {
+    font-size: 0.84rem;
+    color: #374151;
+    line-height: 1.55;
+    margin: 0 0 14px 0;
+}
+
+.booking-acciones-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.btn-booking-oficial {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #003B95;
+    color: #FFF;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 10px 18px;
+    border-radius: 4px;
+    transition: background 0.2s, transform 0.2s;
+}
+
+    .btn-booking-oficial:hover { background: #00266B; transform: translateY(-1px); }
+
+/* ── Guardar hospedaje en itinerario ─────────────────────────────────── */
+.btn-vincular-itinerario {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: none;
+    border: 1.5px solid var(--acento-bosque);
+    color: var(--acento-bosque);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 9px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    transition: all 0.22s;
+}
+
+    .btn-vincular-itinerario:hover {
+        background: var(--acento-bosque);
+        color: #FFF;
+    }
+
+    .btn-vincular-itinerario.guardado {
+        background: #15803D;
+        border-color: #15803D;
+        color: #FFF;
+    }
+
+.alerta-itinerario-exito {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #DCFCE7;
+    color: #15803D;
+    border: 1px solid #86EFAC;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 0.84rem;
+    font-weight: 500;
+    margin-top: 10px;
+    animation: fadeInModal 0.3s ease;
+}
+
+/* ── Botones de contacto ──────────────────────────────────────────────── */
+.modal-botones-contacto {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.btn-contacto-ws {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #25D366;
+    color: #FFF;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 11px 18px;
+    border-radius: 4px;
+    transition: background 0.2s, transform 0.2s;
+}
+
+    .btn-contacto-ws:hover { background: #1EBE5A; transform: translateY(-1px); }
+
+.btn-contacto-tel,
+.btn-contacto-mapa {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: 1.5px solid var(--borde-card);
+    color: var(--txt-principal);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 4px;
+    transition: border-color 0.2s, background 0.2s;
+    font-family: 'Montserrat', sans-serif;
+}
+
+    .btn-contacto-tel:hover { border-color: var(--acento-bosque); background: rgba(33,59,49,0.04); }
+    .btn-contacto-mapa:hover { border-color: #E0660A; background: rgba(224,102,10,0.05); }
+
+/* ── Footer del modal ─────────────────────────────────────────────────── */
+.modal-footer-cierre {
+    border-top: 1px solid var(--borde-divisor);
+    padding: 16px 32px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.btn-volver-ficha {
+    background: none;
+    border: none;
+    color: var(--txt-secundario);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'Montserrat', sans-serif;
+    transition: color 0.2s;
+    padding: 0;
+}
+
+    .btn-volver-ficha:hover { color: var(--txt-principal); }
+
+/* ==========================================================================
+   PANTALLA DE ESPERA INMERSIVA
    ========================================================================== */
 .pantalla-espera-inmersiva {
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background-color: #1A2621;
+    background: #1A2621;
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -670,24 +1196,18 @@
     height: 100%;
     object-fit: cover;
     filter: brightness(0.65) saturate(1.1);
-    transform: scale(1.05);
     animation: zoomSuave 8s ease-out forwards;
 }
 
 @keyframes zoomSuave {
-    from {
-        transform: scale(1);
-    }
-
-    to {
-        transform: scale(1.08);
-    }
+    from { transform: scale(1);    }
+    to   { transform: scale(1.08); }
 }
 
 .espera-scrim {
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at center, rgba(16, 26, 21, 0.4) 0%, rgba(16, 26, 21, 0.88) 100%);
+    background: radial-gradient(circle at center, rgba(16,26,21,0.4) 0%, rgba(16,26,21,0.88) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -697,28 +1217,21 @@
 .espera-contenido {
     max-width: 620px;
     text-align: center;
-    color: #FFFFFF;
+    color: #FFF;
     position: relative;
     animation: fadeInLento 0.8s ease-out;
 }
 
 @keyframes fadeInLento {
-    from {
-        opacity: 0;
-        transform: translateY(12px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0);    }
 }
 
 .espera-eyebrow {
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 3px;
-    color: #E2AD63; /* Ocre cálido */
+    color: #E2AD63;
     font-weight: 600;
     display: block;
     margin-bottom: 12px;
@@ -731,7 +1244,7 @@
     margin: 0 0 14px 0;
     line-height: 1.1;
     letter-spacing: -0.5px;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    text-shadow: 0 2px 10px rgba(0,0,0,0.4);
 }
 
 .espera-cita {
@@ -739,7 +1252,7 @@
     font-style: italic;
     font-size: 1.3rem;
     line-height: 1.6;
-    color: rgba(255, 255, 255, 0.88);
+    color: rgba(255,255,255,0.88);
     margin: 0 auto 35px auto;
     max-width: 500px;
 }
@@ -748,31 +1261,25 @@
     display: inline-flex;
     align-items: center;
     gap: 14px;
-    background: rgba(0, 0, 0, 0.35);
+    background: rgba(0,0,0,0.35);
     backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
     padding: 10px 22px;
     border-radius: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255,255,255,0.2);
 }
 
 .spinner-anillo-selva {
     width: 20px;
     height: 20px;
-    border: 2.5px solid rgba(255, 255, 255, 0.25);
-    border-top: 2.5px solid #FFFFFF;
+    border: 2.5px solid rgba(255,255,255,0.25);
+    border-top: 2.5px solid #FFF;
     border-radius: 50%;
     animation: girar 0.8s linear infinite;
 }
 
 @keyframes girar {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
+    0%   { transform: rotate(0deg);   }
+    100% { transform: rotate(360deg); }
 }
 
 .espera-texto-progreso {
@@ -780,5 +1287,68 @@
     text-transform: uppercase;
     letter-spacing: 1.5px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(255,255,255,0.95);
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media (max-width: 768px) {
+    .selva-hero { height: 380px; }
+
+    .hero-titulo { font-size: 2.8rem; }
+
+    .hero-contenido-centrado { padding: 28px 24px; }
+
+    .selva-articulo { margin-top: 32px; }
+
+    .bloque-titulo { font-size: 1.6rem; }
+
+    .parrafo-destacado { font-size: 1.2rem; }
+}
+
+@media (max-width: 640px) {
+    .selva-nav { padding: 16px 20px; }
+
+    .selva-hero { height: 300px; border-radius: 0; }
+
+    .hero-titulo { font-size: 2.2rem; }
+
+    .hero-contenido-centrado { padding: 20px 18px; }
+
+    .pildoras-categorias-row { gap: 7px; }
+
+    .btn-pildora-silueta { padding: 8px 13px; font-size: 0.72rem; }
+
+    .negocios-grid-editorial { grid-template-columns: 1fr; }
+
+    .festividades-rotacion-grid { grid-template-columns: 1fr; }
+
+    .modal-backdrop-negocio {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .modal-card-negocio {
+        border-radius: 14px 14px 0 0;
+        max-width: 100%;
+        max-height: 92vh;
+        overflow-y: auto;
+    }
+
+    .modal-foto-principal-wrap { height: 220px; }
+
+    .modal-negocio-cuerpo { padding: 20px 18px 16px; }
+
+    .modal-footer-cierre { padding: 14px 18px; }
+
+    .modal-datos-grid { grid-template-columns: 1fr; }
+
+    .booking-acciones-row,
+    .modal-botones-contacto { flex-direction: column; }
+
+    .btn-contacto-ws,
+    .btn-contacto-tel,
+    .btn-contacto-mapa,
+    .btn-booking-oficial { width: 100%; justify-content: center; }
 }

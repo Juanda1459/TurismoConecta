@@ -5,6 +5,7 @@
 @inject ItinerarioApiService ApiService
 @inject NavigationManager Nav
 @inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthStateProvider
 
 <HeadContent>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -30,6 +31,21 @@
                         <span class="espera-texto-progreso">Cargando tus itinerarios...</span>
                     </div>
                 </div>
+            </div>
+        </div>
+    }
+
+    @* ESTADO: NO AUTENTICADO *@
+    else if (noAutenticado)
+    {
+        <div class="lista-container">
+            <div class="estado-vacio">
+                <span class="estado-icono">🔒</span>
+                <h3>Inicia sesión para ver tus itinerarios</h3>
+                <p>Guarda y organiza tus rutas personalizadas por Boyacá en tu cuenta.</p>
+                <button class="btn-accion-primaria" @onclick='() => Nav.NavigateTo("/login")'>
+                    Iniciar Sesión →
+                </button>
             </div>
         </div>
     }
@@ -130,6 +146,7 @@
     private List<ItinerarioListadoDto>? itinerarios;
     private bool cargando = true;
     private bool huboError = false;
+    private bool noAutenticado = false;
 
     protected override async Task OnInitializedAsync() => await CargarItinerarios();
 
@@ -137,6 +154,16 @@
     {
         cargando = true;
         huboError = false;
+        noAutenticado = false;
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (!(authState.User.Identity?.IsAuthenticated ?? false))
+        {
+            noAutenticado = true;
+            cargando = false;
+            return;
+        }
+
         var resultado = await ApiService.ListarAsync();
         if (resultado == null) huboError = true;
         else itinerarios = resultado;

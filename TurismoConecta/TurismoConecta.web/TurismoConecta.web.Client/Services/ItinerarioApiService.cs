@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 
 namespace TurismoConecta.web.Client.Services
 {
@@ -56,12 +56,40 @@ namespace TurismoConecta.web.Client.Services
 
         // ── CREAR un itinerario nuevo ──────────────────────────────────────
         // Llama a: POST api/itinerarios
-        // Devuelve el itinerario creado o null si falló
-        public async Task<ItinerarioDetalleDto?> CrearAsync(ItinerarioCreateRequest dto, CancellationToken ct = default)
+        public async Task<(bool Exito, string? Error, ItinerarioDetalleDto? Itinerario)> CrearAsync(
+            ItinerarioCreateRequest dto, CancellationToken ct = default)
         {
-            var respuesta = await _http.PostAsJsonAsync("api/itinerarios", dto, ct);
-            if (!respuesta.IsSuccessStatusCode) return null;
-            return await respuesta.Content.ReadFromJsonAsync<ItinerarioDetalleDto>();
+            try
+            {
+                var respuesta = await _http.PostAsJsonAsync("api/itinerarios", dto, ct);
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    var data = await respuesta.Content.ReadFromJsonAsync<ItinerarioDetalleDto>(cancellationToken: ct);
+                    return (true, null, data);
+                }
+
+                if (respuesta.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    return (false, "Debes iniciar sesión para guardar tu itinerario.", null);
+                }
+
+                var err = await respuesta.Content.ReadAsStringAsync(ct);
+                try
+                {
+                    using var doc = System.Text.Json.JsonDocument.Parse(err);
+                    if (doc.RootElement.TryGetProperty("mensaje", out var msgProp))
+                    {
+                        return (false, msgProp.GetString(), null);
+                    }
+                }
+                catch { }
+
+                return (false, !string.IsNullOrWhiteSpace(err) ? err : "No se pudo crear el itinerario.", null);
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message, null);
+            }
         }
 
         // ── ELIMINAR un itinerario ─────────────────────────────────────────
