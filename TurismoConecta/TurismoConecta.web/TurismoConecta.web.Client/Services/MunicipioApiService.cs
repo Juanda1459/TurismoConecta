@@ -1,5 +1,6 @@
+// Services/MunicipioApiService.cs
 using System.Net.Http.Json;
-
+using System.Text.Json;
 
 namespace TurismoConecta.web.Client.Services
 {
@@ -8,110 +9,103 @@ namespace TurismoConecta.web.Client.Services
         private readonly HttpClient _http;
         public MunicipioApiService(HttpClient http) => _http = http;
 
-        public async Task<ResultadoPaginado<MunicipioListadoDto>?> ListarAsync(int pagina, int tamano, CancellationToken ct = default)
+        public async Task<ResultadoPaginado<MunicipioListadoDto>?> ListarAsync(
+            int pagina = 1,
+            int tamano = 9,
+            string? ordenarPor = null,
+            bool ascendente = true,
+            CancellationToken ct = default)
         {
-            try
-            {
-                return await _http.GetFromJsonAsync<ResultadoPaginado<MunicipioListadoDto>>(
-                    $"api/municipios?pagina={pagina}&tamano={tamano}", ct);
-            }
-            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
-            {
-                return null; // el componente decide qué mostrar (mensaje de error) si recibe null
-            }
-        }
+            var qs = $"?pagina={pagina}&tamano={tamano}";
+            if (!string.IsNullOrEmpty(ordenarPor))
+                qs += $"&ordenarPor={ordenarPor}&ascendente={ascendente}";
 
-        public async Task<(bool exito, int idCreado, string? error)> CrearAsync(MunicipioCrearDto dto, CancellationToken ct = default)
-        {
-            var respuesta = await _http.PostAsJsonAsync("api/municipios", dto, ct);
-            if (respuesta.IsSuccessStatusCode)
-            {
-                var resultado = await respuesta.Content.ReadFromJsonAsync<CrearResultado>(cancellationToken: ct);
-                return (true, resultado?.IdMunicipio ?? 0, null);
-            }
-            var error = await respuesta.Content.ReadAsStringAsync(ct);
-            return (false, 0, error);
-        }
-
-        private class CrearResultado { public int IdMunicipio { get; set; } }
-
-        public async Task<List<MunicipioListadoDto>?> BuscarAsync(string texto, CancellationToken ct = default)
-        {
-            try
-            {
-                return await _http.GetFromJsonAsync<List<MunicipioListadoDto>>(
-                    $"api/municipios/buscar?texto={Uri.EscapeDataString(texto)}", ct);
-            }
-            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
-            {
-                return null;
-            }
+            try { return await _http.GetFromJsonAsync<ResultadoPaginado<MunicipioListadoDto>>($"api/municipios{qs}", ct); }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException) { return null; }
         }
 
         public async Task<MunicipioFichaDto?> ObtenerFichaAsync(int id, CancellationToken ct = default)
         {
+            try { return await _http.GetFromJsonAsync<MunicipioFichaDto>($"api/municipios/{id}", ct); }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException) { return null; }
+        }
+
+        public async Task<(bool Exito, int Id, string? Error)> CrearAsync(
+            MunicipioCrearDto dto, CancellationToken ct = default)
+        {
             try
             {
-                return await _http.GetFromJsonAsync<MunicipioFichaDto>($"api/municipios/{id}", ct);
+                var response = await _http.PostAsJsonAsync("api/municipios", dto, ct);
+                if (response.IsSuccessStatusCode)
+                {
+                    var id = await response.Content.ReadFromJsonAsync<int>(cancellationToken: ct);
+                    return (true, id, null);
+                }
+                var err = await response.Content.ReadAsStringAsync(ct);
+                return (false, 0, err);
             }
-            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
-            {
-                return null;
-            }
+            catch (Exception ex) { return (false, 0, ex.Message); }
         }
 
-        public async Task<(bool exito, string? error)> EditarAsync(int id, MunicipioEditarDto dto, CancellationToken ct = default)
+        public async Task<(bool Exito, string? Error)> EditarAsync(
+            int id, MunicipioEditarDto dto, CancellationToken ct = default)
         {
-            var respuesta = await _http.PutAsJsonAsync($"api/municipios/{id}", dto, ct);
-            if (respuesta.IsSuccessStatusCode)
+            try
             {
-                return (true, null);
+                var response = await _http.PutAsJsonAsync($"api/municipios/{id}", dto, ct);
+                if (response.IsSuccessStatusCode) return (true, null);
+                var err = await response.Content.ReadAsStringAsync(ct);
+                return (false, err);
             }
-            // Leemos el mensaje exacto que envió el servidor
-            var error = await respuesta.Content.ReadAsStringAsync(ct);
-            return (false, string.IsNullOrWhiteSpace(error) ? "Error al actualizar el municipio." : error);
+            catch (Exception ex) { return (false, ex.Message); }
         }
 
-        public async Task<(bool exito, string? url, string? error)> SubirImagenAsync(Microsoft.AspNetCore.Components.Forms.IBrowserFile archivo)
+        public async Task<List<EtiquetaDto>> ListarEtiquetasAsync(CancellationToken ct = default)
+        {
+            try { return await _http.GetFromJsonAsync<List<EtiquetaDto>>("api/municipios/etiquetas", ct) ?? new(); }
+            catch { return new(); }
+        }
+
+        public async Task<(bool Exito, string? Url, string? Error)> SubirImagenAsync(
+            Microsoft.AspNetCore.Components.Forms.IBrowserFile archivo,
+            CancellationToken ct = default)
         {
             try
             {
                 using var content = new MultipartFormDataContent();
-                var stream = archivo.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // Límite de 10 MB
-                var fileContent = new StreamContent(stream);
+                var fileContent = new StreamContent(archivo.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024));
                 fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(archivo.ContentType);
-                content.Add(fileContent, "archivo", archivo.Name);
+                content.Add(fileContent, "imagen", archivo.Name);
 
-                var respuesta = await _http.PostAsync("api/municipios/subir-imagen", content);
-                if (respuesta.IsSuccessStatusCode)
+                var response = await _http.PostAsync("api/municipios/upload-imagen", content, ct);
+                if (response.IsSuccessStatusCode)
                 {
-                    var resultado = await respuesta.Content.ReadFromJsonAsync<RespuestaSubidaImagen>();
-                    return (true, resultado?.Url, null);
+                    var res = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: ct);
+                    if (res.TryGetProperty("url", out var urlProp))
+                    {
+                        return (true, urlProp.GetString(), null);
+                    }
+                    return (true, null, null);
                 }
-
-                var error = await respuesta.Content.ReadAsStringAsync();
-                return (false, null, error);
+                var err = await response.Content.ReadAsStringAsync(ct);
+                return (false, null, err);
             }
-            catch (Exception ex)
-            {
-                return (false, null, ex.Message);
-            }
+            catch (Exception ex) { return (false, null, ex.Message); }
         }
 
-        private class RespuestaSubidaImagen { public string Url { get; set; } = ""; }
-
-        public async Task<List<EtiquetaDto>?> ListarEtiquetasAsync(CancellationToken ct = default)
-        {
-            try { return await _http.GetFromJsonAsync<List<EtiquetaDto>>("api/etiquetas", ct); }
-            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException) { return null; }
-        }
-
-        public async Task<List<MunicipioListadoDto>?> BuscarAsync(string? texto, int? idEtiqueta, CancellationToken ct = default)
+        public async Task<List<MunicipioListadoDto>?> BuscarAsync(
+            string? texto,
+            List<int>? etiquetaIds = null,
+            CancellationToken ct = default)
         {
             var query = new List<string>();
-            if (!string.IsNullOrWhiteSpace(texto)) query.Add($"texto={Uri.EscapeDataString(texto)}");
-            if (idEtiqueta.HasValue) query.Add($"idEtiqueta={idEtiqueta}");
-            var qs = query.Any() ? "?" + string.Join("&", query) : "";
+            if (!string.IsNullOrWhiteSpace(texto))
+                query.Add($"texto={Uri.EscapeDataString(texto)}");
+
+            if (etiquetaIds is { Count: > 0 })
+                query.AddRange(etiquetaIds.Select(id => $"etiquetaIds={id}"));
+
+            var qs = query.Count > 0 ? "?" + string.Join("&", query) : "";
 
             try { return await _http.GetFromJsonAsync<List<MunicipioListadoDto>>($"api/municipios/buscar{qs}", ct); }
             catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException) { return null; }
@@ -128,7 +122,6 @@ namespace TurismoConecta.web.Client.Services
                 return new List<NegocioResumenDto>();
             }
         }
-
     }
 
     public class ResultadoPaginado<T>
@@ -159,37 +152,39 @@ namespace TurismoConecta.web.Client.Services
         public string? Descripcion { get; set; }
         public string? Clima { get; set; }
         public string? Historia { get; set; }
-        public List<FechaRelevanteDto> FechasRelevantes { get; set; } = new();
         public decimal? Latitud { get; set; }
         public decimal? Longitud { get; set; }
-
+        public List<FechaRelevanteDto> FechasRelevantes { get; set; } = new();
     }
 
     public class FechaRelevanteDto
     {
-        public int? IdFechaRelevante { get; set; }
+        public int IdFecha { get; set; }
+        // Alias de compatibilidad — EditarMunicipio.razor usa este nombre
+        public int IdFechaRelevante
+        {
+            get => IdFecha;
+            set => IdFecha = value;
+        }
         public string NombreFestividad { get; set; } = "";
-        public DateOnly FechaInicio { get; set; } = DateOnly.FromDateTime(DateTime.Today);
-        public DateOnly FechaFin { get; set; } = DateOnly.FromDateTime(DateTime.Today);
-        public string? TipoFestividad { get; set; } = "Cultural";
-        public int? MesCelebracion { get; set; }
+        public DateOnly FechaInicio { get; set; }
+        public DateOnly FechaFin { get; set; }
+        public string? TipoFestividad { get; set; }
         public string? Descripcion { get; set; }
         public bool EsRecurrente { get; set; } = true;
+        // Campo legacy — se conserva por compatibilidad con EditarMunicipio.razor
+        public int? MesCelebracion { get; set; }
     }
 
     public class MunicipioCrearDto
     {
-        public int IdDepartamento { get; set; }
         public string Nombre { get; set; } = "";
         public string? Descripcion { get; set; }
-        public string? Historia { get; set; }
         public string? Clima { get; set; }
+        public string? Historia { get; set; }
         public string? ImagenUrl { get; set; }
-        public decimal? Latitud { get; set; }
-        public decimal? Longitud { get; set; }
         public List<FechaRelevanteDto> FechasRelevantes { get; set; } = new();
         public List<string> Etiquetas { get; set; } = new();
-
     }
 
     public class MunicipioEditarDto
@@ -201,9 +196,6 @@ namespace TurismoConecta.web.Client.Services
         public string? ImagenUrl { get; set; }
         public List<FechaRelevanteDto> FechasRelevantes { get; set; } = new();
         public List<string> Etiquetas { get; set; } = new();
-
-
-
     }
 
     public class NegocioResumenDto
@@ -211,12 +203,28 @@ namespace TurismoConecta.web.Client.Services
         public int IdNegocio { get; set; }
         public string Nombre { get; set; } = string.Empty;
         public string? Descripcion { get; set; }
+        public string Estado { get; set; } = string.Empty;
+        public int IdCategoria { get; set; }
+        public int IdMunicipio { get; set; }
         public string? Telefono { get; set; }
         public string? Horario { get; set; }
         public string? Direccion { get; set; }
+        public decimal? Latitud { get; set; }
+        public decimal? Longitud { get; set; }
         public double? PromedioCalificacion { get; set; }
         public List<string> Galeria { get; set; } = new();
+
+        // Propiedades de apoyo para UI y enlaces de contacto
+        public string? WhatsApp => Telefono?.Replace(" ", "").Replace("+", "");
+        public string? BookingUrl { get; set; }
+
+        public string NombreCategoria => IdCategoria switch
+        {
+            1 => "Hospedaje & Hotelería",
+            2 => "Gastronomía & Cafés",
+            3 => "Ecoturismo, Parques & Aventura",
+            4 => "Artesanías & Cultura Local",
+            _ => "Comercio Local"
+        };
     }
-
-
 }
