@@ -10,7 +10,9 @@ namespace TurismoConecta.api.Services.Mappers
             IdMunicipio = m.IdMunicipio,
             Nombre = m.Nombre,
             ImagenUrl = m.ImagenUrl,
-            Etiquetas = m.MunicipioEtiqueta.Select(me => me.IdEtiquetaNavigation.Nombre).ToList()
+            Etiquetas = m.MunicipioEtiqueta.Select(me => me.IdEtiquetaNavigation.Nombre).ToList(),
+            Latitud = (double?)m.Latitud,   
+            Longitud = (double?)m.Longitud,
         };
 
         public static MunicipioFichaDto ToFichaDto(Municipio m) => new()

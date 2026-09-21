@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 
 @using System.Linq
 @using Microsoft.AspNetCore.Components.Web
@@ -20,14 +20,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="Pages/inicio.razor.css" />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet"
-          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          crossorigin="anonymous" />
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-            crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
-<script src="js/mapa-colombia.js"></script></HeadContent>
+  </HeadContent>
+    
 
 <div class="inicio-page">
 
@@ -58,7 +52,7 @@
                 <span>●</span>
             </a>
 
-            <a href="/registro"
+            <a href="/register"
                class="nav-button nav-power"
                aria-label="Registrarse">
                 <span>↗</span>
@@ -511,9 +505,16 @@
         }
     }
 
+    private bool mapaInicializado;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender)
+        if (mapaInicializado)
+        {
+            return;
+        }
+
+        if (cargandoMunicipios)
         {
             return;
         }
@@ -526,18 +527,27 @@
             {
                 id = municipio.IdMunicipio,
                 nombre = municipio.Nombre,
-                latitud = municipio.Latitud.Value,
-                longitud = municipio.Longitud.Value
+                latitud = (double)municipio.Latitud.Value,
+                longitud = (double)municipio.Longitud.Value
             })
             .ToList();
 
-        await JS.InvokeVoidAsync(
-            "TurismoConectaMapa.inicializar",
-            municipiosParaMapa,
-            DotNetObjectReference.Create(this));
+        try
+        {
+            await JS.InvokeVoidAsync(
+                "TurismoConectaMapa.inicializar",
+                municipiosParaMapa,
+                DotNetObjectReference.Create(this));
 
-        await JS.InvokeVoidAsync(
-            "TurismoConectaMapa.activarScroll");
+            await JS.InvokeVoidAsync(
+                "TurismoConectaMapa.activarScroll");
+
+            mapaInicializado = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al inicializar mapa: {ex.Message}");
+        }
     }
 
     private void MostrarBuscador()
