@@ -7,7 +7,7 @@
 
 @layout EmptyLayout
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
-
+@inject SitioTuristicoApiService SitioService
 @inject MunicipioApiService ApiService
 @inject EtiquetaApiService EtiquetaService
 @inject NavigationManager Nav
@@ -205,26 +205,27 @@
 
     <div class="destinos-marquee" aria-label="Sitios turísticos mejor reseñados">
         <div class="destinos-track">
-            @foreach (var destino in Destinos.Concat(Destinos))
-            {
-                <article class="destino-frame">
-                    <a href="@destino.Url" class="destino-link" aria-label="Ver @destino.Nombre">
-                        <div class="destino-image-wrap">
-                            <img src="@destino.Imagen" alt="@destino.Nombre" class="destino-image" />
-                            <span class="destino-number">@destino.Orden.ToString("00")</span>
-                        </div>
-                        <div class="destino-content">
-                            <div class="destino-topline">
-                                <h2>@destino.Nombre</h2>
-                                <span class="destino-rating">★ @destino.Calificacion.ToString("0.0")</span>
-                            </div>
-                            <span class="destino-category">@destino.Categoria</span>
-                            <span class="destino-cta">Ver municipio <span aria-hidden="true">→</span></span>
-                        </div>
-                    </a>
-                </article>
-            }
-        </div>
+    @for (int i = 0; i < sitiosParaMarquee.Count; i++)
+    {
+        var sitio = sitiosParaMarquee[i];
+        <article class="destino-frame">
+            <a href="@($"/municipios/{sitio.IdMunicipio}")" class="destino-link" aria-label="Ver @sitio.Nombre">
+                <div class="destino-image-wrap">
+                    <img src="@sitio.ImagenUrl" alt="@sitio.Nombre" class="destino-image" />
+                    <span class="destino-number">@(((i % sitiosTuristicos.Count) + 1).ToString("00"))</span>
+                </div>
+                <div class="destino-content">
+                    <div class="destino-topline">
+                        <h2>@sitio.Nombre</h2>
+                        <span class="destino-rating">@(sitio.Calificacion.HasValue ? $"★ {sitio.Calificacion:0.0}" : "Nuevo")</span>
+                    </div>
+                    <span class="destino-category">@sitio.NombreMunicipio</span>
+                    <span class="destino-cta">Ver municipio <span aria-hidden="true">→</span></span>
+                </div>
+            </a>
+        </article>
+    }
+</div>
     </div>
 
     <div class="destinos-footer">
@@ -507,6 +508,17 @@
             cargandoEtiquetas = false;
         }
     }
+
+    private List<SitioTuristicoDto> sitiosTuristicos = new();
+private List<SitioTuristicoDto> sitiosParaMarquee => sitiosTuristicos.Concat(sitiosTuristicos).ToList();
+
+await CargarSitiosTuristicos();
+
+private async Task CargarSitiosTuristicos()
+{
+    try { sitiosTuristicos = await SitioService.ListarAsync(); }
+    catch { sitiosTuristicos = new(); }
+}
 
     // Mismo criterio de MunicipioFicha.razor — datos de ejemplo por ahora.
     private List<string> ObtenerAtractivosPorDefecto(string nombre)
