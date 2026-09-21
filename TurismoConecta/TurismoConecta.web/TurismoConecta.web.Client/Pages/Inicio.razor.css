@@ -1,4 +1,4 @@
-﻿* {
+* {
     box-sizing: border-box;
     font-family: 'Montserrat', sans-serif;
 }
@@ -118,7 +118,7 @@ h1, h2 {
 .hero-inicio {
     position: relative;
     padding: 3rem 3rem 5rem;
-    min-height: 580px;
+    min-height: 660px;
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -222,7 +222,7 @@ h1, h2 {
     position: relative;
     z-index: 3;
     flex: 1;
-    max-width: 500px;
+    max-width: 580px;
 }
 
 .hero-mapa-titulo span {
@@ -239,7 +239,7 @@ h1, h2 {
 
 .hero-mapa-contenedor {
     position: relative;
-    height: 380px;
+    height: 520px;
     border-radius: 20px;
     overflow: hidden;
     border: 4px solid #D9A441;
