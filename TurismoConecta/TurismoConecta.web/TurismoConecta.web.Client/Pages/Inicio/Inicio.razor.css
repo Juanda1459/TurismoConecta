@@ -343,111 +343,269 @@ h1, h2 {
     }
 
 /* ---------- DESTINOS ---------- */
-.destinos-section {
-    padding: 4rem 3rem;
-}
-
-.section-heading {
-    margin-bottom: 2.5rem;
-}
-
-    .section-heading h2 {
-        font-size: 2.5rem;
-        color: #22281F;
-        margin: 0.2rem 0;
-    }
-
-.destinos-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1.5rem;
-}
-
-.destino-card {
-    background: #ffffff;
-    border-radius: 16px;
+.destinos-page {
+    min-height: 100vh;
     overflow: hidden;
-    cursor: pointer;
-    box-shadow: 0 10px 24px rgba(0,0,0,0.06);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-    position: relative;
+    padding: 58px 0 38px;
+    color: #20251f;
+    background: #f8f6ef;
+    font-family: Georgia, 'Times New Roman', serif;
 }
 
-    .destino-card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 18px 34px rgba(0,0,0,0.12);
-    }
-
-.destino-imagen {
-    position: relative;
-    height: 180px;
-    background: #2E5F35;
+.destinos-heading {
+    width: min(1180px, calc(100% - 48px));
+    margin: 0 auto 42px;
 }
 
-    .destino-imagen img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+.eyebrow {
+    color: #bc3e29;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .18em;
+}
+
+.destinos-heading h1 {
+    margin: 12px 0 4px;
+    color: #151c15;
+    font-size: clamp(42px, 5vw, 62px);
+    font-weight: 400;
+    letter-spacing: -.045em;
+    line-height: 1;
+}
+
+.destinos-heading p {
+    max-width: 650px;
+    margin: 0;
+    color: #4e554d;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.destinos-marquee {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    padding: 10px 0 30px;
+}
+
+    .destinos-marquee::before,
+    .destinos-marquee::after {
+        position: absolute;
+        z-index: 2;
+        top: 0;
+        bottom: 0;
+        width: 90px;
+        content: '';
+        pointer-events: none;
     }
 
-.destino-imagen-respaldo {
+    .destinos-marquee::before {
+        left: 0;
+        background: linear-gradient(90deg, #f8f6ef, transparent);
+    }
+
+    .destinos-marquee::after {
+        right: 0;
+        background: linear-gradient(270deg, #f8f6ef, transparent);
+    }
+
+.destinos-track {
+    display: flex;
+    width: max-content;
+    gap: 24px;
+    padding: 0 7vw;
+    animation: desplazar-destinos 42s linear infinite;
+}
+
+    .destinos-track:hover {
+        animation-play-state: paused;
+    }
+
+.destino-frame {
+    width: clamp(265px, 24vw, 340px);
+    flex: 0 0 auto;
+    border: 1px solid #aeb4a7;
+    background: #fbfaf5;
+    box-shadow: 5px 5px 0 #dfe2d8;
+    transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease;
+}
+
+    .destino-frame:nth-child(3n + 1) {
+        transform: rotate(-1.1deg);
+    }
+
+    .destino-frame:nth-child(3n + 2) {
+        transform: translateY(13px) rotate(.7deg);
+    }
+
+    .destino-frame:nth-child(3n) {
+        transform: rotate(-.4deg);
+    }
+
+    .destino-frame:hover {
+        z-index: 3;
+        border-color: #bc3e29;
+        box-shadow: 8px 8px 0 #cbd2c3;
+        transform: translateY(-12px) rotate(0deg) !important;
+    }
+
+.destino-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}
+
+.destino-image-wrap {
+    position: relative;
+    aspect-ratio: 1.36;
+    margin: 10px 10px 0;
+    overflow: hidden;
+    border: 1px solid #c3c8bd;
+}
+
+.destino-image {
+    display: block;
     width: 100%;
     height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 3rem;
-    color: #ffffff;
+    object-fit: cover;
+    filter: saturate(.9);
+    transition: transform .45s ease;
 }
 
-.destino-numero {
+.destino-frame:hover .destino-image {
+    transform: scale(1.06);
+}
+
+.destino-number {
     position: absolute;
-    top: 12px;
-    right: 12px;
-    background: rgba(0,0,0,0.4);
+    top: 9px;
+    right: 9px;
+    padding: 5px 8px;
     color: #fff;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
-    font-size: 0.75rem;
+    background: #263b28;
+    font: 700 11px Arial, sans-serif;
 }
 
-.destino-contenido {
-    padding: 1.2rem;
+.destino-content {
+    padding: 18px 18px 20px;
+    font-family: Arial, sans-serif;
 }
 
-    .destino-contenido h3 {
-        margin: 0 0 0.5rem;
-        font-size: 1.2rem;
-        color: #22281F;
-    }
-
-.destino-etiquetas {
+.destino-topline {
     display: flex;
-    gap: 0.4rem;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
 }
 
-    .destino-etiquetas span {
-        font-size: 0.75rem;
-        background: #F1EEE3;
-        color: #555;
-        padding: 0.2rem 0.6rem;
-        border-radius: 999px;
+    .destino-topline h2 {
+        margin: 0;
+        font-family: Georgia, 'Times New Roman', serif;
+        font-size: 25px;
+        font-weight: 400;
     }
 
-.destino-enlace {
-    font-size: 0.85rem;
-    color: #B4432D;
+.destino-rating {
+    color: #9c3a27;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.destino-category {
+    display: block;
+    margin-top: 9px;
+    color: #6c7468;
+    font-size: 12px;
+    letter-spacing: .02em;
+}
+
+.destino-cta {
+    display: inline-block;
+    margin-top: 25px;
+    color: #bc3e29;
+    font-size: 13px;
     font-weight: 700;
 }
 
-.centrar-boton {
-    text-align: center;
-    margin-top: 3rem;
+    .destino-cta span {
+        display: inline-block;
+        margin-left: 4px;
+        transition: transform .2s ease;
+    }
+
+.destino-frame:hover .destino-cta span {
+    transform: translateX(4px);
 }
 
+.destinos-footer {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: min(1180px, calc(100% - 48px));
+    margin: 24px auto 0;
+    color: #858d82;
+    font: 11px Arial, sans-serif;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+    .destinos-footer span {
+        height: 1px;
+        flex: 1;
+        background: #cbd0c4;
+    }
+
+    .destinos-footer p {
+        margin: 0;
+        white-space: nowrap;
+    }
+
+@keyframes desplazar-destinos {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(calc(-50% - 12px));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .destinos-track {
+        animation: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .destinos-page {
+        padding-top: 38px;
+    }
+
+    .destinos-heading,
+    .destinos-footer {
+        width: calc(100% - 32px);
+    }
+
+    .destinos-heading {
+        margin-bottom: 28px;
+    }
+
+    .destinos-track {
+        gap: 16px;
+        padding: 0 28px;
+    }
+
+    .destino-frame {
+        width: 278px;
+    }
+
+    .destinos-footer p {
+        font-size: 9px;
+    }
+}
 .boton-principal {
     background: #B4432D;
     color: #fff;
@@ -615,6 +773,68 @@ h1, h2 {
             color: #D9A441;
         }
 
+.mensaje-busqueda {
+    grid-column: 1 / -1;
+    background: var(--teal-suave);
+    color: var(--teal);
+    padding: .7rem 1.1rem;
+    border-radius: var(--radio);
+    font-size: .88rem;
+    margin: -.6rem 0 1.4rem;
+}
+
+.valores-section {
+    padding: 4rem 3rem 5rem;
+}
+
+.valores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.valor-icono {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: .8rem;
+}
+
+.valor-card h3 {
+    font-size: 1.05rem;
+    margin: 0 0 .5rem;
+}
+
+.valor-card p {
+    color: var(--tinta-suave);
+    font-size: .88rem;
+    margin: 0;
+}
+
+.cta-final {
+    background: var(--tinta);
+    color: var(--crema);
+    text-align: center;
+    padding: 4rem 2rem;
+    margin: 0 3rem 3rem;
+    border-radius: var(--radio);
+}
+
+    .cta-final h2 {
+        color: var(--crema);
+        margin: 0 0 .6rem;
+    }
+
+    .cta-final p {
+        color: var(--piedra);
+        margin: 0 0 1.6rem;
+    }
+
+    .cta-final .boton-principal {
+        display: inline-block;
+    }
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 850px) {
     .inicio-navbar, .hero-inicio, .historia-grid, .itinerario-section {

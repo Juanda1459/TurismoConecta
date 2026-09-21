@@ -51,7 +51,12 @@
         this.mapaInicializado = true;
     },
 
+        marcadores: [],
+
     mostrarMunicipios: function () {
+        this.marcadores.forEach((marcador) => this.mapa.removeLayer(marcador));
+        this.marcadores = [];
+
         this.municipios.forEach((municipio) => {
             const marcador = L.marker([
                 municipio.latitud,
@@ -69,7 +74,22 @@
                         </button>
                     </div>
                 `);
+
+            this.marcadores.push(marcador);
         });
+    },
+
+    actualizarMarcadores: function (municipiosFiltrados) {
+        this.municipios = municipiosFiltrados || [];
+        this.mostrarMunicipios();
+
+        if (this.municipios.length === 1 && this.mapa) {
+            this.mapa.flyTo(
+                [this.municipios[0].latitud, this.municipios[0].longitud],
+                10,
+                { animate: true, duration: 1.5 }
+            );
+        }
     },
 
     actualizarZona: function (zona) {

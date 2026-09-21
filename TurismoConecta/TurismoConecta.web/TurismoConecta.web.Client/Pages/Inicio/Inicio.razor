@@ -16,6 +16,8 @@
 <PageTitle>Turismo Conecta | Descubre Colombia</PageTitle>
 
 <HeadContent>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="Pages/inicio.razor.css" />
@@ -191,91 +193,60 @@
             </article>
         </section>
 
-        <section class="destinos-section" id="donde-ir">
-            <div class="section-heading">
-                <div>
-                    <span class="section-eyebrow">
-                        Descubre Boyacá
-                    </span>
+        
+            
+               <section class="destinos-page" id="donde-ir">
 
-                    <h2>
-                        ¿Dónde quieres ir?
-                    </h2>
-                </div>
+    <div class="destinos-heading">
+        <span class="eyebrow">DESCUBRE BOYACÁ</span>
+        <h1>¿Dónde quieres ir?</h1>
+        <p>Explora los municipios registrados y encuentra el destino ideal para tu próxima aventura.</p>
+    </div>
 
-                <p>
-                    Explora los municipios registrados y encuentra el destino
-                    ideal para tu próxima aventura.
-                </p>
-            </div>
-
-            @if (cargandoMunicipios)
+    <div class="destinos-marquee" aria-label="Sitios turísticos mejor reseñados">
+        <div class="destinos-track">
+            @foreach (var destino in Destinos.Concat(Destinos))
             {
-                <div class="destinos-grid">
-                    @for (var i = 0; i < 6; i++)
-                    {
-                        <div class="destino-skeleton"></div>
-                    }
-                </div>
-            }
-            else if (municipios.Count == 0)
-            {
-                <div class="estado-vacio">
-                    <h3>No hay municipios disponibles</h3>
-                    <p>
-                        Cuando existan municipios activos aparecerán aquí.
-                    </p>
-                </div>
-            }
-            else
-            {
-                <div class="destinos-grid">
-                    @foreach (var municipio in municipios)
-                    {
-                        <article class="destino-card"
-                                 @onclick="() => AbrirMunicipio(municipio.IdMunicipio)"
-                                 tabindex="0"
-                                 role="button">
-
-                            <div class="destino-imagen">
-                                @if (!string.IsNullOrWhiteSpace(municipio.ImagenUrl))
-                                {
-                                    <img src="@municipio.ImagenUrl"
-                                         alt="@municipio.Nombre" />
-                                }
-                                else
-                                {
-                                    <div class="destino-imagen-respaldo">
-                                        @municipio.Nombre.Substring(0, 1)
-                                    </div>
-                                }
-
-                                <span class="destino-numero">
-                                    @municipio.IdMunicipio.ToString("D2")
-                                </span>
+                <article class="destino-frame">
+                    <a href="@destino.Url" class="destino-link" aria-label="Ver @destino.Nombre">
+                        <div class="destino-image-wrap">
+                            <img src="@destino.Imagen" alt="@destino.Nombre" class="destino-image" />
+                            <span class="destino-number">@destino.Orden.ToString("00")</span>
+                        </div>
+                        <div class="destino-content">
+                            <div class="destino-topline">
+                                <h2>@destino.Nombre</h2>
+                                <span class="destino-rating">★ @destino.Calificacion.ToString("0.0")</span>
                             </div>
+                            <span class="destino-category">@destino.Categoria</span>
+                            <span class="destino-cta">Ver municipio <span aria-hidden="true">→</span></span>
+                        </div>
+                    </a>
+                </article>
+            }
+        </div>
+    </div>
 
-                            <div class="destino-contenido">
-                                <h3>@municipio.Nombre</h3>
+    <div class="destinos-footer">
+        <span></span>
+        <p>Los destinos favoritos de nuestros viajeros</p>
+        <span></span>
+    </div>
+</section>
 
-                                @if (municipio.Etiquetas is not null &&
-                                     municipio.Etiquetas.Any())
-                                {
-                                    <div class="destino-etiquetas">
-                                        @foreach (var etiqueta in municipio.Etiquetas.Take(3))
-                                        {
-                                            <span>@etiqueta</span>
-                                        }
-                                    </div>
-                                }
+@code {
+    private readonly List<Destino> Destinos = new()
+    {
+        new(1, "Villa de Leyva", 4.9, "Turismo colonial", "https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=900&h=650&fit=crop", "/municipios/villa-de-leyva"),
+        new(2, "Ráquira", 4.9, "Ecoturismo y artesanías", "https://images.unsplash.com/photo-1500534623283-312aade485b7?w=900&h=650&fit=crop", "/municipios/raquira"),
+        new(3, "Lago de Tota", 4.8, "Naturaleza y paisaje", "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&h=650&fit=crop", "/municipios/lago-de-tota"),
+        new(4, "Gámeza", 4.7, "Paisaje y páramo", "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=900&h=650&fit=crop", "/municipios/gameza"),
+        new(5, "Paipa", 4.6, "Balnearios y termas", "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=900&h=650&fit=crop", "/municipios/paipa"),
+        new(6, "Sogamoso", 4.5, "Patrimonio cultural", "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&h=650&fit=crop", "/municipios/sogamoso")
+    };
 
-                                <span class="destino-enlace">
-                                    Ver municipio →
-                                </span>
-                            </div>
-                        </article>
-                    }
-                </div>
+    private sealed record Destino(int Orden, string Nombre, double Calificacion, string Categoria, string Imagen, string Url);
+} 
 
                 <div class="centrar-boton">
                     <a href="/municipios"
@@ -284,7 +255,7 @@
                     </a>
                 </div>
             }
-        </section>
+        
 
         <section class="gustos-section" id="gustos">
             <div class="section-heading gustos-heading">
@@ -426,6 +397,36 @@
         </section>
     </main>
 
+<section class="valores-section">
+    <div class="valores-grid">
+        <div class="valor-card">
+            <span class="valor-icono">🗺️</span>
+            <h3>Catálogo completo</h3>
+            <p>Información verificada de los municipios: historia, clima, fechas y actividades.</p>
+        </div>
+        <div class="valor-card">
+            <span class="valor-icono">🧭</span>
+            <h3>Itinerarios a tu medida</h3>
+            <p>Arma tu recorrido entre varios pueblos y compártelo con quien quieras viajar contigo.</p>
+        </div>
+        <div class="valor-card">
+            <span class="valor-icono">🏨</span>
+            <h3>Negocios verificados</h3>
+            <p>Hoteles, restaurantes y artesanos aprobados por la administración de cada municipio.</p>
+        </div>
+        <div class="valor-card">
+            <span class="valor-icono">⭐</span>
+            <h3>Reseñas reales</h3>
+            <p>Opiniones de otros viajeros para que decidas con información de primera mano.</p>
+        </div>
+    </div>
+</section>
+
+<section class="cta-final">
+    <h2>Tu próximo viaje por Boyacá empieza aquí</h2>
+    <p>Crea tu cuenta gratis y guarda tus municipios y negocios favoritos.</p>
+    <a href="/usuarios/registro" class="boton-principal">Crear cuenta gratis</a>
+</section>
     <footer class="inicio-footer">
         <div>
             <img src="images/turismo-conecta-logo.png"
@@ -446,9 +447,8 @@
 
     <CondorChat />
 </div>
-
 @code {
-    private string textoBusqueda = string.Empty;
+    private string textoBusqueda = "";
     private string zonaMapa = "Colombia";
 
     private bool mostrarBuscador;
@@ -457,8 +457,10 @@
 
     private int? totalMunicipios;
 
-    private List<MunicipioListadoDto> municipios = new();
+    private List<MunicipioListadoDto> todosMunicipios = new();
+    private List<MunicipioListadoDto> municipiosMostrados = new();
     private List<EtiquetaDto> etiquetas = new();
+    private string? mensajeBusqueda;
 
     protected override async Task OnInitializedAsync()
     {
@@ -469,19 +471,17 @@
     private async Task CargarMunicipios()
     {
         cargandoMunicipios = true;
-
         try
         {
             var resultado = await ApiService.ListarAsync(1, 200);
-
-            municipios = resultado?.Items?.ToList()
-                ?? new List<MunicipioListadoDto>();
-
+            todosMunicipios = resultado?.Items?.ToList() ?? new List<MunicipioListadoDto>();
+            municipiosMostrados = todosMunicipios;
             totalMunicipios = resultado?.Total;
         }
         catch
         {
-            municipios = new List<MunicipioListadoDto>();
+            todosMunicipios = new List<MunicipioListadoDto>();
+            municipiosMostrados = new List<MunicipioListadoDto>();
             totalMunicipios = 0;
         }
         finally
@@ -493,13 +493,10 @@
     private async Task CargarEtiquetas()
     {
         cargandoEtiquetas = true;
-
         try
         {
             var resultado = await EtiquetaService.ListarAsync();
-
-            etiquetas = resultado?.ToList()
-                ?? new List<EtiquetaDto>();
+            etiquetas = resultado?.ToList() ?? new List<EtiquetaDto>();
         }
         catch
         {
@@ -511,33 +508,27 @@
         }
     }
 
+    // Mismo criterio de MunicipioFicha.razor — datos de ejemplo por ahora.
+    private List<string> ObtenerAtractivosPorDefecto(string nombre)
+    {
+        if (nombre.Contains("Gámeza", StringComparison.OrdinalIgnoreCase))
+            return new List<string> { "Cañón de Gámeza", "Laguna Negra", "Piedra Pintada Muisca", "Parque Minero Tradicional" };
+        if (nombre.Contains("Ráquira", StringComparison.OrdinalIgnoreCase))
+            return new List<string> { "Plaza de Cerámica", "Monasterio La Candelaria", "Talleres de Alfarería Tradicional" };
+        return new List<string> { "Plaza Principal", "Templo Colonial", "Senderos Ecoturísticos", "Mirador del Valle" };
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender)
-        {
-            return;
-        }
+        if (!firstRender) return;
 
-        var municipiosParaMapa = municipios
-            .Where(municipio =>
-                municipio.Latitud.HasValue &&
-                municipio.Longitud.HasValue)
-            .Select(municipio => new
-            {
-                id = municipio.IdMunicipio,
-                nombre = municipio.Nombre,
-                latitud = municipio.Latitud.Value,
-                longitud = municipio.Longitud.Value
-            })
+        var municipiosParaMapa = todosMunicipios
+            .Where(m => m.Latitud.HasValue && m.Longitud.HasValue)
+            .Select(m => new { id = m.IdMunicipio, nombre = m.Nombre, latitud = m.Latitud.Value, longitud = m.Longitud.Value })
             .ToList();
 
-        await JS.InvokeVoidAsync(
-            "TurismoConectaMapa.inicializar",
-            municipiosParaMapa,
-            DotNetObjectReference.Create(this));
-
-        await JS.InvokeVoidAsync(
-            "TurismoConectaMapa.activarScroll");
+        await JS.InvokeVoidAsync("TurismoConectaMapa.inicializar", municipiosParaMapa, DotNetObjectReference.Create(this));
+        await JS.InvokeVoidAsync("TurismoConectaMapa.activarScroll");
     }
 
     private void MostrarBuscador()
@@ -547,22 +538,61 @@
 
     private void DetectarEnterBusqueda(KeyboardEventArgs evento)
     {
-        if (evento.Key == "Enter")
-        {
-            Buscar();
-        }
+        if (evento.Key == "Enter") Buscar();
     }
 
     private void Buscar()
     {
-        if (string.IsNullOrWhiteSpace(textoBusqueda))
+        var texto = textoBusqueda?.Trim() ?? "";
+
+        if (string.IsNullOrWhiteSpace(texto))
         {
-            Nav.NavigateTo("/municipios");
+            LimpiarBusqueda();
             return;
         }
 
-        Nav.NavigateTo(
-            $"/municipios?texto={Uri.EscapeDataString(textoBusqueda.Trim())}");
+        var porNombre = todosMunicipios
+            .Where(m => m.Nombre.Contains(texto, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        var porAtractivo = todosMunicipios
+            .Where(m => ObtenerAtractivosPorDefecto(m.Nombre).Any(a => a.Contains(texto, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+
+        var combinados = porNombre.Union(porAtractivo).ToList();
+
+        if (combinados.Count == 0)
+        {
+            municipiosMostrados = new();
+            mensajeBusqueda = $"No encontramos nada para \"{texto}\". Prueba con el nombre de un pueblo o un sitio, como \"Plaza\" o \"Laguna\".";
+        }
+        else
+        {
+            municipiosMostrados = combinados;
+            mensajeBusqueda = (porAtractivo.Any() && !porNombre.Any())
+                ? $"\"{texto}\" está en: {string.Join(", ", porAtractivo.Select(m => m.Nombre))}"
+                : null;
+        }
+
+        _ = ActualizarMapaConFiltro(municipiosMostrados);
+    }
+
+    private void LimpiarBusqueda()
+    {
+        textoBusqueda = "";
+        municipiosMostrados = todosMunicipios;
+        mensajeBusqueda = null;
+        _ = ActualizarMapaConFiltro(municipiosMostrados);
+    }
+
+    private async Task ActualizarMapaConFiltro(List<MunicipioListadoDto> lista)
+    {
+        var paraMapa = lista
+            .Where(m => m.Latitud.HasValue && m.Longitud.HasValue)
+            .Select(m => new { id = m.IdMunicipio, nombre = m.Nombre, latitud = m.Latitud!.Value, longitud = m.Longitud!.Value })
+            .ToList();
+
+        await JS.InvokeVoidAsync("TurismoConectaMapa.actualizarMarcadores", paraMapa);
     }
 
     private void AbrirMunicipio(int idMunicipio)

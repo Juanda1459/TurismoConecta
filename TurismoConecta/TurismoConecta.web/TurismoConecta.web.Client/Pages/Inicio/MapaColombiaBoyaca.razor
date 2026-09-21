@@ -1,0 +1,69 @@
+﻿@rendermode InteractiveAuto
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+@* El contenedor tiene 250vh de alto -> eso es lo que da "espacio" para hacer scroll y animar el zoom.
+   Ajusta este alto según cuánto quieras que dure el efecto. *@
+<div id="contenedor-mapa-scroll" style="height: 250vh; position: relative;">
+
+    @* position: sticky -> el mapa se queda pegado en pantalla mientras el contenedor de arriba sigue scrolleando *@
+    <div style="position: sticky; top: 0; height: 100vh; overflow: hidden;">
+        <div id="mapa-scroll" style="width: 100%; height: 100%;"></div>
+
+        <div style="position: absolute; top: 40px; left: 40px; z-index: 1000;
+                    background: rgba(20,40,20,0.85); border: 2px solid #d4a94a;
+                    border-radius: 12px; padding: 20px; color: white; max-width: 320px;">
+            @if (progreso < 0.5)
+            {
+                <p style="margin:0; opacity:0.8;">Comenzamos en</p>
+                <h2 style="color:#d4a94a; margin:4px 0;">Colombia</h2>
+            }
+            else
+            {
+                <p style="margin:0; opacity:0.8;">Te acercas a</p>
+                <h2 style="color:#d4a94a; margin:4px 0;">@NombreMunicipio, Boyacá</h2>
+            }
+            <span style="font-size: 0.85em;">Desliza para acercarte a @NombreMunicipio</span>
+        </div>
+    </div>
+</div>
+
+@code {
+    // Estos valores luego los vas a reemplazar por los que vengan de la búsqueda real
+    // (ya tienes Latitud/Longitud en la tabla Municipio, esto es solo para probar el efecto)
+    [Parameter] public string NombreMunicipio { get; set; } = "Gámeza";
+    [Parameter] public double[] CentroColombia { get; set; } = new[] { 4.5709, -74.2973 };
+    [Parameter] public int ZoomColombia { get; set; } = 5;
+    [Parameter] public double[] CentroMunicipio { get; set; } = new[] { 5.766, -72.734 }; // Gámeza aprox.
+    [Parameter] public int ZoomMunicipio { get; set; } = 13;
+
+    private double progreso = 0;
+    private IJSObjectReference? _modulo;
+    private DotNetObjectReference<MapaColombiaBoyaca>? _dotNetRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        _modulo = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mapaScroll.js");
+        await _modulo.InvokeVoidAsync("iniciarMapa", CentroColombia, ZoomColombia);
+
+        _dotNetRef = DotNetObjectReference.Create(this);
+        await _modulo.InvokeVoidAsync("observarScroll", _dotNetRef, "contenedor-mapa-scroll");
+    }
+
+    [JSInvokable]
+    public async Task ActualizarProgreso(double nuevoProgreso)
+    {
+        progreso = nuevoProgreso;
+        if (_modulo is not null)
+            await _modulo.InvokeVoidAsync("actualizarZoom", progreso, CentroColombia, ZoomColombia, CentroMunicipio, ZoomMunicipio);
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_dotNetRef is not null) _dotNetRef.Dispose();
+        if (_modulo is not null) await _modulo.DisposeAsync();
+    }
+}

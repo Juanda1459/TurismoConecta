@@ -25,6 +25,7 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<GaleriaNegocio> GaleriaNegocios { get; set; }
 
     public virtual DbSet<Itinerario> Itinerarios { get; set; }
+    public virtual DbSet<SitioTuristico> SitiosTuristicos { get; set; }
 
     public virtual DbSet<ItinerarioDetalle> ItinerarioDetalles { get; set; }
 
@@ -191,6 +192,28 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.IdNegocio)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_GaleriaNegocio_Negocio");
+        });
+
+        modelBuilder.Entity<SitioTuristico>(entity =>
+        {
+            entity.ToTable("SitiosTuristicos");
+            entity.HasKey(e => e.IdSitioTuristico);
+            entity.Property(e => e.IdSitioTuristico).HasColumnName("idSitiosTuristicos");
+            entity.Property(e => e.Nombre).HasColumnName("nombre").HasMaxLength(150).IsRequired();
+            entity.Property(e => e.Descripcion).HasColumnName("descripcion").HasMaxLength(1000);
+            entity.Property(e => e.ImagenUrl).HasColumnName("imagenUrl").HasMaxLength(500);
+            entity.Property(e => e.IdMunicipio).HasColumnName("idMunicipio");
+            entity.Property(e => e.IdReseña).HasColumnName("idReseña");
+
+            entity.HasOne(e => e.IdMunicipioNavigation)
+                .WithMany()
+                .HasForeignKey(e => e.IdMunicipio)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.IdReseñaNavigation)
+                .WithMany()
+                .HasForeignKey(e => e.IdReseña)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<Itinerario>(entity =>
