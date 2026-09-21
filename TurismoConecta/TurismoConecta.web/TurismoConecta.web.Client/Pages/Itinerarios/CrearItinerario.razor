@@ -6,6 +6,7 @@
 @inject MunicipioApiService MuniApi
 @inject NavigationManager Nav
 @inject HttpClient Http
+@inject AuthenticationStateProvider AuthStateProvider
 
 <HeadContent>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -216,14 +217,40 @@
             </p>
         </header>
 
+        @if (!usuarioAutenticado && !cargandoInicial)
+        {
+            <div class="alerta-auth-aviso">
+                <span class="alerta-auth-icono">🔒</span>
+                <div class="alerta-auth-contenido">
+                    <span class="alerta-auth-titulo">Debes iniciar sesión para crear tu itinerario</span>
+                    <p class="alerta-auth-desc">
+                        Organiza tus fechas y paradas ahora. Para guardar la ruta en tu cuenta, inicia sesión o regístrate.
+                    </p>
+                </div>
+                <div class="alerta-auth-botones">
+                    <a href="/login" class="btn-auth-iti-login">Iniciar Sesión →</a>
+                    <a href="/register" class="btn-auth-iti-registro">Registrarse</a>
+                </div>
+            </div>
+        }
+
         <EditForm Model="modelo" OnValidSubmit="GuardarItinerario">
             <DataAnnotationsValidator />
 
             @if (!string.IsNullOrEmpty(mensajeError))
             {
                 <div class="alerta-error-itinerario">
-                    <span>⚠️</span>
-                    <p>@mensajeError</p>
+                    <span class="alerta-error-icono">⚠️</span>
+                    <div class="alerta-error-cuerpo">
+                        <p class="alerta-error-texto">@mensajeError</p>
+                        @if (mensajeError.Contains("iniciar sesión", StringComparison.OrdinalIgnoreCase))
+                        {
+                            <div class="alerta-error-acciones">
+                                <a href="/login" class="btn-alerta-login">Iniciar Sesión →</a>
+                                <a href="/register" class="btn-alerta-registro-sutil">¿No tienes cuenta? Regístrate</a>
+                            </div>
+                        }
+                    </div>
                 </div>
             }
 
@@ -371,6 +398,7 @@
 
     private bool cargandoInicial = true;
     private bool guardando = false;
+    private bool usuarioAutenticado = true;
     private string? mensajeError;
 
     // Fotos Wikipedia — respaldo cuando la API no tiene imagen
@@ -498,6 +526,9 @@
         cargandoInicial = true;
         modelo.FechaInicio = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
         modelo.FechaFin    = DateOnly.FromDateTime(DateTime.Today.AddDays(3));
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        usuarioAutenticado = authState.User.Identity?.IsAuthenticated ?? false;
 
         if (!string.IsNullOrEmpty(Municipios))
         {
@@ -650,18 +681,27 @@
             return;
         }
 
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        usuarioAutenticado = authState.User.Identity?.IsAuthenticated ?? false;
+        if (!usuarioAutenticado)
+        {
+            mensajeError = "Debes iniciar sesión para crear tu itinerario.";
+            return;
+        }
+
+        SincronizarParadas();
         guardando = true;
         mensajeError = null;
 
-        var resultado = await ItiApi.CrearAsync(modelo);
-        if (resultado != null)
+        var (exito, error, resultado) = await ItiApi.CrearAsync(modelo);
+        if (exito && resultado != null)
         {
-            await Task.Delay(1500);
+            await Task.Delay(1200);
             Nav.NavigateTo($"/itinerarios/{resultado.IdItinerario}");
         }
         else
         {
-            mensajeError = "No pudimos crear el itinerario. Intenta nuevamente.";
+            mensajeError = error ?? "No pudimos crear el itinerario. Intenta nuevamente.";
             guardando = false;
         }
     }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TurismoConecta.api.Data;
 using TurismoConecta.api.DTOs.Common;
 using TurismoConecta.api.DTOs.Municipios;
@@ -91,9 +91,7 @@ namespace TurismoConecta.api.Services
         {
             var query = _context.Municipios.Where(m => m.Activo).AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(texto))
-                query = query.Where(m => m.Nombre.Contains(texto.Trim()));
-
+            // Filtramos por etiqueta en la BD (puede usar índices)
             if (idEtiqueta.HasValue)
                 query = query.Where(m => m.MunicipioEtiqueta.Any(me => me.IdEtiqueta == idEtiqueta));
 
@@ -101,7 +99,31 @@ namespace TurismoConecta.api.Services
                 .Include(m => m.MunicipioEtiqueta).ThenInclude(me => me.IdEtiquetaNavigation)
                 .ToListAsync(ct);
 
+            // Filtramos por texto en memoria con normalización de tildes.
+            // Así "gameza" encuentra "Gámeza", "tunja" encuentra "Tunja", etc.
+            if (!string.IsNullOrWhiteSpace(texto))
+            {
+                var textoNorm = Normalizar(texto.Trim());
+                municipios = municipios
+                    .Where(m => Normalizar(m.Nombre).Contains(textoNorm))
+                    .ToList();
+            }
+
             return municipios.Select(MunicipioMapper.ToListadoDto).ToList();
+        }
+
+        /// <summary>
+        /// Elimina tildes y convierte a minúsculas para comparación insensible a acentos.
+        /// Ejemplo: "Gámeza" → "gameza"
+        /// </summary>
+        private static string Normalizar(string s)
+        {
+            return new string(
+                s.Normalize(System.Text.NormalizationForm.FormD)
+                 .Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c)
+                             != System.Globalization.UnicodeCategory.NonSpacingMark)
+                 .ToArray()
+            ).ToLower();
         }
 
         public async Task<MunicipioFichaDto?> ObtenerFichaAsync(int id, CancellationToken ct = default)

@@ -1,4 +1,4 @@
-﻿window.TurismoConectaMapa = {
+window.TurismoConectaMapa = {
     mapa: null,
     municipios: [],
     referenciaDotNet: null,
@@ -20,7 +20,7 @@
 
         this.mapa = L.map(contenedor, {
             zoomControl: true,
-            scrollWheelZoom: false,
+            scrollWheelZoom: true,
             attributionControl: true
         });
 
@@ -38,7 +38,7 @@
         this.mapa.on("zoomend", () => {
             const zoom = this.mapa.getZoom();
 
-            if (zoom < 7) {
+            if (zoom < 6.5) {
                 this.actualizarZona("Colombia");
             } else if (zoom < 9) {
                 this.actualizarZona("Boyacá");
@@ -48,6 +48,7 @@
         });
 
         this.mostrarMunicipios();
+        this.resaltarBoyaca();
         this.mapaInicializado = true;
     },
 
@@ -79,17 +80,52 @@
         });
     },
 
-    actualizarMarcadores: function (municipiosFiltrados) {
-        this.municipios = municipiosFiltrados || [];
-        this.mostrarMunicipios();
+    /**
+     * Descarga el GeoJSON de Colombia y dibuja un polígono dorado
+     * sobre el departamento de Boyacá para resaltarlo en el mapa.
+     */
+    resaltarBoyaca: function () {
+        const url =
+            'https://gist.githubusercontent.com/john-guerra/43c7656821069d00dcbc/raw/' +
+            'be6a6e239cd5b5b803c6e7c2ec405b793a9064dd/Colombia.geo.json';
 
-        if (this.municipios.length === 1 && this.mapa) {
-            this.mapa.flyTo(
-                [this.municipios[0].latitud, this.municipios[0].longitud],
-                10,
-                { animate: true, duration: 1.5 }
-            );
-        }
+        fetch(url)
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                // El GeoJSON de Colombia tiene la propiedad NOMBRE_DPT en mayúsculas
+                const boyacaGeoJson = {
+                    type: 'FeatureCollection',
+                    features: data.features.filter(function (f) {
+                        const nombre = (f.properties.NOMBRE_DPT || f.properties.name || '').toUpperCase();
+                        return nombre.includes('BOYAC');
+                    })
+                };
+
+                if (boyacaGeoJson.features.length === 0) {
+                    console.warn('No se encontró el departamento de Boyacá en el GeoJSON.');
+                    return;
+                }
+
+                L.geoJSON(boyacaGeoJson, {
+                    style: {
+                        color: '#D9A441',       // borde dorado (paleta del proyecto)
+                        weight: 2.5,
+                        fillColor: '#D9A441',   // relleno dorado
+                        fillOpacity: 0.18,
+                        dashArray: null
+                    },
+                    onEachFeature: function (feature, layer) {
+                        layer.bindTooltip('Boyacá', {
+                            permanent: false,
+                            direction: 'center',
+                            className: 'boyaca-tooltip'
+                        });
+                    }
+                }).addTo(window.TurismoConectaMapa.mapa);
+            })
+            .catch(function (err) {
+                console.warn('No se pudo cargar el GeoJSON de Boyacá:', err);
+            });
     },
 
     actualizarZona: function (zona) {
@@ -116,92 +152,70 @@
         }
 
         this.mapa.flyTo(
-            [5.4545, -73.3625],
-            8,
+            [5.65, -73.30],
+            8.5,
             {
                 animate: true,
                 duration: 2
             }
         );
+        this.actualizarZona("Boyacá");
     }
 };
 
 window.TurismoConectaMapa.activarScroll = function () {
-    const seccion = document.querySelector(".mapa-story-section");
-
-    if (!seccion) {
-        return;
-    }
-
-    let acercamientoRealizado = false;
+    let enBoyaca = false;
+    let animando = false;
 
     const actualizarZoom = () => {
-        const rect = seccion.getBoundingClientRect();
-        const alturaVentana = window.innerHeight;
-
-        const progreso = Math.max(
-            0,
-            Math.min(
-                1,
-                (alturaVentana - rect.top) /
-                (alturaVentana + rect.height)
-            )
-        );
-
-        const zoomColombia = 5;
-        const zoomBoyaca = 8;
-
-        const zoomActual =
-            zoomColombia + (zoomBoyaca - zoomColombia) * progreso;
-
-        if (window.TurismoConectaMapa.mapa) {
-            window.TurismoConectaMapa.mapa.setZoom(
-                zoomActual,
-                {
-                    animate: false
-                }
-            );
-
-            const latitud =
-                4.5709 + (5.4545 - 4.5709) * progreso;
-
-            const longitud =
-                -74.2973 + (-73.3625 + 74.2973) * progreso;
-
-            window.TurismoConectaMapa.mapa.panTo(
-                [latitud, longitud],
-                {
-                    animate: false
-                }
-            );
+        if (!window.TurismoConectaMapa.mapa || animando) {
+            return;
         }
 
-        if (
-            progreso > 0.55 &&
-            !acercamientoRealizado
-        ) {
-            acercamientoRealizado = true;
+        const scrollY = window.scrollY || window.pageYOffset;
 
-            if (window.TurismoConectaMapa.mapa) {
-                window.TurismoConectaMapa.mapa.flyTo(
-                    [5.4545, -73.3625],
-                    8,
-                    {
-                        animate: true,
-                        duration: 1.5
-                    }
-                );
-            }
+        // Cuando el usuario baja haciendo scroll (> 80px), vuela con animación hacia Boyacá
+        if (scrollY > 80 && !enBoyaca) {
+            enBoyaca = true;
+            animando = true;
+
+            window.TurismoConectaMapa.mapa.flyTo([5.65, -73.30], 8.5, {
+                animate: true,
+                duration: 1.8
+            });
+
+            window.TurismoConectaMapa.actualizarZona("Boyacá");
+
+            setTimeout(() => {
+                animando = false;
+            }, 1900);
+        }
+        // Cuando vuelve a subir al inicio (< 40px), regresa al mapa general de Colombia
+        else if (scrollY < 40 && enBoyaca) {
+            enBoyaca = false;
+            animando = true;
+
+            window.TurismoConectaMapa.mapa.flyTo([4.5709, -74.2973], 5.0, {
+                animate: true,
+                duration: 1.5
+            });
+
+            window.TurismoConectaMapa.actualizarZona("Colombia");
+
+            setTimeout(() => {
+                animando = false;
+            }, 1600);
         }
     };
 
-    actualizarZoom();
+    window.addEventListener("scroll", actualizarZoom, { passive: true });
 
-    window.addEventListener(
-        "scroll",
-        actualizarZoom,
-        {
-            passive: true
-        }
-    );
+    // También al hacer clic en el indicador "Desliza para acercarte a Boyacá"
+    const indicador = document.querySelector(".hero-mapa-indicador");
+    if (indicador) {
+        indicador.style.cursor = "pointer";
+        indicador.addEventListener("click", () => {
+            window.TurismoConectaMapa.acercarABoyaca();
+        });
+    }
 };
