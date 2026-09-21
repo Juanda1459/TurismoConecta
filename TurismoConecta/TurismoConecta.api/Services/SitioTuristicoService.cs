@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TurismoConecta.api.Data;
+using TurismoConecta.api.Models;
 using TurismoConecta.api.DTOs.SitiosTuristicos;
 using TurismoConecta.api.Services.Interfaces;
 
@@ -9,6 +10,29 @@ namespace TurismoConecta.api.Services
     {
         private readonly AppDbContext _context;
 
+        public SitioTuristicoService(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<List<SitioTuristicoDto>> ListarDestacadosAsync(CancellationToken ct = default)
+        {
+            return await _context.SitiosTuristicos
+                .Include(s => s.IdMunicipioNavigation)
+                .Include(s => s.IdReseñaNavigation)
+                .OrderBy(s => s.IdSitioTuristico)
+                .Select(s => new SitioTuristicoDto
+                {
+                    IdSitioTuristico = s.IdSitioTuristico,
+                    Nombre = s.Nombre,
+                    Descripcion = s.Descripcion,
+                    ImagenUrl = s.ImagenUrl,
+                    IdMunicipio = s.IdMunicipio,
+                    NombreMunicipio = s.IdMunicipioNavigation.Nombre,
+                    Calificacion = s.IdReseñaNavigation != null ? (double?)s.IdReseñaNavigation.Calificacion : null
+                })
+                .ToListAsync(ct);
+        }
         private async Task<bool> PuedeGestionarMunicipioAsync(int idUsuario, int idMunicipio, CancellationToken ct)
         {
             var usuario = await _context.Usuarios
