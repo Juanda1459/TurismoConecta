@@ -52,7 +52,12 @@ window.TurismoConectaMapa = {
         this.mapaInicializado = true;
     },
 
+        marcadores: [],
+
     mostrarMunicipios: function () {
+        this.marcadores.forEach((marcador) => this.mapa.removeLayer(marcador));
+        this.marcadores = [];
+
         this.municipios.forEach((municipio) => {
             const marcador = L.marker([
                 municipio.latitud,
@@ -70,6 +75,8 @@ window.TurismoConectaMapa = {
                         </button>
                     </div>
                 `);
+
+            this.marcadores.push(marcador);
         });
     },
 

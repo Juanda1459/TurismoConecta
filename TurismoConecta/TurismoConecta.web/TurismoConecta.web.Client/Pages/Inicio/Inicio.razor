@@ -8,7 +8,7 @@
 
 @layout EmptyLayout
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
-
+@inject SitioTuristicoApiService SitioService
 @inject MunicipioApiService ApiService
 @inject EtiquetaApiService EtiquetaService
 @inject NavigationManager Nav
@@ -45,7 +45,7 @@
                     class="nav-button"
                     aria-label="Buscar"
                     @onclick="MostrarBuscador">
-                <span>⌕</span>
+                <span>🔎</span>
             </button>
 
             <AuthorizeView>
@@ -55,13 +55,13 @@
                             aria-label="Mi Panel"
                             @onclick="IrAlDashboard"
                             title="Ir a mi panel">
-                        <span>▦</span>
+                        <span>👤</span>
                     </button>
                     <a href="/perfil"
                        class="nav-button"
                        aria-label="Mi cuenta"
                        title="Mi cuenta">
-                        <span>●</span>
+                        <span>🔓</span>
                     </a>
                     <button type="button"
                             class="nav-button"
@@ -76,12 +76,12 @@
                     <a href="/login"
                        class="nav-button"
                        aria-label="Iniciar sesión">
-                        <span>●</span>
+                        <span>👤</span>
                     </a>
                     <a href="/register"
                        class="nav-button nav-power"
                        aria-label="Registrarse">
-                        <span>↗</span>
+                        <span>🔓</span>
                     </a>
                 </NotAuthorized>
             </AuthorizeView>
@@ -213,91 +213,51 @@
             </article>
         </section>
 
-        <section class="destinos-section" id="donde-ir">
-            <div class="section-heading">
-                <div>
-                    <span class="section-eyebrow">
-                        Descubre Boyacá
-                    </span>
+        
+            
+               <section class="destinos-page" id="donde-ir">
 
-                    <h2>
-                        ¿Dónde quieres ir?
-                    </h2>
+    <div class="destinos-heading">
+        <span class="eyebrow">DESCUBRE BOYACÁ</span>
+        <h1>¿Dónde quieres ir?</h1>
+        <p>Explora los municipios registrados y encuentra el destino ideal para tu próxima aventura.</p>
+    </div>
+
+    <div class="destinos-marquee" aria-label="Sitios turísticos mejor reseñados">
+    <div class="destinos-track @(carruselPausado ? "pausado" : "")"
+     @onmouseenter="() => carruselPausado = true"
+     @onmouseleave="() => carruselPausado = false"
+     @onclick="() => carruselPausado = !carruselPausado">
+    @for (int i = 0; i < sitiosParaMarquee.Count; i++)
+    {        
+        var sitio = sitiosParaMarquee[i];
+        <article class="destino-frame">
+            <a href="@($"/municipios/{sitio.IdMunicipio}")" class="destino-link" aria-label="Ver @sitio.Nombre">
+                <div class="destino-image-wrap">
+                    <img src="@sitio.ImagenUrl" alt="@sitio.Nombre" class="destino-image" />
+                    <span class="destino-number">@(((i % sitiosTuristicos.Count) + 1).ToString("00"))</span>
                 </div>
-
-                <p>
-                    Explora los municipios registrados y encuentra el destino
-                    ideal para tu próxima aventura.
-                </p>
-            </div>
-
-            @if (cargandoMunicipios)
-            {
-                <div class="destinos-grid">
-                    @for (var i = 0; i < 6; i++)
-                    {
-                        <div class="destino-skeleton"></div>
-                    }
+                <div class="destino-content">
+                    <div class="destino-topline">
+                        <h2>@sitio.Nombre</h2>
+                        <span class="destino-rating">@(sitio.Calificacion.HasValue ? $"★ {sitio.Calificacion:0.0}" : "Nuevo")</span>
+                    </div>
+                    <span class="destino-category">@sitio.NombreMunicipio</span>
+                    <span class="destino-cta">Ver municipio <span aria-hidden="true">→</span></span>
                 </div>
-            }
-            else if (municipios.Count == 0)
-            {
-                <div class="estado-vacio">
-                    <h3>No hay municipios disponibles</h3>
-                    <p>
-                        Cuando existan municipios activos aparecerán aquí.
-                    </p>
-                </div>
-            }
-            else
-            {
-                <div class="destinos-grid">
-                    @foreach (var municipio in municipios)
-                    {
-                        <article class="destino-card"
-                                 @onclick="() => AbrirMunicipio(municipio.IdMunicipio)"
-                                 tabindex="0"
-                                 role="button">
+            </a>
+        </article>
+    }
+    
+</div>
+    </div>
 
-                            <div class="destino-imagen">
-                                @if (!string.IsNullOrWhiteSpace(municipio.ImagenUrl))
-                                {
-                                    <img src="@municipio.ImagenUrl"
-                                         alt="@municipio.Nombre" />
-                                }
-                                else
-                                {
-                                    <div class="destino-imagen-respaldo">
-                                        @municipio.Nombre.Substring(0, 1)
-                                    </div>
-                                }
-
-                                <span class="destino-numero">
-                                    @municipio.IdMunicipio.ToString("D2")
-                                </span>
-                            </div>
-
-                            <div class="destino-contenido">
-                                <h3>@municipio.Nombre</h3>
-
-                                @if (municipio.Etiquetas is not null &&
-                                     municipio.Etiquetas.Any())
-                                {
-                                    <div class="destino-etiquetas">
-                                        @foreach (var etiqueta in municipio.Etiquetas.Take(3))
-                                        {
-                                            <span>@etiqueta</span>
-                                        }
-                                    </div>
-                                }
-
-                                <span class="destino-enlace">
-                                    Ver municipio →
-                                </span>
-                            </div>
-                        </article>
-                    }
-                </div>
+    <div class="destinos-footer">
+        <span></span>
+        <p>Los destinos favoritos de nuestros viajeros</p>
+        <span></span>
+    </div>
+</section>
 
                 <div class="centrar-boton">
                     <a href="/municipios"
@@ -306,7 +266,7 @@
                     </a>
                 </div>
             }
-        </section>
+        
 
         <section class="gustos-section" id="gustos">
             <div class="section-heading gustos-heading">
@@ -448,6 +408,36 @@
         </section>
     </main>
 
+<section class="valores-section">
+    <div class="valores-grid">
+        <div class="valor-card">
+            <span class="valor-icono">🗺️</span>
+            <h3>Catálogo completo</h3>
+            <p>Información verificada de los municipios: historia, clima, fechas y actividades.</p>
+        </div>
+        <div class="valor-card">
+            <span class="valor-icono">🧭</span>
+            <h3>Itinerarios a tu medida</h3>
+            <p>Arma tu recorrido entre varios pueblos y compártelo con quien quieras viajar contigo.</p>
+        </div>
+        <div class="valor-card">
+            <span class="valor-icono">🏨</span>
+            <h3>Negocios verificados</h3>
+            <p>Hoteles, restaurantes y artesanos aprobados por la administración de cada municipio.</p>
+        </div>
+        <div class="valor-card">
+            <span class="valor-icono">⭐</span>
+            <h3>Reseñas reales</h3>
+            <p>Opiniones de otros viajeros para que decidas con información de primera mano.</p>
+        </div>
+    </div>
+</section>
+
+<section class="cta-final">
+    <h2>Tu próximo viaje por Boyacá empieza aquí</h2>
+    <p>Crea tu cuenta gratis y guarda tus municipios y negocios favoritos.</p>
+    <a href="/usuarios/register" class="boton-principal">Crear cuenta gratis</a>
+</section>
     <footer class="inicio-footer">
         <div>
             <img src="images/turismo-conecta-logo.png"
@@ -468,19 +458,23 @@
 
     <CondorChat />
 </div>
-
 @code {
-    private string textoBusqueda = string.Empty;
+    private string textoBusqueda = "";
     private string zonaMapa = "Colombia";
-
+    private bool carruselPausado = false;
     private bool mostrarBuscador;
     private bool cargandoMunicipios = true;
     private bool cargandoEtiquetas = true;
+    private bool mapaInicializado;
 
     private int? totalMunicipios;
 
-    private List<MunicipioListadoDto> municipios = new();
+    private List<MunicipioListadoDto> todosMunicipios = new();
+    private List<MunicipioListadoDto> municipiosMostrados = new();
     private List<EtiquetaDto> etiquetas = new();
+    private List<SitioTuristicoDto> sitiosTuristicos = new();
+    private List<SitioTuristicoDto> sitiosParaMarquee => sitiosTuristicos.Concat(sitiosTuristicos).ToList();
+    private string? mensajeBusqueda;
 
     // Redirige al dashboard según el rol del usuario autenticado
     private async Task IrAlDashboard()
@@ -512,24 +506,23 @@
     {
         await CargarMunicipios();
         await CargarEtiquetas();
+        await CargarSitiosTuristicos();
     }
 
     private async Task CargarMunicipios()
     {
         cargandoMunicipios = true;
-
         try
         {
             var resultado = await ApiService.ListarAsync(1, 200);
-
-            municipios = resultado?.Items?.ToList()
-                ?? new List<MunicipioListadoDto>();
-
+            todosMunicipios = resultado?.Items?.ToList() ?? new List<MunicipioListadoDto>();
+            municipiosMostrados = todosMunicipios;
             totalMunicipios = resultado?.Total;
         }
         catch
         {
-            municipios = new List<MunicipioListadoDto>();
+            todosMunicipios = new List<MunicipioListadoDto>();
+            municipiosMostrados = new List<MunicipioListadoDto>();
             totalMunicipios = 0;
         }
         finally
@@ -541,13 +534,10 @@
     private async Task CargarEtiquetas()
     {
         cargandoEtiquetas = true;
-
         try
         {
             var resultado = await EtiquetaService.ListarAsync();
-
-            etiquetas = resultado?.ToList()
-                ?? new List<EtiquetaDto>();
+            etiquetas = resultado?.ToList() ?? new List<EtiquetaDto>();
         }
         catch
         {
@@ -559,43 +549,34 @@
         }
     }
 
-    private bool mapaInicializado;
+    private async Task CargarSitiosTuristicos()
+    {
+        try { sitiosTuristicos = await SitioService.ListarAsync(); }
+        catch { sitiosTuristicos = new(); }
+    }
+
+    private List<string> ObtenerAtractivosPorDefecto(string nombre)
+    {
+        if (nombre.Contains("Gámeza", StringComparison.OrdinalIgnoreCase))
+            return new List<string> { "Cañón de Gámeza", "Laguna Negra", "Piedra Pintada Muisca", "Parque Minero Tradicional" };
+        if (nombre.Contains("Ráquira", StringComparison.OrdinalIgnoreCase))
+            return new List<string> { "Plaza de Cerámica", "Monasterio La Candelaria", "Talleres de Alfarería Tradicional" };
+        return new List<string> { "Plaza Principal", "Templo Colonial", "Senderos Ecoturísticos", "Mirador del Valle" };
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (mapaInicializado)
-        {
-            return;
-        }
+        if (!firstRender || mapaInicializado || cargandoMunicipios) return;
 
-        if (cargandoMunicipios)
-        {
-            return;
-        }
-
-        var municipiosParaMapa = municipios
-            .Where(municipio =>
-                municipio.Latitud.HasValue &&
-                municipio.Longitud.HasValue)
-            .Select(municipio => new
-            {
-                id = municipio.IdMunicipio,
-                nombre = municipio.Nombre,
-                latitud = (double)municipio.Latitud.Value,
-                longitud = (double)municipio.Longitud.Value
-            })
+        var municipiosParaMapa = todosMunicipios
+            .Where(m => m.Latitud.HasValue && m.Longitud.HasValue)
+            .Select(m => new { id = m.IdMunicipio, nombre = m.Nombre, latitud = m.Latitud!.Value, longitud = m.Longitud!.Value })
             .ToList();
 
         try
         {
-            await JS.InvokeVoidAsync(
-                "TurismoConectaMapa.inicializar",
-                municipiosParaMapa,
-                DotNetObjectReference.Create(this));
-
-            await JS.InvokeVoidAsync(
-                "TurismoConectaMapa.activarScroll");
-
+            await JS.InvokeVoidAsync("TurismoConectaMapa.inicializar", municipiosParaMapa, DotNetObjectReference.Create(this));
+            await JS.InvokeVoidAsync("TurismoConectaMapa.activarScroll");
             mapaInicializado = true;
         }
         catch (Exception ex)
@@ -604,40 +585,70 @@
         }
     }
 
-    private void MostrarBuscador()
-    {
-        mostrarBuscador = !mostrarBuscador;
-    }
+    private void MostrarBuscador() => mostrarBuscador = !mostrarBuscador;
 
     private void DetectarEnterBusqueda(KeyboardEventArgs evento)
     {
-        if (evento.Key == "Enter")
-        {
-            Buscar();
-        }
+        if (evento.Key == "Enter") Buscar();
     }
 
     private void Buscar()
     {
-        if (string.IsNullOrWhiteSpace(textoBusqueda))
+        var texto = textoBusqueda?.Trim() ?? "";
+
+        if (string.IsNullOrWhiteSpace(texto))
         {
-            Nav.NavigateTo("/municipios");
+            LimpiarBusqueda();
             return;
         }
 
-        Nav.NavigateTo(
-            $"/municipios?texto={Uri.EscapeDataString(textoBusqueda.Trim())}");
+        var porNombre = todosMunicipios
+            .Where(m => m.Nombre.Contains(texto, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        var porAtractivo = todosMunicipios
+            .Where(m => ObtenerAtractivosPorDefecto(m.Nombre).Any(a => a.Contains(texto, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+
+        var combinados = porNombre.Union(porAtractivo).ToList();
+
+        if (combinados.Count == 0)
+        {
+            municipiosMostrados = new();
+            mensajeBusqueda = $"No encontramos nada para \"{texto}\". Prueba con el nombre de un pueblo o un sitio, como \"Plaza\" o \"Laguna\".";
+        }
+        else
+        {
+            municipiosMostrados = combinados;
+            mensajeBusqueda = (porAtractivo.Any() && !porNombre.Any())
+                ? $"\"{texto}\" está en: {string.Join(", ", porAtractivo.Select(m => m.Nombre))}"
+                : null;
+        }
+
+        _ = ActualizarMapaConFiltro(municipiosMostrados);
     }
 
-    private void AbrirMunicipio(int idMunicipio)
+    private void LimpiarBusqueda()
     {
-        Nav.NavigateTo($"/municipios/{idMunicipio}");
+        textoBusqueda = "";
+        municipiosMostrados = todosMunicipios;
+        mensajeBusqueda = null;
+        _ = ActualizarMapaConFiltro(municipiosMostrados);
     }
 
-    private void FiltrarPorEtiqueta(int idEtiqueta)
+    private async Task ActualizarMapaConFiltro(List<MunicipioListadoDto> lista)
     {
-        Nav.NavigateTo($"/municipios?idEtiqueta={idEtiqueta}");
+        var paraMapa = lista
+            .Where(m => m.Latitud.HasValue && m.Longitud.HasValue)
+            .Select(m => new { id = m.IdMunicipio, nombre = m.Nombre, latitud = m.Latitud!.Value, longitud = m.Longitud!.Value })
+            .ToList();
+
+        await JS.InvokeVoidAsync("TurismoConectaMapa.actualizarMarcadores", paraMapa);
     }
+
+    private void AbrirMunicipio(int idMunicipio) => Nav.NavigateTo($"/municipios/{idMunicipio}");
+
+    private void FiltrarPorEtiqueta(int idEtiqueta) => Nav.NavigateTo($"/municipios?idEtiqueta={idEtiqueta}");
 
     [JSInvokable]
     public void ActualizarZonaMapa(string zona)

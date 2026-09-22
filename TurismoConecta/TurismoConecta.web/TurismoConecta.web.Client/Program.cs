@@ -29,6 +29,12 @@ builder.Services.AddHttpClient<EtiquetaApiService>(client =>
 })
 .AddHttpMessageHandler<AuthorizationMessageHandler>();
 
+builder.Services.AddHttpClient<SitioTuristicoApiService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7078");
+})
+.AddHttpMessageHandler<AuthorizationMessageHandler>();
+
 builder.Services.AddHttpClient<AsistenteApiService>(client =>
 {
     client.BaseAddress = new Uri("https://localhost:7078");
