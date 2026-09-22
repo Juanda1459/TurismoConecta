@@ -14,6 +14,14 @@
 </HeadContent>
 
 <div class="lista-page">
+    <header class="selva-form-nav">
+        <button class="nav-back-link" @onclick="Volver">
+            <span class="nav-back-arrow">←</span> Volver al Panel
+        </button>
+        <a href="/" class="logo-marco-dorado" title="TurismoConecta">
+            <img src="images/turismo-conecta-logo.png" alt="TurismoConecta" class="topbar-logo-img" />
+        </a>
+    </header>
 
     @* PANTALLA DE ESPERA *@
     @if (cargando)
@@ -40,7 +48,12 @@
     {
         <div class="lista-container">
             <div class="estado-vacio">
-                <span class="estado-icono">🔒</span>
+                <div class="estado-icono-wrap">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                </div>
                 <h3>Inicia sesión para ver tus itinerarios</h3>
                 <p>Guarda y organiza tus rutas personalizadas por Boyacá en tu cuenta.</p>
                 <button class="btn-accion-primaria" @onclick='() => Nav.NavigateTo("/login")'>
@@ -55,7 +68,13 @@
     {
         <div class="lista-container">
             <div class="estado-vacio">
-                <span class="estado-icono">⚠️</span>
+                <div class="estado-icono-wrap">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
                 <h3>No pudimos cargar tus itinerarios</h3>
                 <p>Revisa tu conexión e intenta nuevamente.</p>
                 <button class="btn-accion-primaria" @onclick="CargarItinerarios">Reintentar</button>
@@ -72,7 +91,13 @@
                 <h1 class="lista-titulo">Mis Itinerarios</h1>
             </header>
             <div class="estado-vacio">
-                <span class="estado-icono">🗺️</span>
+                <div class="estado-icono-wrap">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+                        <line x1="8" y1="2" x2="8" y2="18"/>
+                        <line x1="16" y1="6" x2="16" y2="22"/>
+                    </svg>
+                </div>
                 <h3>Aún no tienes itinerarios</h3>
                 <p>Explora los municipios de Boyacá y arma tu primera ruta.</p>
                 <button class="btn-accion-primaria" @onclick='() => Nav.NavigateTo("/municipios")'>
@@ -104,7 +129,12 @@
                 {
                     <div class="card-itinerario-lista" @onclick="() => VerDetalle(iti.IdItinerario)">
                         <div class="card-iti-top">
-                            <div class="card-iti-icono">🏔️</div>
+                            <div class="card-iti-icono">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+                                </svg>
+                            </div>
                             <span class="badge-ruta-tag">Ruta</span>
                         </div>
 
@@ -115,24 +145,45 @@
                                 @if (iti.FechaInicio.HasValue)
                                 {
                                     <span class="meta-item">
-                                        📅 @iti.FechaInicio.Value.ToString("dd MMM yyyy")
+                                        <svg class="meta-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                            <line x1="16" y1="2" x2="16" y2="6"/>
+                                            <line x1="8" y1="2" x2="8" y2="6"/>
+                                            <line x1="3" y1="10" x2="21" y2="10"/>
+                                        </svg>
+                                        <span>@iti.FechaInicio.Value.ToString("dd MMM yyyy")</span>
                                         @if (iti.FechaFin.HasValue)
                                         {
-                                            <text> → @iti.FechaFin.Value.ToString("dd MMM yyyy")</text>
+                                            <span>→ @iti.FechaFin.Value.ToString("dd MMM yyyy")</span>
                                         }
                                     </span>
                                 }
-                                <span class="meta-item">📍 @iti.CantidadParadas municipio@(iti.CantidadParadas != 1 ? "s" : "")</span>
+                                <span class="meta-item">
+                                    <svg class="meta-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                        <circle cx="12" cy="10" r="3"/>
+                                    </svg>
+                                    <span>@iti.CantidadParadas municipio@(iti.CantidadParadas != 1 ? "s" : "")</span>
+                                </span>
                             </div>
                         </div>
 
                         <div class="card-iti-footer" @onclick:stopPropagation="true">
                             <button class="btn-iti-ver" @onclick="() => VerDetalle(iti.IdItinerario)">
-                                Ver detalle →
+                                <span>Ver detalle</span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                    <polyline points="12 5 19 12 12 19"/>
+                                </svg>
                             </button>
                             <button class="btn-iti-eliminar" @onclick="() => Eliminar(iti.IdItinerario)"
                                     title="Eliminar itinerario">
-                                🗑
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    <line x1="10" y1="11" x2="10" y2="17"/>
+                                    <line x1="14" y1="11" x2="14" y2="17"/>
+                                </svg>
                             </button>
                         </div>
                     </div>
@@ -181,5 +232,18 @@
             if (exito) await CargarItinerarios();
             else await JS.InvokeVoidAsync("alert", "No se pudo eliminar el itinerario.");
         }
+    }
+
+    private async Task Volver()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.IsInRole("AdminGeneral"))
+            Nav.NavigateTo("/admin/dashboard");
+        else if (authState.User.IsInRole("AdminMunicipio"))
+            Nav.NavigateTo("/municipio/dashboard");
+        else if (authState.User.IsInRole("AdminComercio"))
+            Nav.NavigateTo("/comercio/dashboard");
+        else
+            Nav.NavigateTo("/");
     }
 }

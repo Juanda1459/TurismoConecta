@@ -1,10 +1,13 @@
-﻿@page "/login"
+@page "/login"
 @layout EmptyLayout
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @using TurismoConecta.web.Client.Models
+@using TurismoConecta.web.Client.Services
+@using Microsoft.AspNetCore.Components.Authorization
 @inject HttpClient Http
 @inject NavigationManager NavManager
 @inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthStateProvider
 
 <div class="page-background">
     <div class="premium-card">
@@ -117,10 +120,23 @@
 
                 await JS.InvokeVoidAsync("guardarToken", respuesta.Token);
 
-                
-                // Redirigir al perfil después del login exitoso
-                await Task.Delay(1500); // Pausa breve para que el usuario vea el mensaje de bienvenida
-                NavManager.NavigateTo("/perfil");
+                if (AuthStateProvider is JwtAuthStateProvider jwtProvider)
+                {
+                    jwtProvider.NotificarCambioAutenticacion();
+                }
+
+                // Pausa breve para que el usuario vea el mensaje de bienvenida
+                await Task.Delay(800);
+
+                // Redirigir al dashboard según el rol del usuario
+                var destino = respuesta.Rol switch
+                {
+                    "AdminGeneral" or "AdminPrincipal" => "/admin/dashboard",
+                    "AdminMunicipio"                   => "/municipio/dashboard",
+                    "AdminComercio" or "AdminEstablecimiento" => "/comercio/dashboard",
+                    _                                  => "/"   // Turista → portal principal
+                };
+                NavManager.NavigateTo(destino, forceLoad: true);
 
 
 

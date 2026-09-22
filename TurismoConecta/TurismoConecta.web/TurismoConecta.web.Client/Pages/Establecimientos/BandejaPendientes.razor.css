@@ -1,0 +1,196 @@
+.panel-comercio-wrap {
+    min-height: 100vh;
+    background-color: #f8faf9;
+    color: #1a2e22;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.panel-topbar {
+    background: #0d2818;
+    color: #fff;
+    padding: 0.85rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.topbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-volver-inicio {
+    background: transparent;
+    border: none;
+    color: #a3c9a8;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+    .btn-volver-inicio:hover {
+        color: #fff;
+    }
+
+.topbar-brand-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.topbar-logo-img {
+    height: 34px;
+    width: auto;
+    object-fit: contain;
+}
+
+.user-role-tag {
+    background: rgba(255, 255, 255, 0.12);
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    color: #e4eef0;
+}
+
+.panel-cuerpo {
+    max-width: 1200px;
+    margin: 2.5rem auto;
+    padding: 0 1.5rem;
+}
+
+.panel-header-editorial {
+    margin-bottom: 2rem;
+}
+
+.eyebrow {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #2d6a4f;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.3rem;
+}
+
+.titulo-editorial {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.8rem;
+    margin: 0;
+    font-weight: 700;
+    color: #0b1d13;
+}
+
+.bajada {
+    color: #52796f;
+    margin: 0.4rem 0 0;
+    font-size: 1rem;
+}
+
+/* Tabla de revisión */
+.tabla-contenedor {
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid #e0ebe3;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.tabla-pendientes {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+    .tabla-pendientes thead {
+        background: #f4f7f5;
+        border-bottom: 1px solid #d8e5dc;
+    }
+
+    .tabla-pendientes th {
+        padding: 1rem 1.2rem;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #495057;
+        font-weight: 700;
+    }
+
+    .tabla-pendientes td {
+        padding: 1.1rem 1.2rem;
+        border-bottom: 1px solid #edf3ef;
+        font-size: 0.92rem;
+        color: #212529;
+    }
+
+.td-nombre {
+    font-weight: 600;
+    color: #0d2818;
+}
+
+.badge-cat-table {
+    background: #e8f5e9;
+    color: #1b4332;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.td-fecha {
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+.td-acciones {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.btn-aprobar {
+    background: #2d6a4f;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-right: 0.5rem;
+    font-size: 0.85rem;
+    transition: background 0.15s ease;
+}
+
+    .btn-aprobar:hover {
+        background: #1b4332;
+    }
+
+.btn-rechazar {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.15s ease;
+}
+
+    .btn-rechazar:hover {
+        background: #dc2626;
+        color: #fff;
+    }
+
+.caja-vacia-editorial {
+    background: #fff;
+    border: 2px dashed #cfe0d5;
+    border-radius: 16px;
+    text-align: center;
+    padding: 4rem 2rem;
+    margin-top: 2rem;
+}
+
+.icono-vacio {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+}

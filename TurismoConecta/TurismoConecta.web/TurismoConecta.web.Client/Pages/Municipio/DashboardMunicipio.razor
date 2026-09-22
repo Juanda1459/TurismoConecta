@@ -1,0 +1,269 @@
+@page "/municipio/dashboard"
+@layout EmptyLayout
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@using TurismoConecta.web.Client.Services
+@using TurismoConecta.web.Client.Models
+@inject NegocioApiService NegocioService
+@inject MunicipioApiService MunicipioService
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JS
+
+<PageTitle>Panel Municipal | TurismoConecta</PageTitle>
+
+<HeadContent>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="Pages/Municipio/DashboardMunicipio.razor.css" />
+</HeadContent>
+
+<AuthorizeView Roles="AdminMunicipio,AdminGeneral,AdminPrincipal">
+    <Authorized Context="authContext">
+        <div class="dashboard-muni-page">
+
+            <!-- TOPBAR -->
+            <header class="muni-topbar">
+                <div class="muni-topbar-inner">
+                    <a href="/admin/dashboard" class="muni-logo logo-marco-dorado" title="TurismoConecta">
+                        <img src="images/turismo-conecta-logo.png" alt="Turismo Conecta" />
+                    </a>
+                    <nav class="muni-nav-links">
+                        <a href="/establecimientos/pendientes" class="muni-nav-link activo">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <span>Bandeja Pendientes</span>
+                        </a>
+                        <a href="/municipios" class="muni-nav-link">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+                            <span>Ver Municipios</span>
+                        </a>
+                        <a href="/itinerarios" class="muni-nav-link">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+                            <span>Itinerarios</span>
+                        </a>
+                    </nav>
+                    <div class="muni-topbar-right">
+                        <div class="badge-admin-info">
+                            <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(authContext.User.Identity?.Name ?? "Gestor")&background=213b31&color=fff&size=80" alt="Foto" class="admin-avatar-topbar"
+                                 onerror="this.onerror=null;this.style.display='none';" />
+                            <span class="admin-label-prefijo">Administrador:</span>
+                            <span class="admin-nombre-valor">@(authContext.User.Identity?.Name ?? "Gestor")</span>
+                            <span class="admin-rol-tag">@(authContext.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? authContext.User.FindFirst("role")?.Value ?? "Municipio")</span>
+                        </div>
+                        <button type="button" class="btn-cerrar-sesion" @onclick="CerrarSesion" title="Cerrar Sesión">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                            <span>Salir</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="muni-main">
+
+                <!-- HERO MUNICIPIO -->
+                <div class="muni-hero">
+                    <div class="muni-hero-content">
+                        <span class="eyebrow">Panel de Gestión</span>
+                        <h1 class="titulo-editorial">Gestión Turística Municipal</h1>
+                        <p class="bajada">Supervisa y aprueba los establecimientos registrados en tu municipio. Mantén la calidad del turismo local.</p>
+                    </div>
+                    <div class="muni-hero-actions">
+                        <button class="btn-primario-muni" @onclick='() => Nav.NavigateTo("/establecimientos/pendientes")'>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: -2px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            Ver Bandeja de Pendientes
+                        </button>
+                        <button class="btn-secundario-muni" @onclick='() => Nav.NavigateTo("/municipios")'>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: -2px;"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>
+                            Explorar Municipios
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPIs MUNICIPIO -->
+                @if (cargando)
+                {
+                    <div class="cargando-box">
+                        <div class="spinner-muni"></div>
+                        <p>Cargando estadísticas del municipio...</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="muni-kpi-grid">
+                        <div class="muni-kpi aprobados">
+                            <div class="muni-kpi-ico">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            </div>
+                            <div class="muni-kpi-num">@cantAprobados</div>
+                            <div class="muni-kpi-lbl">Aprobados y Activos</div>
+                        </div>
+                        <div class="muni-kpi pendientes-kpi">
+                            <div class="muni-kpi-ico">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            </div>
+                            <div class="muni-kpi-num">@cantPendientes</div>
+                            <div class="muni-kpi-lbl">Esperando Revisión</div>
+                        </div>
+                        <div class="muni-kpi rechazados">
+                            <div class="muni-kpi-ico">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                            </div>
+                            <div class="muni-kpi-num">@cantRechazados</div>
+                            <div class="muni-kpi-lbl">Rechazados</div>
+                        </div>
+                        <div class="muni-kpi total">
+                            <div class="muni-kpi-ico">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            </div>
+                            <div class="muni-kpi-num">@(cantAprobados + cantPendientes + cantRechazados)</div>
+                            <div class="muni-kpi-lbl">Total Registrados</div>
+                        </div>
+                    </div>
+
+                    <!-- PANEL DOBLE -->
+                    <div class="muni-panel-doble">
+
+                        <!-- Pendientes urgentes -->
+                        <div class="muni-card">
+                            <div class="muni-card-header">
+                                <h2 class="muni-card-titulo">
+                                    Solicitudes Pendientes
+                                    @if (cantPendientes > 0)
+                                    {
+                                        <span class="badge-urgente">@cantPendientes</span>
+                                    }
+                                </h2>
+                                <button class="btn-link-muni" @onclick='() => Nav.NavigateTo("/establecimientos/pendientes")'>
+                                    Gestionar →
+                                </button>
+                            </div>
+
+                            @if (!pendientes.Any())
+                            {
+                                <div class="muni-vacio">
+                                    <div class="muni-vacio-ico">
+                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                    </div>
+                                    <p>Al día. No hay solicitudes pendientes por revisar.</p>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="muni-lista-pendientes">
+                                    @foreach (var p in pendientes.Take(5))
+                                    {
+                                        <div class="muni-pendiente-item" @onclick='() => Nav.NavigateTo("/establecimientos/pendientes")'>
+                                            <div class="muni-pendiente-info">
+                                                <span class="muni-pendiente-nombre">@p.Nombre</span>
+                                                <span class="muni-pendiente-meta">@p.NombreCategoria · @p.NombrePropietario</span>
+                                            </div>
+                                            <span class="muni-pendiente-fecha">@(p.FechaRegistro?.ToString("dd/MM") ?? "-")</span>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Accesos rápidos -->
+                        <div class="muni-card">
+                            <h2 class="muni-card-titulo">Herramientas de Gestión</h2>
+                            <div class="muni-herramientas">
+                                <button class="muni-herramienta-btn" @onclick='() => Nav.NavigateTo("/establecimientos/pendientes")'>
+                                    <div class="muni-tool-ico">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    </div>
+                                    <div>
+                                        <div class="muni-tool-titulo">Bandeja Pendientes</div>
+                                        <div class="muni-tool-desc">Aprobar o rechazar solicitudes de comerciantes</div>
+                                    </div>
+                                </button>
+                                <button class="muni-herramienta-btn" @onclick='() => Nav.NavigateTo("/municipios")'>
+                                    <div class="muni-tool-ico">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+                                    </div>
+                                    <div>
+                                        <div class="muni-tool-titulo">Municipios</div>
+                                        <div class="muni-tool-desc">Administrar fichas y galería de municipios</div>
+                                    </div>
+                                </button>
+                                <button class="muni-herramienta-btn" @onclick='() => Nav.NavigateTo("/itinerarios")'>
+                                    <div class="muni-tool-ico">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+                                    </div>
+                                    <div>
+                                        <div class="muni-tool-titulo">Itinerarios</div>
+                                        <div class="muni-tool-desc">Ver rutas y recorridos de los turistas</div>
+                                    </div>
+                                </button>
+                                <button class="muni-herramienta-btn" @onclick='() => Nav.NavigateTo("/perfil")'>
+                                    <div class="muni-tool-ico">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                                    </div>
+                                    <div>
+                                        <div class="muni-tool-titulo">Mi Perfil</div>
+                                        <div class="muni-tool-desc">Datos de tu cuenta y configuración</div>
+                                    </div>
+                                </button>
+                                <button class="muni-herramienta-btn" @onclick='() => Nav.NavigateTo("/")'>
+                                    <div class="muni-tool-ico">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                                    </div>
+                                    <div>
+                                        <div class="muni-tool-titulo">Portal Público</div>
+                                        <div class="muni-tool-desc">Ver cómo ven los turistas la plataforma</div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </main>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="sin-acceso-muni">
+            <h2>Acceso Restringido</h2>
+            <p>Se requiere cuenta de <strong>Administrador Municipal</strong>.</p>
+            <button @onclick='() => Nav.NavigateTo("/login")'>Iniciar Sesión</button>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private bool cargando = true;
+    private int cantAprobados;
+    private int cantPendientes;
+    private int cantRechazados;
+    private List<NegocioPendienteAprobacionDto> pendientes = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        cargando = true;
+        try
+        {
+            pendientes = await NegocioService.ListarPendientesAsync();
+            cantPendientes = pendientes.Count;
+            // Nota: para aprobados/rechazados se podría agregar endpoint futuro
+            // Por ahora mostramos los pendientes que tenemos
+        }
+        catch { }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private async Task CerrarSesion()
+    {
+        await JS.InvokeVoidAsync("borrarToken");
+        if (AuthStateProvider is JwtAuthStateProvider jwt)
+        {
+            jwt.NotificarCambioAutenticacion();
+        }
+        Nav.NavigateTo("/login", forceLoad: true);
+    }
+}

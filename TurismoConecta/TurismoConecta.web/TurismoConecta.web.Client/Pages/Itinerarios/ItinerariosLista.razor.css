@@ -13,6 +13,56 @@
     color: var(--texto-principal);
 }
 
+.selva-form-nav {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--borde-sutil);
+}
+
+.nav-back-link {
+    background: none;
+    border: none;
+    color: var(--texto-principal);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: opacity 0.2s ease;
+}
+
+.nav-back-link:hover {
+    opacity: 0.6;
+}
+
+.nav-brand-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+}
+
+.nav-brand-logo {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
+}
+
+.nav-label-admin {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--acento-tierra);
+    font-weight: 600;
+}
+
 .lista-container {
     max-width: 1120px;
     margin: 0 auto;
@@ -101,53 +151,70 @@
 }
 
 .card-iti-top {
-    background: linear-gradient(135deg, #213B31 0%, #34604E 100%);
-    padding: 24px 20px 20px;
+    background: #182620;
+    padding: 20px 22px;
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .card-iti-icono {
-    font-size: 2rem;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .badge-ruta-tag,
 .badge-compartido {
     font-size: 0.68rem;
-    font-weight: 700;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #213B31;
-    background: #E0A94D;
-    padding: 4px 10px;
+    letter-spacing: 1.5px;
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 5px 12px;
     border-radius: 20px;
 }
 
 .card-iti-body {
-    padding: 20px 22px 16px;
+    padding: 22px 22px 18px;
     flex: 1;
 }
 
 .card-iti-nombre {
     font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 1.45rem;
+    font-size: 1.5rem;
     font-weight: 600;
     color: var(--texto-principal);
-    margin: 0 0 12px;
-    line-height: 1.2;
+    margin: 0 0 14px;
+    line-height: 1.25;
 }
 
 .card-iti-meta {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 8px;
 }
 
 .meta-item {
-    font-size: 0.80rem;
+    font-size: 0.82rem;
     color: var(--texto-secundario);
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.meta-svg {
+    color: #4A5B53;
+    flex-shrink: 0;
 }
 
 .card-iti-footer {
@@ -157,6 +224,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 10px;
+    background: #FAFAF7;
 }
 
 .btn-iti-ver {
@@ -167,30 +235,35 @@
     font-weight: 700;
     cursor: pointer;
     padding: 0;
-    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
 }
 
-.btn-iti-ver:hover { opacity: 0.65; }
+.btn-iti-ver:hover {
+    color: #000;
+    transform: translateX(3px);
+}
 
 .btn-iti-eliminar {
-    background: none;
+    background: #FFFFFF;
     border: 1px solid var(--borde-sutil);
-    border-radius: 50%;
+    border-radius: 8px;
     width: 32px;
     height: 32px;
     cursor: pointer;
-    font-size: 0.85rem;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    color: var(--texto-secundario);
+    color: #8A9790;
 }
 
 .btn-iti-eliminar:hover {
-    background: #FDEDEC;
-    border-color: #C0392B;
-    color: #C0392B;
+    background: #FFF1F0;
+    border-color: #FFA39E;
+    color: #CF1322;
 }
 
 /* ── ESTADO VACÍO / ERROR ── */
@@ -201,10 +274,16 @@
     margin: 0 auto;
 }
 
-.estado-icono {
-    font-size: 3rem;
-    display: block;
-    margin-bottom: 20px;
+.estado-icono-wrap {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: #EFECE6;
+    color: #213B31;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
 }
 
 .estado-vacio h3 {

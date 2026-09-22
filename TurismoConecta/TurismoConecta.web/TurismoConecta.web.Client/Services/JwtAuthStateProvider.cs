@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -44,14 +44,43 @@ namespace TurismoConecta.web.Client.Services
 
                 var claims = jwt.Claims.ToList();
 
-                // Asegurar compatibilidad: si el claim se llama "role", duplicarlo como ClaimTypes.Role
-                var roleClaim = claims.FirstOrDefault(c => c.Type == "role" || c.Type == ClaimTypes.Role);
-                if (roleClaim != null && roleClaim.Type != ClaimTypes.Role)
+                // Asegurar compatibilidad de tipos de claim (role y ClaimTypes.Role)
+                var roleClaims = claims.Where(c => c.Type == "role" || c.Type == ClaimTypes.Role).ToList();
+                foreach (var rc in roleClaims)
                 {
-                    claims.Add(new Claim(ClaimTypes.Role, roleClaim.Value));
+                    if (rc.Type != ClaimTypes.Role)
+                        claims.Add(new Claim(ClaimTypes.Role, rc.Value));
+                    if (rc.Type != "role")
+                        claims.Add(new Claim("role", rc.Value));
+
+                    // Mapeo bidireccional de alias de roles
+                    if (string.Equals(rc.Value, "AdminGeneral", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(rc.Value, "AdminPrincipal", StringComparison.OrdinalIgnoreCase))
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, "AdminGeneral"));
+                        claims.Add(new Claim(ClaimTypes.Role, "AdminPrincipal"));
+                        claims.Add(new Claim("role", "AdminGeneral"));
+                        claims.Add(new Claim("role", "AdminPrincipal"));
+                    }
+                    else if (string.Equals(rc.Value, "AdminComercio", StringComparison.OrdinalIgnoreCase) ||
+                             string.Equals(rc.Value, "AdminEstablecimiento", StringComparison.OrdinalIgnoreCase))
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, "AdminComercio"));
+                        claims.Add(new Claim(ClaimTypes.Role, "AdminEstablecimiento"));
+                        claims.Add(new Claim("role", "AdminComercio"));
+                        claims.Add(new Claim("role", "AdminEstablecimiento"));
+                    }
                 }
 
-                var identity = new ClaimsIdentity(claims, "jwt", ClaimTypes.Name, ClaimTypes.Role);
+                // Asegurar compatibilidad de Name
+                var nameClaim = claims.FirstOrDefault(c => c.Type == "name" || c.Type == "unique_name" || c.Type == ClaimTypes.Name);
+                if (nameClaim != null && nameClaim.Type != ClaimTypes.Name)
+                {
+                    claims.Add(new Claim(ClaimTypes.Name, nameClaim.Value));
+                }
+
+                var distinctClaims = claims.DistinctBy(c => $"{c.Type}:{c.Value}").ToList();
+                var identity = new ClaimsIdentity(distinctClaims, "jwt", ClaimTypes.Name, ClaimTypes.Role);
                 var user = new ClaimsPrincipal(identity);
 
                 return new AuthenticationState(user);

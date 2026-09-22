@@ -17,8 +17,24 @@ namespace TurismoConecta.api.Controllers
             _usuarioService = usuarioService;
         }
 
+        [HttpGet]
+        [Authorize(Roles = "AdminGeneral,AdminPrincipal")]
+        public async Task<IActionResult> ListarUsuarios()
+        {
+            var usuarios = await _usuarioService.ListarUsuariosAsync();
+            return Ok(usuarios);
+        }
+
+        [HttpGet("roles")]
+        [Authorize(Roles = "AdminGeneral,AdminPrincipal")]
+        public async Task<IActionResult> ListarRoles()
+        {
+            var roles = await _usuarioService.ListarRolesAsync();
+            return Ok(roles);
+        }
+
         [HttpPut("asignar-rol")]
-        [Authorize(Roles = "AdminGeneral")]
+        [Authorize(Roles = "AdminGeneral,AdminPrincipal")]
         public async Task<IActionResult> AsignarRol(AssignRoleRequestDto dto)
         {
             var exito = await _usuarioService.AsignarRolAsync(dto);
@@ -27,6 +43,48 @@ namespace TurismoConecta.api.Controllers
                 return BadRequest("No se pudo asignar el rol. Verifica el idUsuario y el nombre del rol.");
 
             return Ok("Rol asignado correctamente.");
+        }
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "AdminGeneral,AdminPrincipal")]
+        public async Task<IActionResult> ActualizarUsuario(int id, UsuarioAdminEdicionDto dto)
+        {
+            var exito = await _usuarioService.ActualizarUsuarioAdminAsync(id, dto);
+
+            if (!exito)
+                return NotFound("No se encontró el usuario a actualizar.");
+
+            return Ok("Usuario actualizado correctamente.");
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "AdminGeneral,AdminPrincipal")]
+        public async Task<IActionResult> EliminarUsuario(int id)
+        {
+            if (id == ObtenerIdUsuarioActual())
+                return BadRequest("No puedes eliminar tu propia cuenta de administrador mientras estés en sesión.");
+
+            var exito = await _usuarioService.EliminarUsuarioAsync(id);
+
+            if (!exito)
+                return NotFound("No se encontró el usuario a eliminar.");
+
+            return Ok("Usuario procesado/eliminado correctamente.");
+        }
+
+        [HttpPut("{id}/estado")]
+        [Authorize(Roles = "AdminGeneral,AdminPrincipal")]
+        public async Task<IActionResult> CambiarEstado(int id, [FromBody] bool activo)
+        {
+            if (id == ObtenerIdUsuarioActual() && !activo)
+                return BadRequest("No puedes desactivar tu propia cuenta mientras estés en sesión.");
+
+            var exito = await _usuarioService.CambiarEstadoAsync(id, activo);
+
+            if (!exito)
+                return NotFound("No se encontró el usuario.");
+
+            return Ok("Estado del usuario actualizado.");
         }
 
         [HttpGet("perfil")]

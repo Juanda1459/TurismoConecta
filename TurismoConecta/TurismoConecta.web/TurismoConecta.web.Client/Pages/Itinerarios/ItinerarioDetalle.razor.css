@@ -690,3 +690,87 @@
 }
 
 .btn-guardar-iti:hover { background: #13241E; transform: translateY(-1px); }
+
+/* ── HOTELES POR ESTANCIA EN ITINERARIO ── */
+.parada-contenedor-card {
+    background: #FAFCFA;
+    border: 1px solid #E3ECE6;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 16px;
+}
+
+.hoteles-estancia-bloque {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #D6E4DB;
+}
+
+.estancia-titulo {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #2D6A4F;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.hoteles-grid-mini {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 8px;
+}
+
+.hotel-mini-item {
+    background: #FFF;
+    border: 1px solid #E1EBE4;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.hotel-mini-img {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+}
+
+.hotel-mini-info {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    justify-content: space-between;
+}
+
+.hotel-mini-nombre {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #0D2818;
+}
+
+.hotel-mini-dir {
+    font-size: 0.72rem;
+    color: #6C757D;
+}
+
+.btn-reserva-hotel-wa {
+    background: #25D366;
+    color: #FFF;
+    text-decoration: none;
+    text-align: center;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-top: 6px;
+    transition: background 0.15s;
+}
+
+.btn-reserva-hotel-wa:hover {
+    background: #1EBE5D;
+}
+
