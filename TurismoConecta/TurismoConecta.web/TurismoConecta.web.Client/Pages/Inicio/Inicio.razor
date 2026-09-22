@@ -2,6 +2,7 @@
 
 @using System.Linq
 @using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.JSInterop
 @using TurismoConecta.web.Client.Services
 
@@ -12,6 +13,7 @@
 @inject EtiquetaApiService EtiquetaService
 @inject NavigationManager Nav
 @inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Turismo Conecta | Descubre Colombia</PageTitle>
 
@@ -46,17 +48,43 @@
                 <span>🔎</span>
             </button>
 
-            <a href="/login"
-               class="nav-button"
-               aria-label="Iniciar sesión">
-                <span>👤</span>
-            </a>
-
-            <a href="/register"
-               class="nav-button nav-power"
-               aria-label="Registrarse">
-                <span>🔓</span>
-            </a>
+            <AuthorizeView>
+                <Authorized>
+                    <button type="button"
+                            class="nav-button nav-power"
+                            aria-label="Mi Panel"
+                            @onclick="IrAlDashboard"
+                            title="Ir a mi panel">
+                        <span>▦</span>
+                    </button>
+                    <a href="/perfil"
+                       class="nav-button"
+                       aria-label="Mi cuenta"
+                       title="Mi cuenta">
+                        <span>●</span>
+                    </a>
+                    <button type="button"
+                            class="nav-button"
+                            style="color: #ff9b9b; border-color: rgba(220, 53, 69, 0.4);"
+                            aria-label="Cerrar sesión"
+                            @onclick="CerrarSesion"
+                            title="Cerrar sesión">
+                        <span style="font-size: 0.8rem;">✕</span>
+                    </button>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="/login"
+                       class="nav-button"
+                       aria-label="Iniciar sesión">
+                        <span>●</span>
+                    </a>
+                    <a href="/register"
+                       class="nav-button nav-power"
+                       aria-label="Registrarse">
+                        <span>↗</span>
+                    </a>
+                </NotAuthorized>
+            </AuthorizeView>
         </div>
     </header>
 
@@ -448,6 +476,32 @@
     private List<SitioTuristicoDto> sitiosParaMarquee => sitiosTuristicos.Concat(sitiosTuristicos).ToList();
     private string? mensajeBusqueda;
 
+    // Redirige al dashboard según el rol del usuario autenticado
+    private async Task IrAlDashboard()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity?.IsAuthenticated ?? true)
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
+
+        var rol = user.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
+               ?? user.FindFirst("role")?.Value;
+
+        var destino = rol switch
+        {
+            "AdminGeneral"   => "/admin/dashboard",
+            "AdminMunicipio" => "/municipio/dashboard",
+            "AdminComercio"  => "/comercio/dashboard",
+            _                => "/perfil"
+        };
+
+        Nav.NavigateTo(destino);
+    }
+
     protected override async Task OnInitializedAsync()
     {
         await CargarMunicipios();
@@ -604,5 +658,18 @@
     }
 
     [JSInvokable]
-    public void AbrirMunicipioDesdeMapa(int idMunicipio) => AbrirMunicipio(idMunicipio);
+    public void AbrirMunicipioDesdeMapa(int idMunicipio)
+    {
+        AbrirMunicipio(idMunicipio);
+    }
+
+    private async Task CerrarSesion()
+    {
+        await JS.InvokeVoidAsync("borrarToken");
+        if (AuthStateProvider is JwtAuthStateProvider jwt)
+        {
+            jwt.NotificarCambioAutenticacion();
+        }
+        Nav.NavigateTo("/login", forceLoad: true);
+    }
 }

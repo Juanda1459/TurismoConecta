@@ -1,0 +1,442 @@
+/* ============================================
+   DASHBOARD ADMIN MUNICIPIO — TurismoConecta
+   ============================================ */
+
+.dashboard-muni-page {
+    min-height: 100vh;
+    background: #f0f5f8;
+    font-family: 'Montserrat', sans-serif;
+    color: #1a2636;
+    padding-bottom: 4rem;
+}
+
+/* ── TOPBAR ── */
+.muni-topbar {
+    background: #0d1f35;
+    padding: 0 2rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.muni-topbar-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.muni-logo img {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
+}
+
+.muni-nav-links {
+    display: flex;
+    gap: 0.25rem;
+    flex: 1;
+    margin-left: 1rem;
+}
+
+.muni-nav-link {
+    color: #93b4d4;
+    text-decoration: none;
+    font-size: 0.83rem;
+    font-weight: 500;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.muni-nav-link:hover,
+.muni-nav-link.activo {
+    background: rgba(147, 180, 212, 0.12);
+    color: #fff;
+}
+
+.muni-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: auto;
+}
+
+.badge-municipio {
+    background: rgba(59, 130, 246, 0.18);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    color: #dbeafe;
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.muni-avatar-link {
+    color: #cde3f5;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.muni-avatar-link:hover {
+    color: #fff;
+}
+
+/* ── MAIN ── */
+.muni-main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem;
+}
+
+/* ── HERO ── */
+.muni-hero {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d6a4f 100%);
+    border-radius: 18px;
+    padding: 2.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    color: #fff;
+}
+
+.muni-hero-content {}
+
+.eyebrow {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 0.4rem;
+}
+
+.titulo-editorial {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.4rem;
+    line-height: 1.15;
+}
+
+.bajada {
+    color: rgba(255,255,255,0.75);
+    font-size: 0.88rem;
+    margin: 0;
+    max-width: 480px;
+    line-height: 1.6;
+}
+
+.muni-hero-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.btn-primario-muni {
+    background: #fff;
+    color: #1e3a5f;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.btn-primario-muni:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+}
+
+.btn-secundario-muni {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+}
+
+.btn-secundario-muni:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+/* ── CARGANDO ── */
+.cargando-box {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 3rem;
+    color: #4a6680;
+}
+
+.spinner-muni {
+    width: 28px;
+    height: 28px;
+    border: 3px solid #d0e6f5;
+    border-top-color: #1e3a5f;
+    border-radius: 50%;
+    animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+    to { transform: rotate(360deg); }
+}
+
+/* ── KPI GRID ── */
+.muni-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.muni-kpi {
+    background: #fff;
+    border-radius: 14px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border-top: 4px solid transparent;
+    transition: transform 0.2s;
+}
+
+.muni-kpi:hover {
+    transform: translateY(-3px);
+}
+
+.muni-kpi.aprobados { border-top-color: #10b981; }
+.muni-kpi.pendientes-kpi { border-top-color: #f59e0b; }
+.muni-kpi.rechazados { border-top-color: #ef4444; }
+.muni-kpi.total { border-top-color: #3b82f6; }
+
+.muni-kpi-ico {
+    font-size: 1.7rem;
+    margin-bottom: 0.5rem;
+}
+
+.muni-kpi-num {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #0d1f35;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.muni-kpi-lbl {
+    font-size: 0.79rem;
+    color: #5a7a9a;
+    font-weight: 500;
+}
+
+/* ── PANEL DOBLE ── */
+.muni-panel-doble {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+@media (max-width: 768px) {
+    .muni-panel-doble {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── CARD ── */
+.muni-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.muni-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.muni-card-titulo {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0d1f35;
+    margin: 0 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.badge-urgente {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    color: #92400e;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+}
+
+.btn-link-muni {
+    background: none;
+    border: none;
+    color: #1e3a5f;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-link-muni:hover { color: #2d6a4f; }
+
+/* ── LISTA PENDIENTES ── */
+.muni-lista-pendientes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.muni-pendiente-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0.9rem;
+    border-radius: 8px;
+    background: #f7f9fc;
+    border: 1px solid #e4edf5;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.muni-pendiente-item:hover {
+    background: #e8f0f9;
+}
+
+.muni-pendiente-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.muni-pendiente-nombre {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: #0d1f35;
+}
+
+.muni-pendiente-meta {
+    font-size: 0.76rem;
+    color: #5a7a9a;
+}
+
+.muni-pendiente-fecha {
+    font-size: 0.75rem;
+    color: #8aa5bf;
+    flex-shrink: 0;
+}
+
+/* ── VACÍO ── */
+.muni-vacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2.5rem 1rem;
+    gap: 0.5rem;
+    color: #5a7a9a;
+    text-align: center;
+}
+
+.muni-vacio-ico {
+    font-size: 2rem;
+    margin-bottom: 0.25rem;
+}
+
+.muni-vacio p {
+    font-size: 0.88rem;
+    margin: 0;
+}
+
+/* ── HERRAMIENTAS ── */
+.muni-herramientas {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.muni-herramienta-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    background: #f4f8fc;
+    border: 1px solid #daeaf5;
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+
+.muni-herramienta-btn:hover {
+    background: #e5f0fa;
+    border-color: #1e3a5f;
+    transform: translateX(3px);
+}
+
+.muni-tool-ico {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.muni-tool-titulo {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: #0d1f35;
+    margin-bottom: 0.15rem;
+}
+
+.muni-tool-desc {
+    font-size: 0.75rem;
+    color: #5a7a9a;
+}
+
+/* ── SIN ACCESO ── */
+.sin-acceso-muni {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 1rem;
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    padding: 2rem;
+}
+
+.sin-acceso-muni button {
+    background: #1e3a5f;
+    color: #fff;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-top: 0.5rem;
+}

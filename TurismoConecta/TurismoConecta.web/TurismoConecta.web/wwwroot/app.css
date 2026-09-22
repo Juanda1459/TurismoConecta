@@ -444,3 +444,111 @@ h1:focus {
 .btn-itinerario:hover .btn-itinerario-flecha {
     transform: translateX(3px) !important;
 }
+
+/* ==========================================================================
+   SISTEMA DE IDENTIDAD EDITORIAL: LOGO EN RECUADRO DORADO Y BADGE DE ADMIN
+   ========================================================================== */
+.logo-marco-dorado {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 7px 20px !important;
+    background: linear-gradient(135deg, rgba(226, 173, 99, 0.18) 0%, rgba(226, 173, 99, 0.05) 100%) !important;
+    border: 1.5px solid #E2AD63 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 18px rgba(226, 173, 99, 0.22), inset 0 0 14px rgba(226, 173, 99, 0.08) !important;
+    transition: all 0.25s ease !important;
+    text-decoration: none !important;
+}
+
+.logo-marco-dorado:hover {
+    background: linear-gradient(135deg, rgba(226, 173, 99, 0.26) 0%, rgba(226, 173, 99, 0.1) 100%) !important;
+    border-color: #F8D9A8 !important;
+    box-shadow: 0 6px 24px rgba(226, 173, 99, 0.35), inset 0 0 18px rgba(226, 173, 99, 0.15) !important;
+    transform: translateY(-1px) !important;
+}
+
+.topbar-logo-img,
+.nav-brand-logo {
+    height: 48px !important;
+    width: auto !important;
+    object-fit: contain !important;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5)) !important;
+}
+
+.badge-admin-info {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(226, 173, 99, 0.55) !important;
+    padding: 6px 14px !important;
+    border-radius: 999px !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2) !important;
+    backdrop-filter: blur(4px) !important;
+}
+
+.admin-label-prefijo {
+    color: #E2AD63 !important;
+    font-size: 0.74rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.8px !important;
+}
+
+.admin-nombre-valor {
+    color: #FFFFFF !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+}
+
+.admin-rol-tag {
+    background: rgba(226, 173, 99, 0.22) !important;
+    border: 1px solid rgba(226, 173, 99, 0.55) !important;
+    color: #F8D9A8 !important;
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    padding: 2px 8px !important;
+    border-radius: 999px !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+}
+
+.admin-avatar-topbar {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: 1.5px solid rgba(226, 173, 99, 0.6) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    flex-shrink: 0 !important;
+}
+
+.btn-cerrar-sesion {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: rgba(220, 53, 69, 0.12) !important;
+    color: #ffb3b3 !important;
+    border: 1px solid rgba(220, 53, 69, 0.45) !important;
+    padding: 6px 14px !important;
+    border-radius: 999px !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.22s ease !important;
+    backdrop-filter: blur(4px) !important;
+    text-decoration: none !important;
+}
+
+.btn-cerrar-sesion:hover {
+    background: rgba(220, 53, 69, 0.3) !important;
+    color: #ffffff !important;
+    border-color: rgba(220, 53, 69, 0.7) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 14px rgba(220, 53, 69, 0.3) !important;
+}
+
+.btn-cerrar-sesion svg {
+    stroke: currentColor !important;
+}

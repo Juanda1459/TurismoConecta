@@ -46,6 +46,19 @@
         opacity: 0.6;
     }
 
+.nav-brand-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+}
+
+.nav-brand-logo {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
+}
+
 .nav-label-admin {
     font-size: 0.75rem;
     text-transform: uppercase;

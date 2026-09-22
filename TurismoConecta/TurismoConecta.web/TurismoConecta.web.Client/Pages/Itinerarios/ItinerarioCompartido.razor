@@ -2,18 +2,22 @@
 @layout EmptyLayout
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @using TurismoConecta.web.Client.Services
-@inject ItinerarioApiService ApiService
+@using TurismoConecta.web.Client.Models
+@inject ItinerarioApiService ItinerarioService
+@inject MunicipioApiService MunicipioService
 @inject NavigationManager Nav
+@inject IJSRuntime JS
 
 <HeadContent>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="Pages/Itinerarios/ItinerarioCompartido.razor.css" />
 </HeadContent>
 
 <div class="compartido-page">
 
-    @* CARGANDO *@
+    @* ESTADO DE CARGA *@
     @if (cargando)
     {
         <div class="pantalla-espera-inmersiva">
@@ -21,133 +25,283 @@
                  alt="Boyacá" class="espera-bg-img" />
             <div class="espera-scrim">
                 <div class="espera-contenido">
-                    <span class="espera-eyebrow">Itinerario Compartido</span>
+                    <span class="espera-eyebrow">Itinerario de Viaje</span>
                     <h2 class="espera-lugar">Descubriendo Boyacá...</h2>
-                    <p class="espera-cita">"Viajar es la única cosa que compras que te hace más rico."</p>
+                    <p class="espera-cita">"Cargando los mejores pueblos y negocios locales para esta aventura."</p>
                     <div class="espera-indicador">
                         <div class="spinner-anillo-selva"></div>
-                        <span class="espera-texto-progreso">Cargando el itinerario compartido...</span>
+                        <span class="espera-texto-progreso">Consultando la ruta...</span>
                     </div>
                 </div>
             </div>
         </div>
     }
-
-    @* ENLACE NO VÁLIDO *@
+    @* ENLACE INVÁLIDO *@
     else if (itinerario == null)
     {
         <div class="compartido-container">
             <div class="compartido-error">
-                <span>🗺️</span>
-                <h2>Enlace no válido o expirado</h2>
-                <p>El itinerario no existe o el creador dejó de compartirlo.</p>
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 16px; display: block;">
+                    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+                    <line x1="8" y1="2" x2="8" y2="18"/>
+                    <line x1="16" y1="6" x2="16" y2="22"/>
+                </svg>
+                <h2>Itinerario no disponible</h2>
+                <p>El enlace no es válido o el creador de la ruta decidió dejar de compartirla.</p>
                 <button class="btn-ir-inicio" @onclick='() => Nav.NavigateTo("/")'>
-                    Explorar TurismoConecta →
+                    Explorar Destinos de Boyacá →
                 </button>
             </div>
         </div>
     }
-
-    @* ITINERARIO PÚBLICO *@
+    @* ITINERARIO ENRIQUECIDO *@
     else
     {
-        @* HERO *@
-        <div class="compartido-hero">
+        <!-- HERO DEL ITINERARIO -->
+        <header class="compartido-hero">
             <div class="compartido-hero-contenido">
-                <span class="compartido-eyebrow">✦ Ruta Boyacense Compartida</span>
+                <div class="hero-header-row">
+                    <div class="compartido-brand-tag">
+                        <a href="/" class="logo-marco-dorado" title="Ir a TurismoConecta">
+                            <img src="images/turismo-conecta-logo.png" alt="TurismoConecta" class="topbar-logo-img" />
+                        </a>
+                        <span class="compartido-eyebrow">✦ Experiencia Compartida en Boyacá</span>
+                    </div>
+                    
+                    <!-- HERRAMIENTA VIRAL: BOTONES DE COMPARTIR -->
+                    <div class="social-share-strip">
+                        <button class="btn-share-social whatsapp" @onclick="CompartirEnWhatsApp" title="Enviar por WhatsApp">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                            </svg>
+                            Enviar por WhatsApp
+                        </button>
+                        <button class="btn-share-social copy" @onclick="CopiarEnlace" title="Copiar enlace al portapapeles">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                            </svg>
+                            @(enlaceCopiado ? "¡Enlace copiado!" : "Copiar link")
+                        </button>
+                    </div>
+                </div>
+
                 <h1 class="compartido-nombre">@itinerario.Nombre</h1>
 
                 <div class="compartido-hero-meta">
                     @if (itinerario.FechaInicio.HasValue)
                     {
                         <span class="hero-dato">
-                            📅 @itinerario.FechaInicio.Value.ToString("dd 'de' MMMM")
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 5px;">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            @itinerario.FechaInicio.Value.ToString("dd 'de' MMMM")
                             @if (itinerario.FechaFin.HasValue)
                             {
-                                <text> → @itinerario.FechaFin.Value.ToString("dd 'de' MMMM, yyyy")</text>
+                                <text> al @itinerario.FechaFin.Value.ToString("dd 'de' MMMM, yyyy")</text>
                             }
                         </span>
                     }
-                    <span class="hero-dato">📍 @itinerario.Paradas.Count municipio@(itinerario.Paradas.Count != 1 ? "s" : "")</span>
+                    <span class="hero-dato">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 5px;">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        @itinerario.Paradas.Count paradas planificadas
+                    </span>
                 </div>
             </div>
-        </div>
+        </header>
 
-        @* BANNER CTA *@
+        <!-- BANNER DE BIENVENIDA -->
         <div class="banner-cta">
-            <p>🌟 Estás viendo un itinerario compartido.</p>
-            <a href="/register" class="btn-cta-registro">Crea tu cuenta gratis y planea el tuyo →</a>
+            <p><strong>Guía interactiva:</strong> Explora la ruta día por día y descubre dónde comer, dormir y qué experiencias vivir en cada municipio.</p>
         </div>
 
-        <div class="compartido-container">
+        <main class="compartido-container">
 
-            @* OBSERVACIONES *@
+            @* NOTAS DEL CREADOR *@
             @if (!string.IsNullOrWhiteSpace(itinerario.Observaciones))
             {
                 <div class="compartido-seccion">
-                    <span class="compartido-seccion-label">Notas del Viajero</span>
+                    <span class="compartido-seccion-label">Consejos & Recomendaciones del Viajero</span>
                     <blockquote class="compartido-cita">
                         "@itinerario.Observaciones"
                     </blockquote>
                 </div>
             }
 
-            @* PARADAS *@
+            @* RUTA DESGLOSADA DÍA A DÍA CON COMERCIOS *@
             <div class="compartido-seccion">
-                <span class="compartido-seccion-label">Ruta Sugerida</span>
+                <span class="compartido-seccion-label">Ruta Paso a Paso y Recomendaciones Locales</span>
 
                 @if (!itinerario.Paradas.Any())
                 {
-                    <p style="color: #5A6961; font-size: 0.90rem;">Aún no hay paradas en este itinerario.</p>
+                    <p class="texto-vacio">Aún no hay paradas registradas en esta ruta.</p>
                 }
                 else
                 {
                     var porDia = itinerario.Paradas.GroupBy(p => p.DiaNumero).OrderBy(g => g.Key);
 
-                    <div class="compartido-dias-grid">
+                    <div class="compartido-dias-stack">
                         @foreach (var dia in porDia)
                         {
-                            <div class="compartido-dia-card">
-                                <div class="dia-card-header">
-                                    <span class="dia-card-label">Día @dia.Key</span>
-                                    <span class="dia-card-count">@dia.Count() parada@(dia.Count() != 1 ? "s" : "")</span>
+                            <section class="dia-card-expandida">
+                                <div class="dia-banner">
+                                    <h2 class="dia-titulo">Día @dia.Key</h2>
+                                    <span class="dia-subtitulo">@dia.Count() municipio@(dia.Count() != 1 ? "s" : "") por recorrer</span>
                                 </div>
-                                <ul class="dia-card-lista">
+
+                                <div class="dia-cuerpo">
                                     @foreach (var parada in dia.OrderBy(p => p.Orden))
                                     {
-                                        <li class="dia-card-item">
-                                            <span class="item-num">@parada.Orden</span>
-                                            <a href="/municipios/@parada.IdMunicipio" class="item-nombre">
-                                                @parada.NombreMunicipio
-                                            </a>
-                                        </li>
+                                        <div class="parada-bloque">
+                                            <div class="parada-encabezado">
+                                                <div class="parada-orden">@parada.Orden</div>
+                                                <div class="parada-info">
+                                                    <h3 class="parada-municipio-nombre">@parada.NombreMunicipio</h3>
+                                                    <a href="/municipios/@parada.IdMunicipio" target="_blank" class="link-ver-municipio">
+                                                        Ver guía completa del municipio ↗
+                                                    </a>
+                                                </div>
+                                            </div>
+
+                                            <!-- NEGOCIOS DEL MUNICIPIO DE LA PARADA -->
+                                            @if (negociosPorMunicipio.TryGetValue(parada.IdMunicipio, out var listaNegocios) && listaNegocios.Any())
+                                            {
+                                                <div class="establecimientos-sugeridos-box">
+                                                    <h4 class="sugeridos-titulo">
+                                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;">
+                                                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                                            <polyline points="9 22 9 12 15 12 15 22"/>
+                                                        </svg>
+                                                        Dónde hospedarse y comer en @parada.NombreMunicipio:
+                                                    </h4>
+                                                    
+                                                    <div class="establecimientos-carrusel">
+                                                        @foreach (var neg in listaNegocios.Take(4))
+                                                        {
+                                                            <div class="card-sugerido-mini">
+                                                                <div class="card-sugerido-foto-wrap">
+                                                                    <img src="@(neg.Galeria.FirstOrDefault() ?? "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=400")" 
+                                                                         class="card-sugerido-foto" alt="@neg.Nombre" />
+                                                                    <span class="badge-cat-mini">@neg.NombreCategoria</span>
+                                                                </div>
+
+                                                                <div class="card-sugerido-cuerpo">
+                                                                    <h5 class="card-sugerido-nombre">@neg.Nombre</h5>
+                                                                    @if (!string.IsNullOrWhiteSpace(neg.Direccion))
+                                                                    {
+                                                                        <p class="card-sugerido-dir">
+                                                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-right: 3px;">
+                                                                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                                                                <circle cx="12" cy="10" r="3"/>
+                                                                            </svg>
+                                                                            @neg.Direccion
+                                                                        </p>
+                                                                    }
+
+                                                                    <div class="card-sugerido-footer">
+                                                                        @if (!string.IsNullOrWhiteSpace(neg.Telefono))
+                                                                        {
+                                                                            <a href="@ObtenerUrlWhatsApp(neg.Telefono, neg.Nombre, itinerario.Nombre)" 
+                                                                               target="_blank" class="btn-reserva-whatsapp">
+                                                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;">
+                                                                                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                                                                                </svg>
+                                                                                Reservar
+                                                                            </a>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <span class="sin-contacto">Recomendado</span>
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
                                     }
-                                </ul>
-                            </div>
+                                </div>
+                            </section>
                         }
                     </div>
                 }
             </div>
 
-            @* FOOTER CTA *@
+            <!-- FOOTER CON INVITACIÓN A REGISTRARSE -->
             <div class="compartido-footer-cta">
-                <h3>¿Te inspiró esta ruta?</h3>
-                <p>Arma tu propio itinerario por Boyacá con TurismoConecta.</p>
-                <a href="/register" class="btn-footer-cta">Comenzar gratis →</a>
+                <h3>¿Te gustaría hacer este viaje?</h3>
+                <p>Crea tu cuenta gratuita en TurismoConecta y personaliza tus propios itinerarios con pueblos, gastronomía y hospedaje de Boyacá.</p>
+                <div class="footer-botones-cta">
+                    <a href="/register" class="btn-footer-cta">Crear mi itinerario gratis →</a>
+                    <button class="btn-footer-secundario" @onclick='() => Nav.NavigateTo("/municipios")'>Explorar Pueblos</button>
+                </div>
             </div>
-        </div>
+
+        </main>
     }
 </div>
 
 @code {
     [Parameter] public Guid Codigo { get; set; }
+
     private ItinerarioDetalleDto? itinerario;
     private bool cargando = true;
+    private bool enlaceCopiado = false;
+    private Dictionary<int, List<NegocioResumenDto>> negociosPorMunicipio = new();
 
     protected override async Task OnInitializedAsync()
     {
         cargando = true;
-        itinerario = await ApiService.ObtenerCompartidoAsync(Codigo);
+        itinerario = await ItinerarioService.ObtenerCompartidoAsync(Codigo);
+
+        if (itinerario != null && itinerario.Paradas.Any())
+        {
+            var idsMunicipios = itinerario.Paradas.Select(p => p.IdMunicipio).Distinct().ToList();
+
+            foreach (var idMun in idsMunicipios)
+            {
+                var comercios = await MunicipioService.ObtenerNegociosPorMunicipioAsync(idMun);
+                if (comercios != null && comercios.Any())
+                {
+                    negociosPorMunicipio[idMun] = comercios;
+                }
+            }
+        }
+
         cargando = false;
+    }
+
+    private async Task CopiarEnlace()
+    {
+        var urlActual = Nav.Uri;
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", urlActual);
+        enlaceCopiado = true;
+        StateHasChanged();
+
+        await Task.Delay(3000);
+        enlaceCopiado = false;
+        StateHasChanged();
+    }
+
+    private void CompartirEnWhatsApp()
+    {
+        var urlActual = Nav.Uri;
+        var mensaje = Uri.EscapeDataString($"¡Hola! Te comparto esta ruta de viaje por Boyacá que encontré en TurismoConecta: '{itinerario?.Nombre}' 👉 {urlActual}");
+        Nav.NavigateTo($"https://api.whatsapp.com/send?text={mensaje}", forceLoad: true);
+    }
+
+    private string ObtenerUrlWhatsApp(string telefono, string nombreNegocio, string nombreItinerario)
+    {
+        var telLimpio = telefono.Replace(" ", "").Replace("+", "").Replace("-", "");
+        var texto = Uri.EscapeDataString($"Hola {nombreNegocio}, vi su establecimiento en el itinerario '{nombreItinerario}' de TurismoConecta y me gustaría pedir información y disponibilidad.");
+        return $"https://wa.me/{telLimpio}?text={texto}";
     }
 }

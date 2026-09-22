@@ -148,8 +148,8 @@ namespace TurismoConecta.api.Services
 
             if (admin is null) return (false, "Usuario administrador no encontrado.");
 
-            // Verificamos permisos: AdminGeneral puede editar cualquiera; AdminMunicipio solo el asignado
-            bool esAdminGeneral = admin.IdRolNavigation?.Nombre == "AdminGeneral" || admin.IdRol == 1;
+            // Verificamos permisos: AdminGeneral o AdminPrincipal puede editar cualquiera; AdminMunicipio solo el asignado
+            bool esAdminGeneral = admin.IdRolNavigation?.Nombre == "AdminGeneral" || admin.IdRolNavigation?.Nombre == "AdminPrincipal" || admin.IdRol == 1;
             bool esAdminDelMunicipio = admin.MunicipioAsignadoId == id;
 
             if (!esAdminGeneral && !esAdminDelMunicipio)

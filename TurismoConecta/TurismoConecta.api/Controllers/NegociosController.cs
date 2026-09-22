@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TurismoConecta.api.DTOs.Negocios;
@@ -33,7 +33,7 @@ namespace TurismoConecta.api.Controllers
         }
 
         [HttpPatch("{id:int}/estado")]
-        [Authorize(Roles = "AdminMunicipio")]
+        [Authorize(Roles = "AdminMunicipio,AdminGeneral,AdminPrincipal")]
         public async Task<IActionResult> CambiarEstado(int id, [FromBody] string nuevoEstado)
         {
             var (exito, error) = await _negocioService.CambiarEstadoAsync(id, UsuarioActual, nuevoEstado);
@@ -41,9 +41,9 @@ namespace TurismoConecta.api.Controllers
             return error!.Contains("permiso") ? Forbid() : BadRequest(new { mensaje = error });
         }
 
-        // HU-24: bandeja de pendientes del admin municipal
+        // HU-24: bandeja de pendientes del admin municipal y general
         [HttpGet("pendientes")]
-        [Authorize(Roles = "AdminMunicipio")]
+        [Authorize(Roles = "AdminMunicipio,AdminGeneral,AdminPrincipal")]
         public async Task<IActionResult> Pendientes() =>
             Ok(await _negocioService.ListarPendientesAsync(UsuarioActual));
 
@@ -59,5 +59,16 @@ namespace TurismoConecta.api.Controllers
             var negocio = await _negocioService.ObtenerFichaAsync(id);
             return negocio is null ? NotFound() : Ok(negocio);
         }
+
+
+        [HttpGet("mis-negocios")]
+        [Authorize(Roles = "AdminComercio,AdminGeneral,AdminPrincipal")]
+        public async Task<IActionResult> MisNegocios()
+        {
+            var listado = await _negocioService.ListarMisNegociosAsync(UsuarioActual);
+            return Ok(listado);
+        }
+
+
     }
 }

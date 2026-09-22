@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TurismoConecta.api.DTOs.Common;
@@ -41,7 +41,7 @@ namespace TurismoConecta.api.Controllers
 
         /// <summary>Edita la ficha de un municipio. Solo el AdminMunicipal asignado a ese municipio.</summary>
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "AdminGeneral,AdminMunicipio")]
+        [Authorize(Roles = "AdminGeneral,AdminPrincipal,AdminMunicipio")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -59,7 +59,7 @@ namespace TurismoConecta.api.Controllers
 
         /// <summary>Crea un nuevo municipio en el catálogo. Solo AdminGeneral.</summary>
         [HttpPost]
-        [Authorize(Roles = "AdminGeneral")]
+        [Authorize(Roles = "AdminGeneral,AdminPrincipal")]
         [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Crear([FromBody] MunicipioCrearDto dto, CancellationToken ct = default)
@@ -80,7 +80,7 @@ namespace TurismoConecta.api.Controllers
 
         /// <summary>Sube una imagen de portada para un municipio.</summary>
         [HttpPost("subir-imagen")]
-        [Authorize(Roles = "AdminGeneral,AdminMunicipio")]
+        [Authorize(Roles = "AdminGeneral,AdminPrincipal,AdminMunicipio")]
         public async Task<IActionResult> SubirImagen(IFormFile archivo, [FromServices] IWebHostEnvironment env)
         {
             if (archivo == null || archivo.Length == 0)

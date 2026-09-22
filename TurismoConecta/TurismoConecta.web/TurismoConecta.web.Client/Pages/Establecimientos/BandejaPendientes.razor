@@ -1,0 +1,193 @@
+@page "/establecimientos/pendientes"
+@layout EmptyLayout
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@inject NegocioApiService NegocioService
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+
+<HeadContent>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="Pages/Establecimientos/BandejaPendientes.razor.css" />
+</HeadContent>
+
+<AuthorizeView Roles="AdminMunicipio,AdminGeneral,AdminPrincipal">
+    <Authorized Context="authContext">
+        <div class="panel-comercio-wrap">
+            <header class="panel-topbar">
+                <div class="topbar-container">
+                    <button class="btn-volver-inicio" @onclick="VolverDashboard">← Volver al Dashboard</button>
+                    <div class="topbar-brand-center">
+                        <a href="/admin/dashboard" class="logo-marco-dorado" title="TurismoConecta">
+                            <img src="images/turismo-conecta-logo.png" alt="TurismoConecta" class="topbar-logo-img" />
+                        </a>
+                    </div>
+                    <div class="badge-admin-info">
+                        <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(authContext.User.Identity?.Name ?? "Gestor")&background=213b31&color=fff&size=80" alt="Foto" class="admin-avatar-topbar"
+                             onerror="this.onerror=null;this.style.display='none';" />
+                        <span class="admin-label-prefijo">Administrador:</span>
+                        <span class="admin-nombre-valor">@(authContext.User.Identity?.Name ?? "Gestor")</span>
+                        <span class="admin-rol-tag">@(authContext.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? authContext.User.FindFirst("role")?.Value ?? "Admin")</span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="panel-cuerpo">
+                <div class="panel-header-editorial">
+                    <div>
+                        <span class="eyebrow">Validación de Establecimientos</span>
+                        <h1 class="titulo-editorial">Bandeja de Pendientes</h1>
+                        <p class="bajada">Revisa y autoriza la publicación de negocios locales en tu municipio.</p>
+                    </div>
+                </div>
+
+                @if (cargando)
+                {
+                    <p>Cargando solicitudes...</p>
+                }
+                else if (!pendientes.Any())
+                {
+                    <div class="caja-vacia-editorial">
+                        <div class="icono-vacio">
+                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #2d6a4f; margin-bottom: 12px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                        <h3>Al día. No hay solicitudes pendientes</h3>
+                        <p>Todos los negocios registrados en tu municipio han sido revisados.</p>
+                    </div>
+                }
+                else
+                {
+                    <div style="background:#fff; border-radius:12px; border:1px solid #e0ebe3; overflow:hidden;">
+                        <table style="width:100%; border-collapse:collapse; text-align:left;">
+                            <thead style="background:#f4f7f5; border-bottom:1px solid #d8e5dc;">
+                                <tr>
+                                    <th style="padding:1rem;">Establecimiento</th>
+                                    <th style="padding:1rem;">Categoría</th>
+                                    <th style="padding:1rem;">Propietario</th>
+                                    <th style="padding:1rem;">Fecha Envío</th>
+                                    <th style="padding:1rem; text-align:right;">Decisión</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var p in pendientes)
+                                {
+                                    <tr style="border-bottom:1px solid #edf3ef;">
+                                        <td style="padding:1rem; font-weight:600;">@p.Nombre</td>
+                                        <td style="padding:1rem;"><span class="badge-cat" style="position:static; background:#e8f5e9; color:#1b4332;">@p.NombreCategoria</span></td>
+                                        <td style="padding:1rem; color:#555;">@p.NombrePropietario</td>
+                                        <td style="padding:1rem; color:#777; font-size:0.85rem;">@(p.FechaRegistro?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                                        <td style="padding:1rem; text-align:right;">
+                                            <button style="background:#2d6a4f; color:#fff; border:none; padding:0.45rem 0.9rem; border-radius:6px; cursor:pointer; font-weight:600; margin-right:0.5rem;"
+                                                    @onclick='() => ResolverEstado(p.IdNegocio, "Aprobado")'>
+                                                ✓ Aprobar
+                                            </button>
+                                            <button style="background:#dc2626; color:#fff; border:none; padding:0.45rem 0.9rem; border-radius:6px; cursor:pointer; font-weight:600;"
+                                                    @onclick='() => ResolverEstado(p.IdNegocio, "Rechazado")'>
+                                                ✕ Rechazar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </main>
+        </div>
+    </Authorized>
+</AuthorizeView>
+
+@if (!string.IsNullOrEmpty(mensajeAlerta))
+{
+    <div class="floating-toast-clean @(esError ? "toast-error" : "toast-success")">
+        <div class="toast-indicator"></div>
+        <div class="toast-content">
+            <div class="toast-header-flex">
+                <span class="toast-title">@(esError ? "Aviso del Sistema" : tituloAlerta ?? "Operación Exitosa")</span>
+                <button type="button" class="btn-cerrar-toast" @onclick="CerrarAlerta">✕</button>
+            </div>
+            <p class="toast-desc">@mensajeAlerta</p>
+        </div>
+    </div>
+}
+
+@code {
+    private List<NegocioPendienteAprobacionDto> pendientes = new();
+    private bool cargando = true;
+    private string? mensajeAlerta;
+    private string? tituloAlerta;
+    private bool esError = false;
+    private CancellationTokenSource? _toastCts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarPendientes();
+    }
+
+    private async Task CargarPendientes()
+    {
+        cargando = true;
+        pendientes = await NegocioService.ListarPendientesAsync();
+        cargando = false;
+    }
+
+    private async Task ResolverEstado(int idNegocio, string nuevoEstado)
+    {
+        var (exito, error) = await NegocioService.CambiarEstadoAsync(idNegocio, nuevoEstado);
+        if (exito)
+        {
+            var accion = nuevoEstado == "Aprobado" ? "aprobado para publicación" : "rechazado";
+            MostrarToast($"El establecimiento ha sido {accion} exitosamente.", error: false, titulo: nuevoEstado == "Aprobado" ? "Establecimiento Aprobado" : "Solicitud Rechazada");
+            await CargarPendientes();
+        }
+        else
+        {
+            MostrarToast(error ?? "No se pudo procesar la solicitud.", error: true, titulo: "Error al Procesar");
+        }
+    }
+
+    private void MostrarToast(string mensaje, bool error = false, string? titulo = null)
+    {
+        _toastCts?.Cancel();
+        _toastCts = new CancellationTokenSource();
+
+        mensajeAlerta = mensaje;
+        esError = error;
+        tituloAlerta = titulo;
+        StateHasChanged();
+
+        var token = _toastCts.Token;
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(4000, token);
+                if (!token.IsCancellationRequested)
+                {
+                    await InvokeAsync(() =>
+                    {
+                        mensajeAlerta = null;
+                        StateHasChanged();
+                    });
+                }
+            }
+            catch (TaskCanceledException) { }
+        });
+    }
+
+    private void CerrarAlerta()
+    {
+        _toastCts?.Cancel();
+        mensajeAlerta = null;
+    }
+
+    private async Task VolverDashboard()
+    {
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (auth.User.IsInRole("AdminGeneral"))
+            Nav.NavigateTo("/admin/dashboard");
+        else
+            Nav.NavigateTo("/municipio/dashboard");
+    }
+}

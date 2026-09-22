@@ -19,6 +19,21 @@ builder.Services.AddHttpClient<MunicipioApiService>(client =>
 })
 .AddHttpMessageHandler<AuthorizationMessageHandler>();
 
+builder.Services.AddHttpClient<NegocioApiService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7078");
+})
+.AddHttpMessageHandler<AuthorizationMessageHandler>();
+
+builder.Services.AddHttpClient<UsuarioApiService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7078");
+})
+.AddHttpMessageHandler<AuthorizationMessageHandler>();
+
+
+
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();

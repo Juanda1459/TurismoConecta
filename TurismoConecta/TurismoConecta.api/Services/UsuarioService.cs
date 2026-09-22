@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using TurismoConecta.api.Data;
 using TurismoConecta.api.DTOs.Usuarios;
@@ -120,6 +120,153 @@ namespace TurismoConecta.api.Services
                 }
             }
 
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<List<UsuarioAdminDto>> ListarUsuariosAsync()
+        {
+            var usuarios = await _context.Usuarios
+                .Include(u => u.IdRolNavigation)
+                .Include(u => u.MunicipioAsignado)
+                .OrderByDescending(u => u.FechaRegistro)
+                .ToListAsync();
+
+            return usuarios.Select(u => new UsuarioAdminDto
+            {
+                IdUsuario = u.IdUsuario,
+                Nombre = u.Nombre,
+                Apellido = u.Apellido,
+                Email = u.Email,
+                Telefono = u.Telefono,
+                Rol = u.IdRolNavigation.Nombre,
+                MunicipioAsignadoId = u.MunicipioAsignadoId,
+                NombreMunicipioAsignado = u.MunicipioAsignado != null ? u.MunicipioAsignado.Nombre : null,
+                FechaRegistro = u.FechaRegistro,
+                Activo = u.Activo,
+                FotoUrl = u.FotoUrl
+            }).ToList();
+        }
+
+        public async Task<List<RolDto>> ListarRolesAsync()
+        {
+            var roles = await _context.Rols.ToListAsync();
+            return roles.Select(r => new RolDto
+            {
+                IdRol = r.IdRol,
+                Nombre = r.Nombre,
+                Descripcion = r.Descripcion
+            }).ToList();
+        }
+
+        public async Task<bool> ActualizarUsuarioAdminAsync(int idUsuario, UsuarioAdminEdicionDto dto)
+        {
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.IdUsuario == idUsuario);
+            if (usuario == null) return false;
+
+            usuario.Nombre = dto.Nombre.Trim();
+            usuario.Apellido = dto.Apellido.Trim();
+            usuario.Email = dto.Email.Trim().ToLowerInvariant();
+            usuario.Telefono = string.IsNullOrWhiteSpace(dto.Telefono) ? null : dto.Telefono.Trim();
+            usuario.Activo = dto.Activo;
+            usuario.MunicipioAsignadoId = dto.MunicipioAsignadoId;
+
+            if (!string.IsNullOrWhiteSpace(dto.Rol))
+            {
+                var rol = await _context.Rols.FirstOrDefaultAsync(r => r.Nombre == dto.Rol);
+                if (rol != null)
+                {
+                    usuario.IdRol = rol.IdRol;
+                }
+            }
+
+            if (dto.EliminarFoto)
+            {
+                if (!string.IsNullOrEmpty(usuario.FotoUrl))
+                {
+                    try
+                    {
+                        var oldPath = Path.Combine(_env.WebRootPath, usuario.FotoUrl.TrimStart('/'));
+                        if (File.Exists(oldPath)) File.Delete(oldPath);
+                    }
+                    catch { }
+                }
+                usuario.FotoUrl = null;
+            }
+            else if (!string.IsNullOrWhiteSpace(dto.FotoBase64))
+            {
+                try
+                {
+                    var base64Data = dto.FotoBase64;
+                    if (base64Data.Contains(","))
+                    {
+                        base64Data = base64Data.Split(',')[1];
+                    }
+
+                    byte[] imageBytes = Convert.FromBase64String(base64Data);
+
+                    var folderPath = Path.Combine(_env.WebRootPath, "images", "perfiles");
+                    if (!Directory.Exists(folderPath))
+                    {
+                        Directory.CreateDirectory(folderPath);
+                    }
+
+                    var fileName = $"perfil_{usuario.IdUsuario}_{DateTime.UtcNow.Ticks}.jpg";
+                    var filePath = Path.Combine(folderPath, fileName);
+
+                    if (!string.IsNullOrEmpty(usuario.FotoUrl))
+                    {
+                        var oldPath = Path.Combine(_env.WebRootPath, usuario.FotoUrl.TrimStart('/'));
+                        if (File.Exists(oldPath)) File.Delete(oldPath);
+                    }
+
+                    await File.WriteAllBytesAsync(filePath, imageBytes);
+                    usuario.FotoUrl = $"/images/perfiles/{fileName}";
+                }
+                catch { }
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> EliminarUsuarioAsync(int idUsuario)
+        {
+            var usuario = await _context.Usuarios
+                .Include(u => u.Favoritos)
+                .Include(u => u.Notificacions)
+                .FirstOrDefaultAsync(u => u.IdUsuario == idUsuario);
+
+            if (usuario == null) return false;
+
+            // Verificar dependencias con registros turísticos/comerciales
+            bool tieneDependencias = await _context.Negocios.AnyAsync(n => n.IdUsuario == idUsuario)
+                || await _context.Itinerarios.AnyAsync(i => i.IdUsuario == idUsuario)
+                || await _context.Reseñas.AnyAsync(r => r.IdUsuario == idUsuario);
+
+            if (tieneDependencias)
+            {
+                // Soft delete: Desactivar la cuenta para mantener la integridad histórica
+                usuario.Activo = false;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+
+            // Eliminación completa si no tiene dependencias críticas
+            if (usuario.Favoritos.Any()) _context.Favoritos.RemoveRange(usuario.Favoritos);
+            if (usuario.Notificacions.Any()) _context.Notificacions.RemoveRange(usuario.Notificacions);
+
+            _context.Usuarios.Remove(usuario);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> CambiarEstadoAsync(int idUsuario, bool activo)
+        {
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.IdUsuario == idUsuario);
+            if (usuario == null) return false;
+
+            usuario.Activo = activo;
             await _context.SaveChangesAsync();
             return true;
         }
