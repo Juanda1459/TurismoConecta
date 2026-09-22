@@ -55,7 +55,7 @@
             <a href="/register"
                class="nav-button nav-power"
                aria-label="Registrarse">
-                <span>Copiado🔓</span>
+                <span>🔓</span>
             </a>
         </div>
     </header>
@@ -196,9 +196,12 @@
     </div>
 
     <div class="destinos-marquee" aria-label="Sitios turísticos mejor reseñados">
-        <div class="destinos-track">
+    <div class="destinos-track @(carruselPausado ? "pausado" : "")"
+     @onmouseenter="() => carruselPausado = true"
+     @onmouseleave="() => carruselPausado = false"
+     @onclick="() => carruselPausado = !carruselPausado">
     @for (int i = 0; i < sitiosParaMarquee.Count; i++)
-    {
+    {        
         var sitio = sitiosParaMarquee[i];
         <article class="destino-frame">
             <a href="@($"/municipios/{sitio.IdMunicipio}")" class="destino-link" aria-label="Ver @sitio.Nombre">
@@ -217,6 +220,7 @@
             </a>
         </article>
     }
+    
 </div>
     </div>
 
@@ -404,7 +408,7 @@
 <section class="cta-final">
     <h2>Tu próximo viaje por Boyacá empieza aquí</h2>
     <p>Crea tu cuenta gratis y guarda tus municipios y negocios favoritos.</p>
-    <a href="/usuarios/registro" class="boton-principal">Crear cuenta gratis</a>
+    <a href="/usuarios/register" class="boton-principal">Crear cuenta gratis</a>
 </section>
     <footer class="inicio-footer">
         <div>
@@ -429,7 +433,7 @@
 @code {
     private string textoBusqueda = "";
     private string zonaMapa = "Colombia";
-
+    private bool carruselPausado = false;
     private bool mostrarBuscador;
     private bool cargandoMunicipios = true;
     private bool cargandoEtiquetas = true;
