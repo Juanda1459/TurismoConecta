@@ -1039,7 +1039,7 @@ h1, h2 {
     }
 
     .itinerario-section {
-        margin: 0 1.5rem 3rem;
+        margin: 0 1.5rem 3rem;{+}
     }
 
     .cta-final {
