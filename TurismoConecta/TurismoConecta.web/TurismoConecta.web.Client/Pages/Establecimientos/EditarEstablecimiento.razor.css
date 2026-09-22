@@ -1,0 +1,207 @@
+.form-negocio-page {
+    min-height: 100vh;
+    background-color: #f6f8f7;
+    font-family: 'Montserrat', sans-serif;
+    color: #1a2e22;
+    padding-bottom: 4rem;
+}
+
+.form-negocio-topbar {
+    background: #0d2818;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-volver {
+    background: transparent;
+    border: none;
+    color: #a3c9a8;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+    .btn-volver:hover {
+        color: #ffffff;
+    }
+
+.topbar-brand-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.topbar-logo-img {
+    height: 34px;
+    width: auto;
+    object-fit: contain;
+}
+
+.badge-role {
+    color: #d1fae5;
+    font-size: 0.8rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+}
+
+.form-container {
+    max-width: 820px;
+    margin: 2.5rem auto 0;
+    padding: 0 1.5rem;
+}
+
+.eyebrow {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #2d6a4f;
+    font-weight: 700;
+    display: block;
+}
+
+.titulo-editorial {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.6rem;
+    margin: 0.2rem 0;
+    color: #0b1d13;
+}
+
+/* Alerta especial HU-23: advertencia de cambio sustancial */
+.alerta-hu23 {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+    padding: 1rem 1.2rem;
+    border-radius: 8px;
+    margin: 1.2rem 0 2rem;
+    font-size: 0.9rem;
+    color: #92400e;
+    line-height: 1.5;
+}
+
+.seccion-bloque {
+    background: #fff;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e0ebe3;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+}
+
+.seccion-titulo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.4rem;
+    border-bottom: 1px solid #f0f4f1;
+    padding-bottom: 0.8rem;
+}
+
+.num-step {
+    background: #e8f5e9;
+    color: #2d6a4f;
+    font-weight: 700;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+.seccion-titulo-wrap h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #0b1d13;
+}
+
+.form-grupo {
+    margin-bottom: 1.3rem;
+    display: flex;
+    flex-direction: column;
+}
+
+    .form-grupo label {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #2b2d42;
+        margin-bottom: 0.4rem;
+    }
+
+.input-editorial, .textarea-editorial {
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #d4ded7;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.92rem;
+    transition: border-color 0.2s;
+    background: #fff;
+}
+
+    .input-editorial:focus, .textarea-editorial:focus {
+        outline: none;
+        border-color: #2d6a4f;
+    }
+
+    .input-editorial:disabled {
+        background: #f1f5f3;
+        cursor: not-allowed;
+        color: #718096;
+    }
+
+.form-grid-dos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+}
+
+.val-error {
+    color: #dc2626;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+.alerta-error {
+    background: #fee2e2;
+    border: 1px solid #f87171;
+    color: #991b1b;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.botones-submit-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-cancelar {
+    background: transparent;
+    border: 1px solid #ced4da;
+    padding: 0.8rem 1.6rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-guardar {
+    background: #1b4332;
+    color: #fff;
+    border: none;
+    padding: 0.85rem 2.2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+    .btn-guardar:hover {
+        background: #2d6a4f;
+    }

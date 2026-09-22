@@ -10,5 +10,6 @@ namespace TurismoConecta.api.Services.Interfaces
         Task<List<NegocioDto>> ListarPorMunicipioAsync(int idMunicipio, int? idCategoria);
         Task<List<NegocioPendienteDto>> ListarPendientesAsync(int idAdminMunicipal); // HU-24: bandeja
         Task<NegocioDto?> ObtenerFichaAsync(int idNegocio);
+        Task<List<NegocioDto>> ListarMisNegociosAsync(int idUsuario);
     }
 }

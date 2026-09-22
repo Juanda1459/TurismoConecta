@@ -1,0 +1,208 @@
+@page "/establecimientos/editar/{Id:int}"
+@layout EmptyLayout
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@inject NegocioApiService NegocioService
+@inject MunicipioApiService MunicipioService
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+
+<HeadContent>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="Pages/Establecimientos/EditarEstablecimiento.razor.css" />
+</HeadContent>
+
+<AuthorizeView Roles="AdminComercio,AdminGeneral,AdminPrincipal">
+    <Authorized Context="authContext">
+        <div class="form-negocio-page">
+            <header class="form-negocio-topbar">
+                <button class="btn-volver" @onclick="Cancelar">
+                    ← Cancelar y volver
+                </button>
+                <div class="topbar-brand-center">
+                    <a href="/admin/dashboard" class="logo-marco-dorado" title="TurismoConecta">
+                        <img src="images/turismo-conecta-logo.png" alt="TurismoConecta" class="topbar-logo-img" />
+                    </a>
+                </div>
+                <div class="badge-admin-info">
+                    <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(authContext.User.Identity?.Name ?? "Comercio")&background=213b31&color=fff&size=80" alt="Foto" class="admin-avatar-topbar"
+                         onerror="this.onerror=null;this.style.display='none';" />
+                    <span class="admin-label-prefijo">Administrador:</span>
+                    <span class="admin-nombre-valor">@(authContext.User.Identity?.Name ?? "Comercio")</span>
+                    <span class="admin-rol-tag">@(authContext.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? authContext.User.FindFirst("role")?.Value ?? "Admin")</span>
+                </div>
+            </header>
+
+            <main class="form-container">
+                @if (cargando)
+                {
+                    <p>Cargando información del establecimiento...</p>
+                }
+                else
+                {
+                    <div class="form-encabezado">
+                        <span class="eyebrow">Edición de Comercio</span>
+                        <h1 class="titulo-editorial">Editar: @dto.Nombre</h1>
+                        
+                        <!-- Notificación HU-23 -->
+                        <div class="alerta-hu23" style="background:#fffbeb; border-left:4px solid #f59e0b; padding:1rem; border-radius:8px; margin: 1rem 0; font-size:0.88rem; color:#92400e;">
+                            <strong>Nota de moderación:</strong> Si modificas el <em>Nombre</em> o la <em>Categoría</em>, el establecimiento pasará de nuevo a estado <strong>Pendiente</strong> para validación por parte del administrador municipal.
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(mensajeError))
+                    {
+                        <div class="alerta-error">@mensajeError</div>
+                    }
+
+                    <EditForm Model="dto" OnValidSubmit="ActualizarEstablecimiento">
+                        <DataAnnotationsValidator />
+
+                        <div class="seccion-bloque">
+                            <div class="seccion-titulo-wrap">
+                                <span class="num-step">01</span>
+                                <h3>Datos Principales</h3>
+                            </div>
+
+                            <div class="form-grupo">
+                                <label>Nombre del Establecimiento *</label>
+                                <InputText @bind-Value="dto.Nombre" class="input-editorial" />
+                                <ValidationMessage For="() => dto.Nombre" class="val-error" />
+                            </div>
+
+                            <div class="form-grid-dos">
+                                <div class="form-grupo">
+                                    <label>Municipio</label>
+                                    <select class="input-editorial" @bind="dto.IdMunicipio" disabled>
+                                        @foreach (var m in listaMunicipios)
+                                        {
+                                            <option value="@m.IdMunicipio">@m.Nombre</option>
+                                        }
+                                    </select>
+                                    <small style="color:#6c757d; font-size:0.75rem;">El municipio no es modificable después de registrarlo.</small>
+                                </div>
+
+                                <div class="form-grupo">
+                                    <label>Categoría *</label>
+                                    <select class="input-editorial" @bind="dto.IdCategoria">
+                                        <option value="1">Hospedaje & Hotelería</option>
+                                        <option value="2">Gastronomía & Cafés</option>
+                                        <option value="3">Ecoturismo, Parques & Aventura</option>
+                                        <option value="4">Artesanías & Cultura Local</option>
+                                        <option value="5">Comercio Local / Otros</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-grupo">
+                                <label>Descripción del Negocio</label>
+                                <InputTextArea @bind-Value="dto.Descripcion" class="textarea-editorial" rows="3" />
+                            </div>
+                        </div>
+
+                        <div class="seccion-bloque">
+                            <div class="seccion-titulo-wrap">
+                                <span class="num-step">02</span>
+                                <h3>Contacto y Operación</h3>
+                            </div>
+
+                            <div class="form-grid-dos">
+                                <div class="form-grupo">
+                                    <label>Dirección</label>
+                                    <InputText @bind-Value="dto.Direccion" class="input-editorial" />
+                                </div>
+
+                                <div class="form-grupo">
+                                    <label>Teléfono o WhatsApp</label>
+                                    <InputText @bind-Value="dto.Telefono" class="input-editorial" />
+                                </div>
+                            </div>
+
+                            <div class="form-grupo">
+                                <label>Horario de Atención</label>
+                                <InputText @bind-Value="dto.Horario" class="input-editorial" />
+                            </div>
+                        </div>
+
+                        <div class="botones-submit-bar">
+                            <button type="button" class="btn-cancelar" @onclick='() => Nav.NavigateTo("/mis-establecimientos")'>
+                                Cancelar
+                            </button>
+                            <button type="submit" class="btn-guardar" disabled="@guardando">
+                                @(guardando ? "Actualizando..." : "Guardar Cambios")
+                            </button>
+                        </div>
+                    </EditForm>
+                }
+            </main>
+        </div>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private FormNegocioDto dto = new();
+    private List<MunicipioListadoDto> listaMunicipios = new();
+    private bool cargando = true;
+    private bool guardando = false;
+    private string? mensajeError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var resMun = await MunicipioService.ListarAsync(1, 100);
+        if (resMun?.Items != null) listaMunicipios = resMun.Items;
+
+        var negocio = await NegocioService.ObtenerPorIdAsync(Id);
+        if (negocio != null)
+        {
+            dto = new FormNegocioDto
+            {
+                Nombre = negocio.Nombre,
+                Descripcion = negocio.Descripcion,
+                IdCategoria = negocio.IdCategoria,
+                IdMunicipio = negocio.IdMunicipio,
+                Telefono = negocio.Telefono,
+                Horario = negocio.Horario,
+                Direccion = negocio.Direccion,
+                Latitud = negocio.Latitud,
+                Longitud = negocio.Longitud,
+                ImagenesGaleria = negocio.Galeria
+            };
+        }
+        else
+        {
+            mensajeError = "No se encontró el establecimiento solicitado.";
+        }
+        cargando = false;
+    }
+
+    private async Task ActualizarEstablecimiento()
+    {
+        guardando = true;
+        var (exito, error) = await NegocioService.EditarAsync(Id, dto);
+        if (exito)
+        {
+            var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+            if (auth.User.IsInRole("AdminGeneral"))
+                Nav.NavigateTo("/admin/dashboard");
+            else
+                Nav.NavigateTo("/comercio/dashboard");
+        }
+        else
+        {
+            mensajeError = error ?? "Error al actualizar.";
+            guardando = false;
+        }
+    }
+
+    private async Task Cancelar()
+    {
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (auth.User.IsInRole("AdminGeneral"))
+            Nav.NavigateTo("/admin/dashboard");
+        else
+            Nav.NavigateTo("/comercio/dashboard");
+    }
+}

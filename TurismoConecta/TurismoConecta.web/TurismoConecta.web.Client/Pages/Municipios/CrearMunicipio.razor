@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 </HeadContent>
 
-<AuthorizeView Roles="AdminGeneral">
+<AuthorizeView Roles="AdminGeneral,AdminPrincipal">
     <Authorized Context="authContext">
         <div class="selva-form-page">
             @if (cargando || guardando)
@@ -35,9 +35,18 @@
 
             <header class="selva-form-nav">
                 <button class="nav-back-link" @onclick="Cancelar">
-                    <span class="nav-back-arrow">←</span> Catálogo de Pueblos
+                    <span class="nav-back-arrow">←</span> Volver al Panel Maestro
                 </button>
-                <span class="nav-label-admin">Panel de Administración</span>
+                <a href="/admin/dashboard" class="logo-marco-dorado" title="TurismoConecta">
+                    <img src="images/turismo-conecta-logo.png" alt="TurismoConecta" class="nav-brand-logo" />
+                </a>
+                <div class="badge-admin-info">
+                    <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(authContext.User.Identity?.Name ?? "Admin")&background=213b31&color=fff&size=80" alt="Foto" class="admin-avatar-topbar"
+                         onerror="this.onerror=null;this.style.display='none';" />
+                    <span class="admin-label-prefijo">Administrador:</span>
+                    <span class="admin-nombre-valor">@(authContext.User.Identity?.Name ?? "Admin")</span>
+                    <span class="admin-rol-tag">@(authContext.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? authContext.User.FindFirst("role")?.Value ?? "Superadmin")</span>
+                </div>
             </header>
 
             <div class="form-container-editorial">
@@ -409,5 +418,5 @@
         }
     }
 
-    private void Cancelar() => Nav.NavigateTo("/municipios");
+    private void Cancelar() => Nav.NavigateTo("/admin/dashboard");
 }

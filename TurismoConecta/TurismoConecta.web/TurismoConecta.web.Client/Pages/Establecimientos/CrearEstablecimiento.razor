@@ -1,0 +1,271 @@
+@page "/establecimientos/crear"
+@layout EmptyLayout
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@inject NegocioApiService NegocioService
+@inject MunicipioApiService MunicipioService
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+
+<HeadContent>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="Pages/Establecimientos/CrearEstablecimiento.razor.css" />
+</HeadContent>
+
+<AuthorizeView Roles="AdminComercio,AdminGeneral,AdminPrincipal">
+    <Authorized Context="authContext">
+        <div class="form-negocio-page">
+            <header class="form-negocio-topbar">
+                <button class="btn-volver" @onclick="Cancelar">
+                    ← Cancelar y volver
+                </button>
+                <div class="topbar-brand-center">
+                    <a href="/admin/dashboard" class="logo-marco-dorado" title="TurismoConecta">
+                        <img src="images/turismo-conecta-logo.png" alt="TurismoConecta" class="topbar-logo-img" />
+                    </a>
+                </div>
+                <div class="badge-admin-info">
+                    <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(authContext.User.Identity?.Name ?? "Comercio")&background=213b31&color=fff&size=80" alt="Foto" class="admin-avatar-topbar"
+                         onerror="this.onerror=null;this.style.display='none';" />
+                    <span class="admin-label-prefijo">Administrador:</span>
+                    <span class="admin-nombre-valor">@(authContext.User.Identity?.Name ?? "Comercio")</span>
+                    <span class="admin-rol-tag">@(authContext.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? authContext.User.FindFirst("role")?.Value ?? "Admin")</span>
+                </div>
+            </header>
+
+            <main class="form-container">
+                <div class="form-encabezado">
+                    <span class="eyebrow">Red Turística de Boyacá</span>
+                    <h1 class="titulo-editorial">Registrar Nuevo Establecimiento</h1>
+                    <p class="bajada">
+                        Publica tu negocio local. Tras completar los datos, tu solicitud quedará en estado
+                        <strong>Pendiente</strong> mientras la alcaldía municipal verifica tu información.
+                    </p>
+                </div>
+
+                @if (!string.IsNullOrEmpty(mensajeError))
+                {
+                    <div class="alerta-error">
+                        @mensajeError
+                    </div>
+                }
+
+                <EditForm Model="dto" OnValidSubmit="GuardarEstablecimiento">
+                    <DataAnnotationsValidator />
+
+                    <!-- SECCIÓN 1: DATOS BÁSICOS -->
+                    <div class="seccion-bloque">
+                        <div class="seccion-titulo-wrap">
+                            <span class="num-step">01</span>
+                            <h3>Identidad y Ubicación</h3>
+                        </div>
+
+                        <div class="form-grupo">
+                            <label>Nombre del Establecimiento *</label>
+                            <InputText @bind-Value="dto.Nombre" class="input-editorial" placeholder="Ej. Hotel Colonial El Mirador, Café Campesino..." />
+                            <ValidationMessage For="() => dto.Nombre" class="val-error" />
+                        </div>
+
+                        <div class="form-grid-dos">
+                            <div class="form-grupo">
+                                <label>Municipio *</label>
+                                <select class="input-editorial" @bind="dto.IdMunicipio">
+                                    <option value="0">-- Selecciona el Municipio --</option>
+                                    @foreach (var m in listaMunicipios)
+                                    {
+                                        <option value="@m.IdMunicipio">@m.Nombre</option>
+                                    }
+                                </select>
+                                <ValidationMessage For="() => dto.IdMunicipio" class="val-error" />
+                            </div>
+
+                            <div class="form-grupo">
+                                <label>Categoría *</label>
+                                <select class="input-editorial" @bind="dto.IdCategoria">
+                                    <option value="1">Hospedaje & Hotelería</option>
+                                    <option value="2">Gastronomía & Cafés</option>
+                                    <option value="3">Ecoturismo, Parques & Aventura</option>
+                                    <option value="4">Artesanías & Cultura Local</option>
+                                    <option value="5">Comercio Local / Otros</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-grupo">
+                            <label>Descripción del Negocio</label>
+                            <InputTextArea @bind-Value="dto.Descripcion" class="textarea-editorial" rows="3"
+                                           placeholder="Describe tu propuesta, especialidades, platos típicos o comodidades para los viajeros..." />
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN 2: CONTACTO Y HORARIOS -->
+                    <div class="seccion-bloque">
+                        <div class="seccion-titulo-wrap">
+                            <span class="num-step">02</span>
+                            <h3>Información al Turista</h3>
+                        </div>
+
+                        <div class="form-grid-dos">
+                            <div class="form-grupo">
+                                <label>Dirección física</label>
+                                <InputText @bind-Value="dto.Direccion" class="input-editorial" placeholder="Ej. Cra 4 # 10-25, Plaza Principal" />
+                            </div>
+
+                            <div class="form-grupo">
+                                <label>Teléfono o WhatsApp de reservas</label>
+                                <InputText @bind-Value="dto.Telefono" class="input-editorial" placeholder="Ej. +57 312 3456789" />
+                            </div>
+                        </div>
+
+                        <div class="form-grupo">
+                            <label>Horario de Atención</label>
+                            <InputText @bind-Value="dto.Horario" class="input-editorial" placeholder="Ej. Martes a Domingo: 8:00 AM - 7:00 PM" />
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN 3: FOTOS Y GALERÍA (HU-22) -->
+                    <div class="seccion-bloque">
+                        <div class="seccion-titulo-wrap">
+                            <span class="num-step">03</span>
+                            <h3>Galería Fotográfica</h3>
+                        </div>
+
+                        <p class="seccion-desc">Sube fotos o añade URLs directas de tu establecimiento.</p>
+
+                        <div class="subida-fotos-box">
+                            <div class="upload-file-trigger">
+                                <label class="btn-subir-archivo">
+                                    📸 Subir foto desde el dispositivo
+                                    <InputFile OnChange="OnSubirFoto" accept="image/*" style="display:none;" />
+                                </label>
+                                @if (subiendoFoto)
+                                {
+                                    <span class="texto-cargando-foto">⏳ Subiendo imagen...</span>
+                                }
+                            </div>
+
+                            <div class="url-input-row">
+                                <input type="text" class="input-editorial" placeholder="O pega una URL: https://..." @bind="urlFotoManual" />
+                                <button type="button" class="btn-agregar-url" @onclick="AgregarUrlFoto">Añadir URL</button>
+                            </div>
+                        </div>
+
+                        @if (dto.ImagenesGaleria.Any())
+                        {
+                            <div class="galeria-preview-grid">
+                                @foreach (var (foto, index) in dto.ImagenesGaleria.Select((f, i) => (f, i)))
+                                {
+                                    <div class="foto-thumb-wrap">
+                                        <img src="@foto" class="foto-thumb" alt="Foto @(index + 1)" />
+                                        @if (index == 0)
+                                        {
+                                            <span class="portada-tag">Foto Principal</span>
+                                        }
+                                        <button type="button" class="btn-borrar-foto" @onclick="() => EliminarFoto(foto)">✕</button>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <div class="botones-submit-bar">
+                        <button type="button" class="btn-cancelar" @onclick="Cancelar">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn-guardar" disabled="@guardando">
+                            @(guardando ? "Enviando Solicitud..." : "Registrar Establecimiento")
+                        </button>
+                    </div>
+                </EditForm>
+            </main>
+        </div>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    private FormNegocioDto dto = new();
+    private List<MunicipioListadoDto> listaMunicipios = new();
+    private bool guardando = false;
+    private bool subiendoFoto = false;
+    private string? mensajeError;
+    private string urlFotoManual = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Cargamos los municipios para el dropdown
+        var resultadoMun = await MunicipioService.ListarAsync(pagina: 1, tamano: 100);
+        if (resultadoMun?.Items != null)
+        {
+            listaMunicipios = resultadoMun.Items;
+        }
+    }
+
+    private async Task OnSubirFoto(InputFileChangeEventArgs e)
+    {
+        var archivo = e.File;
+        if (archivo == null) return;
+
+        subiendoFoto = true;
+        var (exito, url, error) = await NegocioService.SubirFotoGaleriaAsync(archivo);
+        if (exito && !string.IsNullOrWhiteSpace(url))
+        {
+            dto.ImagenesGaleria.Add(url);
+        }
+        else
+        {
+            mensajeError = error ?? "Error al subir la imagen.";
+        }
+        subiendoFoto = false;
+    }
+
+    private void AgregarUrlFoto()
+    {
+        if (!string.IsNullOrWhiteSpace(urlFotoManual))
+        {
+            dto.ImagenesGaleria.Add(urlFotoManual.Trim());
+            urlFotoManual = "";
+        }
+    }
+
+    private void EliminarFoto(string url)
+    {
+        dto.ImagenesGaleria.Remove(url);
+    }
+
+    private async Task GuardarEstablecimiento()
+    {
+        if (dto.IdMunicipio <= 0)
+        {
+            mensajeError = "Por favor selecciona un municipio de la lista.";
+            return;
+        }
+
+        guardando = true;
+        mensajeError = null;
+
+        var (exito, creado, error) = await NegocioService.CrearAsync(dto);
+        if (exito)
+        {
+            var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+            if (auth.User.IsInRole("AdminGeneral"))
+                Nav.NavigateTo("/admin/dashboard");
+            else
+                Nav.NavigateTo("/comercio/dashboard");
+        }
+        else
+        {
+            mensajeError = error ?? "Ocurrió un error al guardar el establecimiento.";
+            guardando = false;
+        }
+    }
+
+    private async Task Cancelar()
+    {
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (auth.User.IsInRole("AdminGeneral"))
+            Nav.NavigateTo("/admin/dashboard");
+        else
+            Nav.NavigateTo("/comercio/dashboard");
+    }
+}

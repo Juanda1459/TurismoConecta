@@ -1,0 +1,973 @@
+@page "/admin/usuarios"
+@layout EmptyLayout
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@using TurismoConecta.web.Client.Services
+@using TurismoConecta.web.Client.Models
+@inject UsuarioApiService UsuarioService
+@inject MunicipioApiService MunicipioService
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JS
+@implements IDisposable
+
+<HeadContent>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="Pages/Admin/AdministrarUsuarios.razor.css" />
+</HeadContent>
+
+<AuthorizeView Roles="AdminGeneral,AdminPrincipal">
+    <Authorized Context="authContext">
+        <div class="admin-usuarios-page">
+            <header class="topbar-admin">
+                <div class="topbar-container">
+                    <button class="btn-volver" @onclick='() => Nav.NavigateTo("/admin/dashboard")'>
+                        <span class="flecha-volver">←</span> Volver al Dashboard
+                    </button>
+                    <div class="topbar-brand-center">
+                        <a href="/admin/dashboard" class="logo-marco-dorado" title="TurismoConecta">
+                            <img src="images/turismo-conecta-logo.png" alt="TurismoConecta" class="topbar-logo-img" />
+                        </a>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="badge-admin-info">
+                            <img src="@ObtenerUrlFotoAdmin()" alt="Foto" class="admin-avatar-topbar"
+                                 onerror="this.onerror=null;this.style.display='none';" />
+                            <span class="admin-label-prefijo">Administrador:</span>
+                            <span class="admin-nombre-valor">@ObtenerNombreAdministrador(authContext.User)</span>
+                            <span class="admin-rol-tag">@ObtenerRolAdministrador(authContext.User)</span>
+                        </div>
+                        <button type="button" class="btn-cerrar-sesion" @onclick="CerrarSesion" title="Cerrar Sesión">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                            <span>Salir</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="contenedor-principal">
+                <div class="header-editorial">
+                    <span class="eyebrow">Seguridad & Control de Acceso</span>
+                    <h1 class="titulo-editorial">Gestión de Usuarios y Roles</h1>
+                    <p class="bajada">Supervisa las cuentas de la plataforma, edita datos de contacto, asigna permisos o gestiona el estado de cada persona.</p>
+                </div>
+
+                <!-- Barra de herramientas, búsqueda y nuevo usuario -->
+                <div class="toolbar-filtros">
+                    <div class="buscador-box">
+                        <svg class="icono-buscar" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" class="input-busqueda" placeholder="Buscar por nombre o correo electrónico..."
+                               @bind="terminoBusqueda" @bind:event="oninput" />
+                    </div>
+
+                    <div class="toolbar-acciones-derecha">
+                        <div class="filtro-rol-box">
+                            <label>Filtrar:</label>
+                            <div class="select-pill-wrapper">
+                                <select class="select-filtro" @bind="filtroRol">
+                                    <option value="">Todos los roles (@usuarios.Count)</option>
+                                    @foreach (var r in rolesDisponibles)
+                                    {
+                                        <option value="@r.Nombre">@r.Nombre (@usuarios.Count(u => u.Rol == r.Nombre))</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <button class="btn-nuevo-usuario-clean" @onclick="AbrirModalCrear">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            <span>Nuevo Usuario</span>
+                        </button>
+                    </div>
+                </div>
+
+                @if (cargando)
+                {
+                    <div class="cargando-box">
+                        <div class="spinner-anillo-selva"></div>
+                        <p class="texto-cargando">Cargando directorio de usuarios...</p>
+                    </div>
+                }
+                else if (!UsuariosFiltrados.Any())
+                {
+                    <div class="vacio-box">
+                        <svg class="icono-vacio" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <p class="titulo-vacio">No se encontraron usuarios</p>
+                        <p class="sub-vacio">Intenta modificar el término de búsqueda o el filtro de rol.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="tabla-card">
+                        <table class="tabla-usuarios">
+                            <thead>
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Contacto</th>
+                                    <th>Fecha Registro</th>
+                                    <th>Rol Actual</th>
+                                    <th>Cambio Rápido</th>
+                                    <th style="text-align: right;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var u in UsuariosFiltrados)
+                                {
+                                    <tr class="@(!u.Activo ? "fila-inactivo" : "")">
+                                        <td>
+                                            <div class="usuario-celda">
+                                                <img src="@ObtenerUrlFoto(u.FotoUrl, u.NombreCompleto)" 
+                                                     class="avatar-mini" alt="@u.NombreCompleto" 
+                                                     onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=@Uri.EscapeDataString(string.IsNullOrWhiteSpace(u.NombreCompleto) ? "U" : u.NombreCompleto)&background=213b31&color=fff';" />
+                                                <div>
+                                                    <div class="user-nombre">
+                                                        @(string.IsNullOrWhiteSpace(u.NombreCompleto) ? "Sin nombre" : u.NombreCompleto)
+                                                        @if (!u.Activo)
+                                                        {
+                                                            <span class="badge-inactivo">Inactivo</span>
+                                                        }
+                                                    </div>
+                                                    <div class="user-email">@u.Email</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="texto-contacto">@(string.IsNullOrWhiteSpace(u.Telefono) ? "Sin teléfono" : u.Telefono)</span>
+                                            @if (!string.IsNullOrEmpty(u.NombreMunicipioAsignado))
+                                            {
+                                                <div class="badge-municipio-asignado">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-right: 3px;">
+                                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                                        <circle cx="12" cy="10" r="3"/>
+                                                    </svg>
+                                                    @u.NombreMunicipioAsignado
+                                                </div>
+                                            }
+                                        </td>
+                                        <td class="texto-fecha">
+                                            @u.FechaRegistro.ToString("dd/MM/yyyy")
+                                        </td>
+                                        <td>
+                                            <span class="chip-rol @u.Rol.ToLower()">@u.Rol</span>
+                                        </td>
+                                        <td>
+                                            <div class="accion-cambio-rol select-pill-wrapper-mini">
+                                                <select class="select-cambio-rol" 
+                                                        value="@u.Rol" 
+                                                        @onchange="(e) => CambiarRolUsuario(u, e.Value?.ToString())">
+                                                    @foreach (var r in rolesDisponibles)
+                                                    {
+                                                        <option value="@r.Nombre">@r.Nombre</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <div class="acciones-botones-grupo">
+                                                <button class="btn-accion-icono editar" title="Editar datos del usuario"
+                                                        @onclick="() => AbrirModalEditar(u)">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                                    </svg>
+                                                </button>
+                                                @if (u.Email != miEmailActual)
+                                                {
+                                                    <button class="btn-accion-icono eliminar" title="Eliminar o desactivar usuario"
+                                                            @onclick="() => AbrirModalEliminar(u)">
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            <polyline points="3 6 5 6 21 6"/>
+                                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                                            <line x1="10" y1="11" x2="10" y2="17"/>
+                                                            <line x1="14" y1="11" x2="14" y2="17"/>
+                                                        </svg>
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge-tu-cuenta" title="Esta es tu cuenta en sesión">Tú</span>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </main>
+
+            <!-- MODAL: EDITAR USUARIO (ESTÉTICA EDITORIAL PULIDA DE MUNICIPIOS) -->
+            @if (usuarioParaEditar != null)
+            {
+                <div class="modal-backdrop" @onclick="CerrarModales">
+                    <div class="modal-edicion-card" @onclick:stopPropagation="true">
+                        <div class="modal-edicion-header">
+                            <div>
+                                <span class="eyebrow-modal">Edición de Cuenta</span>
+                                <h3 class="modal-titulo-editorial">Editar @usuarioParaEditar.Nombre</h3>
+                                <span class="modal-subtitulo-editorial">Modifica datos de contacto, rol en el sistema y jurisdicción territorial.</span>
+                            </div>
+                            <button class="btn-cerrar-modal" @onclick="CerrarModales" title="Cerrar ventana">✕</button>
+                        </div>
+
+                        <div class="modal-edicion-cuerpo">
+                            <!-- SECCIÓN 00: FOTOGRAFÍA DE PERFIL -->
+                            <div class="form-section-clean">
+                                <div class="section-badge-title">
+                                    <span class="badge-number">00</span>
+                                    <div>
+                                        <h4>Fotografía de Perfil</h4>
+                                        <span class="section-subtitle">Imagen visible en la plataforma y credenciales</span>
+                                    </div>
+                                </div>
+
+                                <div class="foto-editor-box">
+                                    <div class="foto-preview-wrapper">
+                                        <img src="@previewFotoModal" alt="Foto de perfil" class="foto-preview-img"
+                                             onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=@Uri.EscapeDataString(usuarioParaEditar?.NombreCompleto ?? "U")&background=213b31&color=fff';" />
+                                        @if (formEdicion.EliminarFoto)
+                                        {
+                                            <span class="foto-badge-eliminada">Se eliminará</span>
+                                        }
+                                    </div>
+                                    <div class="foto-acciones-wrapper">
+                                        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                                            <label class="btn-subir-foto" for="inputFotoUsuario">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                    <polyline points="17 8 12 3 7 8"/>
+                                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                                </svg>
+                                                <span>@(string.IsNullOrEmpty(formEdicion.FotoBase64) && string.IsNullOrEmpty(usuarioParaEditar.FotoUrl) ? "Subir Foto" : "Cambiar Foto")</span>
+                                            </label>
+                                            <InputFile id="inputFotoUsuario" OnChange="OnFotoSeleccionada" accept="image/png,image/jpeg,image/webp" style="display: none;" />
+
+                                            @if (!string.IsNullOrEmpty(usuarioParaEditar.FotoUrl) || !string.IsNullOrEmpty(formEdicion.FotoBase64))
+                                            {
+                                                <button type="button" class="btn-quitar-foto" @onclick="QuitarFotoModal">
+                                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <polyline points="3 6 5 6 21 6"/>
+                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                                    </svg>
+                                                    <span>Quitar</span>
+                                                </button>
+                                            }
+                                        </div>
+                                        <span class="foto-ayuda-texto">Formatos admitidos: JPG, PNG o WEBP (máx. 4 MB).</span>
+                                        @if (!string.IsNullOrEmpty(errorSubidaFoto))
+                                        {
+                                            <div class="alerta-error-sutil" style="margin-top: 4px;">@errorSubidaFoto</div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-divider"></div>
+
+                            <!-- SECCIÓN 01: INFORMACIÓN ESENCIAL -->
+                            <div class="form-section-clean">
+                                <div class="section-badge-title">
+                                    <span class="badge-number">01</span>
+                                    <div>
+                                        <h4>Información Esencial</h4>
+                                        <span class="section-subtitle">Datos de contacto e identificación del titular</span>
+                                    </div>
+                                </div>
+
+                                <div class="form-grid-dos">
+                                    <div class="form-group-clean">
+                                        <label>Nombre *</label>
+                                        <input type="text" class="input-editorial w-100" @bind="formEdicion.Nombre" placeholder="Nombre(s)" />
+                                    </div>
+                                    <div class="form-group-clean">
+                                        <label>Apellido</label>
+                                        <input type="text" class="input-editorial w-100" @bind="formEdicion.Apellido" placeholder="Apellido(s)" />
+                                    </div>
+                                </div>
+
+                                <div class="form-grid-dos">
+                                    <div class="form-group-clean">
+                                        <label>Correo Electrónico *</label>
+                                        <input type="email" class="input-editorial w-100" @bind="formEdicion.Email" placeholder="correo@ejemplo.com" />
+                                    </div>
+                                    <div class="form-group-clean">
+                                        <label>Teléfono de Contacto</label>
+                                        <input type="tel" class="input-editorial w-100" @bind="formEdicion.Telefono" placeholder="Ej. 300 123 4567" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-divider"></div>
+
+                            <!-- SECCIÓN 02: PERMISOS Y JURISDICCIÓN -->
+                            <div class="form-section-clean">
+                                <div class="section-badge-title">
+                                    <span class="badge-number">02</span>
+                                    <div>
+                                        <h4>Permisos & Jurisdicción</h4>
+                                        <span class="section-subtitle">Nivel de autorización y asignación de municipio</span>
+                                    </div>
+                                </div>
+
+                                <div class="form-grid-dos">
+                                    <div class="form-group-clean">
+                                        <label>Rol en el Sistema *</label>
+                                        <div class="select-pill-wrapper">
+                                            <select class="input-editorial w-100" @bind="formEdicion.Rol">
+                                                @foreach (var r in rolesDisponibles)
+                                                {
+                                                    <option value="@r.Nombre">@r.Nombre</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    @if (formEdicion.Rol == "AdminMunicipio")
+                                    {
+                                        <div class="form-group-clean">
+                                            <label>Municipio Asignado *</label>
+                                            <div class="select-pill-wrapper">
+                                                <select class="input-editorial w-100" @bind="formEdicion.MunicipioAsignadoId">
+                                                    <option value="">-- Seleccionar Municipio --</option>
+                                                    @foreach (var m in municipiosDisponibles)
+                                                    {
+                                                        <option value="@m.IdMunicipio">@m.Nombre</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="form-divider"></div>
+
+                            <!-- SECCIÓN 03: ESTADO DE LA CUENTA -->
+                            <div class="form-section-clean no-margin">
+                                <div class="section-badge-title">
+                                    <span class="badge-number">03</span>
+                                    <div>
+                                        <h4>Estado de la Cuenta</h4>
+                                        <span class="section-subtitle">Control de acceso y habilitación para inicio de sesión</span>
+                                    </div>
+                                </div>
+
+                                <div class="toggle-estado-box">
+                                    <label class="switch-editorial">
+                                        <input type="checkbox" @bind="formEdicion.Activo" />
+                                        <span class="slider-editorial"></span>
+                                    </label>
+                                    <div class="toggle-texto">
+                                        <span class="toggle-label">@(formEdicion.Activo ? "Cuenta Activa" : "Cuenta Inactiva / Deshabilitada")</span>
+                                        <span class="toggle-ayuda">@(formEdicion.Activo ? "El usuario puede iniciar sesión con total normalidad." : "El usuario no podrá ingresar a la plataforma hasta ser reactivado.")</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(errorModal))
+                            {
+                                <div class="alerta-error-sutil">@errorModal</div>
+                            }
+                        </div>
+
+                        <div class="modal-edicion-footer">
+                            <button type="button" class="btn-cancelar-clean" @onclick="CerrarModales">
+                                Descartar
+                            </button>
+                            <button type="button" class="btn-primario-clean" @onclick="GuardarEdicionUsuario" disabled="@guardandoModal">
+                                @(guardandoModal ? "Guardando cambios..." : "Guardar Cambios")
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- MODAL: CREAR NUEVO USUARIO -->
+            @if (mostrandoModalCrear)
+            {
+                <div class="modal-backdrop" @onclick="CerrarModales">
+                    <div class="modal-edicion-card" @onclick:stopPropagation="true">
+                        <div class="modal-edicion-header">
+                            <div>
+                                <span class="eyebrow-modal">Alta de Usuario</span>
+                                <h3 class="modal-titulo-editorial">Registrar Nuevo Usuario</h3>
+                                <span class="modal-subtitulo-editorial">Crea una nueva cuenta de acceso asignando su rol inicial en la plataforma.</span>
+                            </div>
+                            <button class="btn-cerrar-modal" @onclick="CerrarModales" title="Cerrar ventana">✕</button>
+                        </div>
+
+                        <div class="modal-edicion-cuerpo">
+                            <!-- SECCIÓN 01: INFORMACIÓN ESENCIAL -->
+                            <div class="form-section-clean">
+                                <div class="section-badge-title">
+                                    <span class="badge-number">01</span>
+                                    <div>
+                                        <h4>Información Esencial</h4>
+                                        <span class="section-subtitle">Datos personales y credenciales de acceso</span>
+                                    </div>
+                                </div>
+
+                                <div class="form-grid-dos">
+                                    <div class="form-group-clean">
+                                        <label>Nombre *</label>
+                                        <input type="text" class="input-editorial w-100" @bind="formCrear.Nombre" placeholder="Nombre(s)" />
+                                    </div>
+                                    <div class="form-group-clean">
+                                        <label>Apellido</label>
+                                        <input type="text" class="input-editorial w-100" @bind="formCrear.Apellido" placeholder="Apellido(s)" />
+                                    </div>
+                                </div>
+
+                                <div class="form-grid-dos">
+                                    <div class="form-group-clean">
+                                        <label>Correo Electrónico *</label>
+                                        <input type="email" class="input-editorial w-100" @bind="formCrear.Email" placeholder="correo@ejemplo.com" />
+                                    </div>
+                                    <div class="form-group-clean">
+                                        <label>Contraseña Inicial *</label>
+                                        <input type="password" class="input-editorial w-100" @bind="formCrear.Password" placeholder="Mínimo 6 caracteres" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group-clean">
+                                    <label>Teléfono de Contacto</label>
+                                    <input type="tel" class="input-editorial w-100" @bind="formCrear.Telefono" placeholder="Ej. 300 123 4567" />
+                                </div>
+                            </div>
+
+                            <div class="form-divider"></div>
+
+                            <!-- SECCIÓN 02: ASIGNACIÓN DE ROL -->
+                            <div class="form-section-clean no-margin">
+                                <div class="section-badge-title">
+                                    <span class="badge-number">02</span>
+                                    <div>
+                                        <h4>Rol & Jurisdicción Territorial</h4>
+                                        <span class="section-subtitle">Permisos y alcance operativo del nuevo usuario</span>
+                                    </div>
+                                </div>
+
+                                <div class="form-grid-dos">
+                                    <div class="form-group-clean">
+                                        <label>Rol Asignado *</label>
+                                        <div class="select-pill-wrapper">
+                                            <select class="input-editorial w-100" @bind="formCrear.Rol">
+                                                @foreach (var r in rolesDisponibles)
+                                                {
+                                                    <option value="@r.Nombre">@r.Nombre</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    @if (formCrear.Rol == "AdminMunicipio")
+                                    {
+                                        <div class="form-group-clean">
+                                            <label>Municipio Asignado *</label>
+                                            <div class="select-pill-wrapper">
+                                                <select class="input-editorial w-100" @bind="formCrear.MunicipioAsignadoId">
+                                                    <option value="">-- Seleccionar Municipio --</option>
+                                                    @foreach (var m in municipiosDisponibles)
+                                                    {
+                                                        <option value="@m.IdMunicipio">@m.Nombre</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(errorModal))
+                            {
+                                <div class="alerta-error-sutil">@errorModal</div>
+                            }
+                        </div>
+
+                        <div class="modal-edicion-footer">
+                            <button type="button" class="btn-cancelar-clean" @onclick="CerrarModales">
+                                Descartar
+                            </button>
+                            <button type="button" class="btn-primario-clean" @onclick="EjecutarCrearUsuario" disabled="@guardandoModal">
+                                @(guardandoModal ? "Creando usuario..." : "Crear Usuario")
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- MODAL: CONFIRMAR ELIMINAR / DESACTIVAR -->
+            @if (usuarioParaEliminar != null)
+            {
+                <div class="modal-backdrop" @onclick="CerrarModales">
+                    <div class="modal-eliminar-card" @onclick:stopPropagation="true">
+                        <div class="modal-eliminar-ico">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                <line x1="10" y1="11" x2="10" y2="17"/>
+                                <line x1="14" y1="11" x2="14" y2="17"/>
+                            </svg>
+                        </div>
+                        <h3 class="modal-eliminar-titulo">¿Eliminar o desactivar usuario?</h3>
+                        <p class="modal-eliminar-desc">
+                            Estás a punto de procesar la cuenta de <strong>@(string.IsNullOrWhiteSpace(usuarioParaEliminar.NombreCompleto) ? usuarioParaEliminar.Email : usuarioParaEliminar.NombreCompleto)</strong>.
+                        </p>
+                        <p class="modal-eliminar-nota">
+                            Para proteger la integridad del sistema, si el usuario tiene comercios o itinerarios creados, la cuenta se <strong>desactivará</strong> de forma segura sin borrar sus registros históricos.
+                        </p>
+
+                        @if (!string.IsNullOrEmpty(errorModal))
+                        {
+                            <div class="alerta-error-sutil">@errorModal</div>
+                        }
+
+                        <div class="modal-eliminar-botones">
+                            <button type="button" class="btn-cancelar-clean" @onclick="CerrarModales">
+                                Cancelar
+                            </button>
+                            <button type="button" class="btn-peligro-clean" @onclick="EjecutarEliminarUsuario" disabled="@guardandoModal">
+                                @(guardandoModal ? "Procesando..." : "Sí, Eliminar / Desactivar")
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="acceso-denegado-clean">
+            <h2>Acceso Restringido</h2>
+            <p>Se requieren privilegios de <strong>Administrador General</strong> para acceder a este módulo.</p>
+            <button class="btn-primario-clean" @onclick='() => Nav.NavigateTo("/")'>Ir al Inicio</button>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+<!-- TOAST FLOTANTE DINÁMICO (ESTILO EXACTO DE MUNICIPIOS) -->
+@if (!string.IsNullOrEmpty(mensajeAlerta))
+{
+    <div class="floating-toast-clean @(esError ? "toast-error" : "toast-success")">
+        <div class="toast-indicator"></div>
+        <div class="toast-content">
+            <div class="toast-header-flex">
+                <span class="toast-title">@(esError ? "Aviso del Sistema" : tituloAlerta ?? "Operación Exitosa")</span>
+                <button type="button" class="btn-cerrar-toast" @onclick="CerrarAlerta" aria-label="Cerrar notificación">✕</button>
+            </div>
+            <p class="toast-desc">@mensajeAlerta</p>
+        </div>
+    </div>
+}
+
+@code {
+    private List<UsuarioAdminItemDto> usuarios = new();
+    private List<RolInfo> rolesDisponibles = new();
+    private List<MunicipioListadoDto> municipiosDisponibles = new();
+    private bool cargando = true;
+    private string terminoBusqueda = "";
+    private string filtroRol = "";
+    private string? miEmailActual;
+    private PerfilResponse? perfilAdmin;
+
+    // Toast flotante dinámico
+    private string? mensajeAlerta;
+    private string? tituloAlerta;
+    private bool esError = false;
+    private CancellationTokenSource? _toastCts;
+
+    // Modales de interacción
+    private UsuarioAdminItemDto? usuarioParaEditar;
+    private UsuarioAdminItemDto? usuarioParaEliminar;
+    private bool mostrandoModalCrear = false;
+    private UsuarioAdminEdicionRequest formEdicion = new();
+    private UsuarioAdminCrearRequest formCrear = new();
+    private bool guardandoModal = false;
+    private string? errorModal;
+    private string? previewFotoModal;
+    private string? errorSubidaFoto;
+
+    private IEnumerable<UsuarioAdminItemDto> UsuariosFiltrados =>
+        usuarios.Where(u =>
+            (string.IsNullOrWhiteSpace(terminoBusqueda) || 
+             u.NombreCompleto.Contains(terminoBusqueda, StringComparison.OrdinalIgnoreCase) || 
+             u.Email.Contains(terminoBusqueda, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrWhiteSpace(filtroRol) || u.Rol == filtroRol)
+        );
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        miEmailActual = authState.User.Identity?.Name;
+        await CargarDatos();
+    }
+
+    private async Task CargarDatos()
+    {
+        cargando = true;
+        try
+        {
+            var taskPerfil = UsuarioService.ObtenerPerfilAsync();
+            var taskRoles = UsuarioService.ListarRolesAsync();
+            var taskUsuarios = UsuarioService.ListarUsuariosAsync();
+            var taskMunicipios = MunicipioService.ListarAsync(1, 200);
+
+            await Task.WhenAll(taskPerfil, taskRoles, taskUsuarios, taskMunicipios);
+
+            perfilAdmin = taskPerfil.Result;
+            rolesDisponibles = taskRoles.Result;
+            usuarios = taskUsuarios.Result;
+            municipiosDisponibles = taskMunicipios.Result?.Items ?? new List<MunicipioListadoDto>();
+        }
+        catch (Exception ex)
+        {
+            MostrarToast("Error cargando usuarios: " + ex.Message, error: true, titulo: "Error de Conexión");
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private void MostrarToast(string mensaje, bool error = false, string? titulo = null)
+    {
+        _toastCts?.Cancel();
+        _toastCts = new CancellationTokenSource();
+
+        mensajeAlerta = mensaje;
+        esError = error;
+        tituloAlerta = titulo;
+        StateHasChanged();
+
+        var token = _toastCts.Token;
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(4000, token);
+                if (!token.IsCancellationRequested)
+                {
+                    await InvokeAsync(() =>
+                    {
+                        mensajeAlerta = null;
+                        StateHasChanged();
+                    });
+                }
+            }
+            catch (TaskCanceledException) { }
+        });
+    }
+
+    private void CerrarAlerta()
+    {
+        _toastCts?.Cancel();
+        mensajeAlerta = null;
+    }
+
+    private async Task CambiarRolUsuario(UsuarioAdminItemDto usuario, string? nuevoRol)
+    {
+        if (string.IsNullOrWhiteSpace(nuevoRol) || nuevoRol == usuario.Rol) return;
+
+        var rolAnterior = usuario.Rol;
+        var (exito, error) = await UsuarioService.CambiarRolAsync(usuario.IdUsuario, nuevoRol);
+
+        if (exito)
+        {
+            usuario.Rol = nuevoRol;
+            var nombre = string.IsNullOrWhiteSpace(usuario.NombreCompleto) ? usuario.Email : usuario.NombreCompleto;
+            MostrarToast($"El rol de '{nombre}' se actualizó a '{nuevoRol}'.", error: false, titulo: "Rol Modificado");
+        }
+        else
+        {
+            usuario.Rol = rolAnterior;
+            MostrarToast(error ?? "No se pudo cambiar el rol.", error: true, titulo: "Aviso de Seguridad");
+        }
+    }
+
+    private void AbrirModalEditar(UsuarioAdminItemDto u)
+    {
+        errorModal = null;
+        errorSubidaFoto = null;
+        usuarioParaEditar = u;
+        previewFotoModal = ObtenerUrlFoto(u.FotoUrl, u.NombreCompleto);
+        formEdicion = new UsuarioAdminEdicionRequest
+        {
+            Nombre = u.Nombre,
+            Apellido = u.Apellido,
+            Email = u.Email,
+            Telefono = u.Telefono,
+            Rol = u.Rol,
+            MunicipioAsignadoId = u.MunicipioAsignadoId,
+            Activo = u.Activo,
+            FotoBase64 = null,
+            EliminarFoto = false
+        };
+    }
+
+    private void AbrirModalCrear()
+    {
+        errorModal = null;
+        formCrear = new UsuarioAdminCrearRequest
+        {
+            Rol = "Turista",
+            Password = ""
+        };
+        mostrandoModalCrear = true;
+    }
+
+    private void AbrirModalEliminar(UsuarioAdminItemDto u)
+    {
+        errorModal = null;
+        usuarioParaEliminar = u;
+    }
+
+    private void CerrarModales()
+    {
+        usuarioParaEditar = null;
+        usuarioParaEliminar = null;
+        mostrandoModalCrear = false;
+        errorModal = null;
+        guardandoModal = false;
+    }
+
+    private async Task GuardarEdicionUsuario()
+    {
+        if (usuarioParaEditar == null) return;
+
+        if (string.IsNullOrWhiteSpace(formEdicion.Nombre))
+        {
+            errorModal = "El nombre del titular es requerido.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(formEdicion.Email))
+        {
+            errorModal = "El correo electrónico es requerido.";
+            return;
+        }
+
+        guardandoModal = true;
+        errorModal = null;
+
+        var (exito, error) = await UsuarioService.ActualizarUsuarioAsync(usuarioParaEditar.IdUsuario, formEdicion);
+
+        guardandoModal = false;
+
+        if (exito)
+        {
+            usuarioParaEditar.Nombre = formEdicion.Nombre;
+            usuarioParaEditar.Apellido = formEdicion.Apellido;
+            usuarioParaEditar.Email = formEdicion.Email;
+            usuarioParaEditar.Telefono = formEdicion.Telefono;
+            usuarioParaEditar.Rol = formEdicion.Rol;
+            usuarioParaEditar.Activo = formEdicion.Activo;
+            usuarioParaEditar.MunicipioAsignadoId = formEdicion.MunicipioAsignadoId;
+
+            if (formEdicion.MunicipioAsignadoId.HasValue)
+            {
+                var muni = municipiosDisponibles.FirstOrDefault(m => m.IdMunicipio == formEdicion.MunicipioAsignadoId.Value);
+                usuarioParaEditar.NombreMunicipioAsignado = muni?.Nombre;
+            }
+            else
+            {
+                usuarioParaEditar.NombreMunicipioAsignado = null;
+            }
+
+            var nombre = usuarioParaEditar.NombreCompleto;
+            CerrarModales();
+            await CargarDatos();
+            MostrarToast($"Datos de '{nombre}' actualizados correctamente.", error: false, titulo: "Cambios Guardados");
+        }
+        else
+        {
+            errorModal = error ?? "No se pudo actualizar el usuario.";
+        }
+    }
+
+    private async Task EjecutarCrearUsuario()
+    {
+        if (string.IsNullOrWhiteSpace(formCrear.Nombre))
+        {
+            errorModal = "El nombre del usuario es requerido.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(formCrear.Email))
+        {
+            errorModal = "El correo electrónico es requerido.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(formCrear.Password) || formCrear.Password.Length < 6)
+        {
+            errorModal = "La contraseña inicial debe tener al menos 6 caracteres.";
+            return;
+        }
+
+        guardandoModal = true;
+        errorModal = null;
+
+        var (exito, error) = await UsuarioService.CrearUsuarioAsync(formCrear);
+        guardandoModal = false;
+
+        if (exito)
+        {
+            var nombre = $"{formCrear.Nombre} {formCrear.Apellido}".Trim();
+            CerrarModales();
+            await CargarDatos();
+            MostrarToast($"El usuario '{nombre}' ha sido registrado exitosamente.", error: false, titulo: "Usuario Creado");
+        }
+        else
+        {
+            errorModal = error ?? "No se pudo registrar el usuario. Verifica los datos ingresados.";
+        }
+    }
+
+    private async Task EjecutarEliminarUsuario()
+    {
+        if (usuarioParaEliminar == null) return;
+
+        guardandoModal = true;
+        errorModal = null;
+
+        var (exito, error) = await UsuarioService.EliminarUsuarioAsync(usuarioParaEliminar.IdUsuario);
+        guardandoModal = false;
+
+        if (exito)
+        {
+            var nombre = string.IsNullOrWhiteSpace(usuarioParaEliminar.NombreCompleto) ? usuarioParaEliminar.Email : usuarioParaEliminar.NombreCompleto;
+            usuarios.Remove(usuarioParaEliminar);
+            CerrarModales();
+            MostrarToast($"La cuenta de '{nombre}' fue procesada / desactivada exitosamente.", error: false, titulo: "Cuenta Gestionada");
+        }
+        else
+        {
+            errorModal = error ?? "No se pudo procesar la eliminación.";
+        }
+    }
+
+    private string ObtenerUrlFoto(string? fotoUrl, string? nombre)
+    {
+        if (string.IsNullOrWhiteSpace(fotoUrl))
+        {
+            return $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(string.IsNullOrWhiteSpace(nombre) ? "U" : nombre)}&background=213b31&color=fff";
+        }
+        if (fotoUrl.StartsWith("data:image", StringComparison.OrdinalIgnoreCase))
+        {
+            return fotoUrl;
+        }
+        if (fotoUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || fotoUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            return fotoUrl;
+        }
+        var ruta = fotoUrl.TrimStart('/');
+        return $"https://localhost:7078/{ruta}";
+    }
+
+    private string ObtenerNombreAdministrador(System.Security.Claims.ClaimsPrincipal user)
+    {
+        var nombre = user.Identity?.Name;
+        if (!string.IsNullOrWhiteSpace(nombre)) return nombre;
+
+        var email = user.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value 
+                 ?? user.FindFirst("email")?.Value;
+        if (!string.IsNullOrWhiteSpace(email)) return email;
+
+        return "Administrador";
+    }
+
+    private string ObtenerRolAdministrador(System.Security.Claims.ClaimsPrincipal user)
+    {
+        var rol = user.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value 
+               ?? user.FindFirst("role")?.Value;
+        return string.IsNullOrWhiteSpace(rol) ? "Superadmin" : rol;
+    }
+
+    private string ObtenerUrlFotoAdmin()
+    {
+        var fotoUrl = perfilAdmin?.FotoUrl;
+        var nombre = perfilAdmin != null ? $"{perfilAdmin.Nombre} {perfilAdmin.Apellido}" : "Admin";
+        if (string.IsNullOrWhiteSpace(fotoUrl))
+            return $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(nombre)}&background=213b31&color=fff&size=80";
+        if (fotoUrl.StartsWith("data:image", StringComparison.OrdinalIgnoreCase) ||
+            fotoUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+            fotoUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            return fotoUrl;
+        return $"https://localhost:7078/{fotoUrl.TrimStart('/')}";
+    }
+
+    private async Task OnFotoSeleccionada(InputFileChangeEventArgs e)
+    {
+        errorSubidaFoto = null;
+        var file = e.File;
+        if (file == null) return;
+
+        if (file.Size > 4 * 1024 * 1024)
+        {
+            errorSubidaFoto = "La imagen no debe superar los 4 MB.";
+            return;
+        }
+
+        try
+        {
+            var format = file.ContentType;
+            if (!format.StartsWith("image/"))
+            {
+                errorSubidaFoto = "Solo se permiten imágenes (PNG, JPG, WEBP).";
+                return;
+            }
+
+            using var stream = file.OpenReadStream(maxAllowedSize: 4 * 1024 * 1024);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            var bytes = ms.ToArray();
+            var base64 = Convert.ToBase64String(bytes);
+
+            formEdicion.FotoBase64 = $"data:{format};base64,{base64}";
+            formEdicion.EliminarFoto = false;
+            previewFotoModal = formEdicion.FotoBase64;
+        }
+        catch (Exception ex)
+        {
+            errorSubidaFoto = "Error al procesar la foto: " + ex.Message;
+        }
+    }
+
+    private void QuitarFotoModal()
+    {
+        formEdicion.FotoBase64 = null;
+        formEdicion.EliminarFoto = true;
+        previewFotoModal = $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(usuarioParaEditar?.NombreCompleto ?? "U")}&background=213b31&color=fff";
+    }
+
+    private async Task CerrarSesion()
+    {
+        await JS.InvokeVoidAsync("borrarToken");
+        if (AuthStateProvider is JwtAuthStateProvider jwt)
+        {
+            jwt.NotificarCambioAutenticacion();
+        }
+        Nav.NavigateTo("/login", forceLoad: true);
+    }
+
+    public void Dispose()
+    {
+        _toastCts?.Cancel();
+        _toastCts?.Dispose();
+    }
+}

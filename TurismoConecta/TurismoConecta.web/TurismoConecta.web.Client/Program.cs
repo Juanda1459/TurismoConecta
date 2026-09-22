@@ -35,6 +35,23 @@ builder.Services.AddHttpClient<AsistenteApiService>(client =>
 })
 .AddHttpMessageHandler<AuthorizationMessageHandler>();
 
+builder.Services.AddHttpClient<NegocioApiService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7078");
+})
+.AddHttpMessageHandler<AuthorizationMessageHandler>();
+
+builder.Services.AddHttpClient<UsuarioApiService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7078");
+})
+.AddHttpMessageHandler<AuthorizationMessageHandler>();
+
+
+
+
+
+
 //Servicios clave para que <AuthorizeView> no se congele:
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();

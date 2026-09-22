@@ -4,6 +4,7 @@
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @inject MunicipioApiService ApiService
 @inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
 
 <HeadContent>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -11,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 </HeadContent>
 
-<AuthorizeView Roles="AdminGeneral,AdminMunicipio">
+<AuthorizeView Roles="AdminGeneral,AdminPrincipal,AdminMunicipio">
     <Authorized Context="authContext">
         <div class="selva-form-page">
             @if (cargando || guardando)
@@ -44,9 +45,18 @@
             {
                 <header class="selva-form-nav">
                     <button class="nav-back-link" @onclick="Cancelar">
-                        <span class="nav-back-arrow">←</span> Volver a la Ficha
+                        <span class="nav-back-arrow">←</span> Volver al Panel
                     </button>
-                    <span class="nav-label-admin">Panel de Edición</span>
+                    <a href="/admin/dashboard" class="logo-marco-dorado" title="TurismoConecta">
+                        <img src="images/turismo-conecta-logo.png" alt="TurismoConecta" class="nav-brand-logo" />
+                    </a>
+                    <div class="badge-admin-info">
+                        <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(authContext.User.Identity?.Name ?? "Admin")&background=213b31&color=fff&size=80" alt="Foto" class="admin-avatar-topbar"
+                             onerror="this.onerror=null;this.style.display='none';" />
+                        <span class="admin-label-prefijo">Administrador:</span>
+                        <span class="admin-nombre-valor">@(authContext.User.Identity?.Name ?? "Admin")</span>
+                        <span class="admin-rol-tag">@(authContext.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? authContext.User.FindFirst("role")?.Value ?? "Admin")</span>
+                    </div>
                 </header>
 
                 <div class="form-container-editorial">
@@ -456,5 +466,14 @@
         }
     }
 
-    private void Cancelar() => Nav.NavigateTo($"/municipios/{Id}", replace: true);
+    private async Task Cancelar()
+    {
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (auth.User.IsInRole("AdminGeneral"))
+            Nav.NavigateTo("/admin/dashboard");
+        else if (auth.User.IsInRole("AdminMunicipio"))
+            Nav.NavigateTo("/municipio/dashboard");
+        else
+            Nav.NavigateTo($"/municipios/{Id}", replace: true);
+    }
 }

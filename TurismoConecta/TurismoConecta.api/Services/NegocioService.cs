@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TurismoConecta.api.Data;
 using TurismoConecta.api.DTOs.Negocios;
 using TurismoConecta.api.Models;
@@ -75,15 +75,18 @@ namespace TurismoConecta.api.Services
             var negocio = await _context.Negocios.FindAsync(idNegocio);
             if (negocio is null) return (false, "Negocio no encontrado.");
 
-            var admin = await _context.Usuarios.FindAsync(idAdminMunicipio);
-            if (admin is null || admin.MunicipioAsignadoId != negocio.IdMunicipio)
+            var admin = await _context.Usuarios.Include(u => u.IdRolNavigation).FirstOrDefaultAsync(u => u.IdUsuario == idAdminMunicipio);
+            if (admin is null)
+                return (false, "Usuario administrador no encontrado.");
+
+            bool esSuperAdmin = admin.IdRolNavigation?.Nombre == "AdminGeneral" || admin.IdRolNavigation?.Nombre == "AdminPrincipal";
+            if (!esSuperAdmin && admin.MunicipioAsignadoId != negocio.IdMunicipio)
                 return (false, "No tienes permiso sobre este municipio.");
 
             negocio.Estado = nuevoEstado;
             if (nuevoEstado == "Aprobado") negocio.FechaAprobacion = DateTime.Now;
 
             await _context.SaveChangesAsync();
-            // TODO (E8/SignalR): disparar notificación al propietario cuando el Hub esté portado al proyecto real
             return (true, null);
         }
 
@@ -102,15 +105,21 @@ namespace TurismoConecta.api.Services
 
         public async Task<List<NegocioPendienteDto>> ListarPendientesAsync(int idAdminMunicipal)
         {
-            var admin = await _context.Usuarios.FindAsync(idAdminMunicipal);
-            if (admin?.MunicipioAsignadoId is null) return new List<NegocioPendienteDto>();
+            var admin = await _context.Usuarios.Include(u => u.IdRolNavigation).FirstOrDefaultAsync(u => u.IdUsuario == idAdminMunicipal);
+            if (admin is null) return new List<NegocioPendienteDto>();
 
-            var pendientes = await _context.Negocios
+            IQueryable<Negocio> query = _context.Negocios
                 .Include(n => n.IdUsuarioNavigation)
-                .Where(n => n.IdMunicipio == admin.MunicipioAsignadoId && n.Estado == "Pendiente")
-                .OrderBy(n => n.FechaRegistro)
-                .ToListAsync();
+                .Where(n => n.Estado == "Pendiente");
 
+            bool esSuperAdmin = admin.IdRolNavigation?.Nombre == "AdminGeneral" || admin.IdRolNavigation?.Nombre == "AdminPrincipal";
+            if (!esSuperAdmin)
+            {
+                if (admin.MunicipioAsignadoId is null) return new List<NegocioPendienteDto>();
+                query = query.Where(n => n.IdMunicipio == admin.MunicipioAsignadoId);
+            }
+
+            var pendientes = await query.OrderBy(n => n.FechaRegistro).ToListAsync();
             return pendientes.Select(NegocioMapper.ToPendienteDto).ToList();
         }
 
@@ -127,5 +136,22 @@ namespace TurismoConecta.api.Services
 
             return NegocioMapper.ToDto(n, promedio);
         }
+
+
+        public async Task<List<NegocioDto>> ListarMisNegociosAsync(int idUsuario)
+        {
+            var negocios = await _context.Negocios
+                .Include(n => n.GaleriaNegocios)
+                .Where(n => n.IdUsuario == idUsuario)
+                .OrderByDescending(n => n.FechaRegistro)
+                .ToListAsync();
+
+            return negocios.Select(n => NegocioMapper.ToDto(n)).ToList();
+        }
+
+
+
+
+
     }
 }
