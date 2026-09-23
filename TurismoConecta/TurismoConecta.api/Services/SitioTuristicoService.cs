@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TurismoConecta.api.Data;
 using TurismoConecta.api.Models;
 using TurismoConecta.api.DTOs.SitiosTuristicos;
@@ -40,7 +40,7 @@ namespace TurismoConecta.api.Services
                 .FirstOrDefaultAsync(u => u.IdUsuario == idUsuario, ct);
 
             if (usuario is null) return false;
-            if (usuario.IdRolNavigation?.Nombre == "AdminGeneral") return true;
+            if (usuario.IdRolNavigation?.Nombre == "AdminGeneral" || usuario.IdRolNavigation?.Nombre == "AdminPrincipal") return true;
             return usuario.IdRolNavigation?.Nombre == "AdminMunicipio" && usuario.MunicipioAsignadoId == idMunicipio;
         }
 

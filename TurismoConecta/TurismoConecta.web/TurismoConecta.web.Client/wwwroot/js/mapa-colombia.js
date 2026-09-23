@@ -18,6 +18,11 @@ window.TurismoConectaMapa = {
             return;
         }
 
+        if (typeof L === "undefined") {
+            console.warn("Leaflet no está cargado todavía en la página.");
+            return;
+        }
+
         this.mapa = L.map(contenedor, {
             zoomControl: true,
             scrollWheelZoom: true,
@@ -50,6 +55,13 @@ window.TurismoConectaMapa = {
         this.mostrarMunicipios();
         this.resaltarBoyaca();
         this.mapaInicializado = true;
+
+        setTimeout(() => {
+            if (this.mapa) this.mapa.invalidateSize();
+        }, 250);
+        setTimeout(() => {
+            if (this.mapa) this.mapa.invalidateSize();
+        }, 1000);
     },
 
         marcadores: [],

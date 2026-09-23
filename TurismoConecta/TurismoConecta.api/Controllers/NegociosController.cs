@@ -16,7 +16,7 @@ namespace TurismoConecta.api.Controllers
         private int UsuarioActual => int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
         [HttpPost]
-        [Authorize(Roles = "AdminComercio")]
+        [Authorize(Roles = "AdminComercio,AdminGeneral,AdminPrincipal")]
         public async Task<IActionResult> Crear([FromBody] NegocioCrearDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -24,7 +24,7 @@ namespace TurismoConecta.api.Controllers
         }
 
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "AdminComercio")]
+        [Authorize(Roles = "AdminComercio,AdminGeneral,AdminPrincipal")]
         public async Task<IActionResult> Editar(int id, [FromBody] NegocioEditarDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);

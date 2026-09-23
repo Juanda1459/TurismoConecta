@@ -19,7 +19,7 @@
 
 <HeadContent>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin ="anonymous" />
     <link rel="stylesheet" href="Pages/inicio.razor.css" />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   </HeadContent>
@@ -215,57 +215,73 @@
 
         
             
-               <section class="destinos-page" id="donde-ir">
+        <section class="destinos-page" id="donde-ir">
+            <div class="destinos-heading">
+                <span class="eyebrow">MARAVILLAS DE BOYACÁ</span>
+                <h1>Tesoros Naturales, Lagos y Monumentos</h1>
+                <p>Explora los lagos legendarios, cumbres nevadas, páramos mágicos, monumentos históricos y pueblos coloniales de nuestra tierra.</p>
 
-    <div class="destinos-heading">
-        <span class="eyebrow">DESCUBRE BOYACÁ</span>
-        <h1>¿Dónde quieres ir?</h1>
-        <p>Explora los municipios registrados y encuentra el destino ideal para tu próxima aventura.</p>
-    </div>
+                <!-- Filtro dinámico de categorías -->
+                <div class="destinos-filtros-bar">
+                    @foreach (var cat in categoriasMaravillas)
+                    {
+                        <button type="button"
+                                class="filtro-maravilla-btn @(categoriaSeleccionada == cat ? "activo" : "")"
+                                @onclick="() => SeleccionarCategoriaMaravilla(cat)">
+                            @cat
+                        </button>
+                    }
+                </div>
+            </div>
 
-    <div class="destinos-marquee" aria-label="Sitios turísticos mejor reseñados">
-    <div class="destinos-track @(carruselPausado ? "pausado" : "")"
-     @onmouseenter="() => carruselPausado = true"
-     @onmouseleave="() => carruselPausado = false"
-     @onclick="() => carruselPausado = !carruselPausado">
-    @for (int i = 0; i < sitiosParaMarquee.Count; i++)
-    {        
-        var sitio = sitiosParaMarquee[i];
-        <article class="destino-frame">
-            <a href="@($"/municipios/{sitio.IdMunicipio}")" class="destino-link" aria-label="Ver @sitio.Nombre">
-                <div class="destino-image-wrap">
-                    <img src="@sitio.ImagenUrl" alt="@sitio.Nombre" class="destino-image" />
-                    <span class="destino-number">@(((i % sitiosTuristicos.Count) + 1).ToString("00"))</span>
+            <div class="destinos-marquee" aria-label="Maravillas y atractivos de Boyacá">
+                <div class="destinos-track @(carruselPausado ? "pausado" : "")"
+                     @onmouseenter="() => carruselPausado = true"
+                     @onmouseleave="() => carruselPausado = false">
+                    @if (maravillasParaMostrar.Count > 0)
+                    {
+                        @for (int i = 0; i < maravillasParaMostrar.Count; i++)
+                        {
+                            var item = maravillasParaMostrar[i];
+                            <article class="destino-frame">
+                                <a href="@($"/municipios/{(item.IdMunicipio > 0 ? item.IdMunicipio : 1)}")" class="destino-link" aria-label="Explorar @item.Nombre">
+                                    <div class="destino-image-wrap">
+                                        <img src="@item.ImagenUrl" alt="@item.Nombre" class="destino-image" loading="lazy" />
+                                        <span class="destino-badge-categoria">@item.BadgeIcono @item.Categoria</span>
+                                        <span class="destino-clima-tag">🌡️ @item.Clima</span>
+                                        <span class="destino-number">@(((i % (maravillasFiltradas.Count > 0 ? maravillasFiltradas.Count : 1)) + 1).ToString("00"))</span>
+                                    </div>
+                                    <div class="destino-content">
+                                        <div class="destino-topline">
+                                            <h2>@item.Nombre</h2>
+                                            <span class="destino-rating">★ @item.Calificacion.ToString("0.0")</span>
+                                        </div>
+                                        <span class="destino-category">📍 @item.Municipio • @item.Altitud</span>
+                                        <p class="destino-descripcion">@item.Descripcion</p>
+                                        <span class="destino-cta">Conocer destino <span aria-hidden="true">→</span></span>
+                                    </div>
+                                </a>
+                            </article>
+                        }
+                    }
                 </div>
-                <div class="destino-content">
-                    <div class="destino-topline">
-                        <h2>@sitio.Nombre</h2>
-                        <span class="destino-rating">@(sitio.Calificacion.HasValue ? $"★ {sitio.Calificacion:0.0}" : "Nuevo")</span>
-                    </div>
-                    <span class="destino-category">@sitio.NombreMunicipio</span>
-                    <span class="destino-cta">Ver municipio <span aria-hidden="true">→</span></span>
+            </div>
+
+            <div class="destinos-footer">
+                <div class="controles-maravillas">
+                    <button type="button" class="btn-control-maravilla" @onclick="() => carruselPausado = !carruselPausado" title="@(carruselPausado ? "Reanudar rotación" : "Pausar rotación")">
+                        @(carruselPausado ? "▶ Reanudar rotación" : "⏸ Pausar rotación")
+                    </button>
                 </div>
+                <p>Desliza o haz clic para explorar los destinos más asombrosos del departamento</p>
+            </div>
+        </section>
+
+        <div class="centrar-boton">
+            <a href="/municipios" class="boton-principal">
+                Ver todos los municipios y atractivos
             </a>
-        </article>
-    }
-    
-</div>
-    </div>
-
-    <div class="destinos-footer">
-        <span></span>
-        <p>Los destinos favoritos de nuestros viajeros</p>
-        <span></span>
-    </div>
-</section>
-
-                <div class="centrar-boton">
-                    <a href="/municipios"
-                       class="boton-principal">
-                        Ver todos los municipios
-                    </a>
-                </div>
-            }
+        </div>
         
 
         <section class="gustos-section" id="gustos">
@@ -466,6 +482,159 @@
     private bool cargandoMunicipios = true;
     private bool cargandoEtiquetas = true;
     private bool mapaInicializado;
+    private string categoriaSeleccionada = "Todos";
+    private readonly List<string> categoriasMaravillas = new() { "Todos", "Lagos", "Montañas", "Monumentos", "Páramos", "Pueblos" };
+
+    public class MaravillaBoyaca
+    {
+        public string Nombre { get; set; } = "";
+        public string Municipio { get; set; } = "";
+        public string Categoria { get; set; } = "";
+        public string Clima { get; set; } = "";
+        public string Altitud { get; set; } = "";
+        public string ImagenUrl { get; set; } = "";
+        public string Descripcion { get; set; } = "";
+        public double Calificacion { get; set; } = 4.8;
+        public string BadgeIcono { get; set; } = "⭐";
+        public int IdMunicipio { get; set; } = 1;
+    }
+
+    private readonly List<MaravillaBoyaca> maravillasBoyaca = new()
+    {
+        new MaravillaBoyaca {
+            Nombre = "Laguna de Tota y Playa Blanca",
+            Municipio = "Aquitania / Cuítiva",
+            Categoria = "Lagos",
+            Clima = "12°C Frío",
+            Altitud = "3.015 msnm",
+            ImagenUrl = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+            Descripcion = "El lago natural más grande de Colombia con arenas blancas naturales y aguas color esmeralda.",
+            Calificacion = 4.9,
+            BadgeIcono = "🌊",
+            IdMunicipio = 1
+        },
+        new MaravillaBoyaca {
+            Nombre = "Sierra Nevada del Cocuy",
+            Municipio = "El Cocuy / Güicán",
+            Categoria = "Montañas",
+            Clima = "-2°C a 8°C Páramo",
+            Altitud = "5.330 msnm",
+            ImagenUrl = "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80",
+            Descripcion = "La mayor masa glaciar de Colombia con picos nevados imponentes como el Ritacuba Blanco.",
+            Calificacion = 5.0,
+            BadgeIcono = "🏔️",
+            IdMunicipio = 1
+        },
+        new MaravillaBoyaca {
+            Nombre = "Monumento Lanceros del Pantano de Vargas",
+            Municipio = "Paipa",
+            Categoria = "Monumentos",
+            Clima = "14°C Templado",
+            Altitud = "2.525 msnm",
+            ImagenUrl = "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?auto=format&fit=crop&w=800&q=80",
+            Descripcion = "La escultura de bronce más colosal de Colombia rindiendo tributo a los 14 jinetes de la gesta libertadora.",
+            Calificacion = 4.9,
+            BadgeIcono = "⚔️",
+            IdMunicipio = 2
+        },
+        new MaravillaBoyaca {
+            Nombre = "Páramo de Ocetá",
+            Municipio = "Monguí",
+            Categoria = "Páramos",
+            Clima = "7°C Frío",
+            Altitud = "3.950 msnm",
+            ImagenUrl = "https://images.unsplash.com/photo-1511497584788-87676104235f?auto=format&fit=crop&w=800&q=80",
+            Descripcion = "Considerado uno de los páramos más bellos del planeta, con jardines de frailejones y laberintos rocosos.",
+            Calificacion = 4.95,
+            BadgeIcono = "🌿",
+            IdMunicipio = 3
+        },
+        new MaravillaBoyaca {
+            Nombre = "Monumento Histórico Puente de Boyacá",
+            Municipio = "Ventaquemada / Tunja",
+            Categoria = "Monumentos",
+            Clima = "13°C Frío",
+            Altitud = "2.700 msnm",
+            ImagenUrl = "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=800&q=80",
+            Descripcion = "Escenario patriota consagrado como patrimonio de la nación donde se selló la libertad de América.",
+            Calificacion = 4.8,
+            BadgeIcono = "🏛️",
+            IdMunicipio = 1
+        },
+        new MaravillaBoyaca {
+            Nombre = "Pozos Azules y Desierto de la Candelaria",
+            Municipio = "Villa de Leyva",
+            Categoria = "Lagos",
+            Clima = "18°C Agradable",
+            Altitud = "2.149 msnm",
+            ImagenUrl = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+            Descripcion = "Espejos de agua azul turquesa en contraste con el paisaje desértico y viñedos boyacenses.",
+            Calificacion = 4.85,
+            BadgeIcono = "💧",
+            IdMunicipio = 4
+        },
+        new MaravillaBoyaca {
+            Nombre = "Santuario y Laguna Sagrada de Iguaque",
+            Municipio = "Chíquiza / Villa de Leyva",
+            Categoria = "Lagos",
+            Clima = "9°C Frío",
+            Altitud = "3.700 msnm",
+            ImagenUrl = "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80",
+            Descripcion = "Cuna mística de la mitología Muisca donde emergió la diosa Bachué de las aguas sagradas.",
+            Calificacion = 4.9,
+            BadgeIcono = "✨",
+            IdMunicipio = 4
+        },
+        new MaravillaBoyaca {
+            Nombre = "Aguas Termales y Lago Sochagota",
+            Municipio = "Paipa",
+            Categoria = "Lagos",
+            Clima = "15°C Templado",
+            Altitud = "2.525 msnm",
+            ImagenUrl = "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80",
+            Descripcion = "Aguas mineromedicinales de origen volcánico, deportes náuticos y hoteles de descanso.",
+            Calificacion = 4.85,
+            BadgeIcono = "♨️",
+            IdMunicipio = 2
+        },
+        new MaravillaBoyaca {
+            Nombre = "Villa de Leyva Colonial",
+            Municipio = "Villa de Leyva",
+            Categoria = "Pueblos",
+            Clima = "17°C Templado",
+            Altitud = "2.149 msnm",
+            ImagenUrl = "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80",
+            Descripcion = "La plaza empedrada más grande de Colombia rodeada de arquitectura colonial perfectamente preservada.",
+            Calificacion = 4.95,
+            BadgeIcono = "🏡",
+            IdMunicipio = 4
+        },
+        new MaravillaBoyaca {
+            Nombre = "Ráquira: Capital Artesanal de América",
+            Municipio = "Ráquira",
+            Categoria = "Pueblos",
+            Clima = "16°C Templado",
+            Altitud = "2.150 msnm",
+            ImagenUrl = "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80",
+            Descripcion = "Fascinantes fachadas multicolores y milenaria tradición de alfarería y artesanías en barro cocido.",
+            Calificacion = 4.8,
+            BadgeIcono = "🏺",
+            IdMunicipio = 5
+        }
+    };
+
+    private List<MaravillaBoyaca> maravillasFiltradas => categoriaSeleccionada == "Todos"
+        ? maravillasBoyaca
+        : maravillasBoyaca.Where(m => m.Categoria == categoriaSeleccionada).ToList();
+
+    private List<MaravillaBoyaca> maravillasParaMostrar => maravillasFiltradas.Count > 0
+        ? maravillasFiltradas.Concat(maravillasFiltradas).ToList()
+        : new();
+
+    private void SeleccionarCategoriaMaravilla(string categoria)
+    {
+        categoriaSeleccionada = categoria;
+    }
 
     private int? totalMunicipios;
 
@@ -473,7 +642,6 @@
     private List<MunicipioListadoDto> municipiosMostrados = new();
     private List<EtiquetaDto> etiquetas = new();
     private List<SitioTuristicoDto> sitiosTuristicos = new();
-    private List<SitioTuristicoDto> sitiosParaMarquee => sitiosTuristicos.Concat(sitiosTuristicos).ToList();
     private string? mensajeBusqueda;
 
     // Redirige al dashboard según el rol del usuario autenticado
@@ -494,6 +662,7 @@
         var destino = rol switch
         {
             "AdminGeneral"   => "/admin/dashboard",
+            "AdminPrincipal" => "/admin/dashboard",
             "AdminMunicipio" => "/municipio/dashboard",
             "AdminComercio"  => "/comercio/dashboard",
             _                => "/perfil"
@@ -528,6 +697,8 @@
         finally
         {
             cargandoMunicipios = false;
+            StateHasChanged();
+            _ = InicializarMapaAsync();
         }
     }
 
@@ -566,7 +737,15 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender || mapaInicializado || cargandoMunicipios) return;
+        if (firstRender && !cargandoMunicipios)
+        {
+            await InicializarMapaAsync();
+        }
+    }
+
+    private async Task InicializarMapaAsync()
+    {
+        if (mapaInicializado) return;
 
         var municipiosParaMapa = todosMunicipios
             .Where(m => m.Latitud.HasValue && m.Longitud.HasValue)
