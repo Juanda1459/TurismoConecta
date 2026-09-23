@@ -78,9 +78,9 @@ namespace TurismoConecta.api.Controllers
         }
 
 
-        /// <summary>Sube una imagen de portada para un municipio.</summary>
+        /// <summary>Sube una imagen de portada para un municipio o establecimiento comercial.</summary>
         [HttpPost("subir-imagen")]
-        [Authorize(Roles = "AdminGeneral,AdminPrincipal,AdminMunicipio")]
+        [Authorize(Roles = "AdminGeneral,AdminPrincipal,AdminMunicipio,AdminComercio,AdminEstablecimiento")]
         public async Task<IActionResult> SubirImagen(IFormFile archivo, [FromServices] IWebHostEnvironment env)
         {
             if (archivo == null || archivo.Length == 0)

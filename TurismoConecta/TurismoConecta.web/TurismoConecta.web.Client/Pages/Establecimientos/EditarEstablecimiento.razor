@@ -185,7 +185,7 @@
         if (exito)
         {
             var auth = await AuthStateProvider.GetAuthenticationStateAsync();
-            if (auth.User.IsInRole("AdminGeneral"))
+            if (auth.User.IsInRole("AdminGeneral") || auth.User.IsInRole("AdminPrincipal"))
                 Nav.NavigateTo("/admin/dashboard");
             else
                 Nav.NavigateTo("/comercio/dashboard");
@@ -200,7 +200,7 @@
     private async Task Cancelar()
     {
         var auth = await AuthStateProvider.GetAuthenticationStateAsync();
-        if (auth.User.IsInRole("AdminGeneral"))
+        if (auth.User.IsInRole("AdminGeneral") || auth.User.IsInRole("AdminPrincipal"))
             Nav.NavigateTo("/admin/dashboard");
         else
             Nav.NavigateTo("/comercio/dashboard");
