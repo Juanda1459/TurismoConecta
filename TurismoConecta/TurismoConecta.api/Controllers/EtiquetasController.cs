@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using TurismoConecta.api.DTOs.Etiquetas;
 using TurismoConecta.api.Services.Etiquetas;
+using TurismoConecta.api.Constants;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -30,7 +31,7 @@ public class EtiquetasController : ControllerBase
     // y verifica que tenga el claim de rol "AdminPrincipal". Si no lo tiene, ASP.NET Core
     // responde automáticamente 403 Forbidden ANTES de que tu código del método se ejecute.
     [HttpPost]
-    [Authorize(Roles = "AdminGeneral,AdminPrincipal")]
+    [Authorize(Roles = Roles.AdminGeneral)]
     public async Task<IActionResult> Create([FromBody] EtiquetaCrearDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState); // valida los [Required]/[MaxLength] del DTO
