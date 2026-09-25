@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using TurismoConecta.api.Constants;
 using TurismoConecta.api.DTOs.Common;
 using TurismoConecta.api.DTOs.Municipios;
 using TurismoConecta.api.Services.Interfaces;
@@ -39,9 +40,9 @@ namespace TurismoConecta.api.Controllers
             return ficha is null ? NotFound(new { mensaje = "Municipio no encontrado." }) : Ok(ficha);
         }
 
-        /// <summary>Edita la ficha de un municipio. Solo el AdminMunicipal asignado a ese municipio.</summary>
+        /// <summary>Edita la ficha de un municipio. Solo el AdminMunicipal, AdminGeneral asignado a ese municipio.</summary>
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "AdminGeneral,AdminPrincipal,AdminMunicipio")]
+        [Authorize(Roles = Roles.AdminMunicipio + "," + Roles.AdminGeneral)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -59,7 +60,7 @@ namespace TurismoConecta.api.Controllers
 
         /// <summary>Crea un nuevo municipio en el catálogo. Solo AdminGeneral.</summary>
         [HttpPost]
-        [Authorize(Roles = "AdminGeneral,AdminPrincipal")]
+        [Authorize(Roles = Roles.AdminGeneral)]
         [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Crear([FromBody] MunicipioCrearDto dto, CancellationToken ct = default)
@@ -80,7 +81,7 @@ namespace TurismoConecta.api.Controllers
 
         /// <summary>Sube una imagen de portada para un municipio o establecimiento comercial.</summary>
         [HttpPost("subir-imagen")]
-        [Authorize(Roles = "AdminGeneral,AdminPrincipal,AdminMunicipio,AdminComercio,AdminEstablecimiento")]
+        [Authorize(Roles = Roles.AdminGeneral + "," + Roles.AdminMunicipio + "," + Roles.AdminEstablecimiento)]
         public async Task<IActionResult> SubirImagen(IFormFile archivo, [FromServices] IWebHostEnvironment env)
         {
             if (archivo == null || archivo.Length == 0)

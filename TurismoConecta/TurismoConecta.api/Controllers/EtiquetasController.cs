@@ -43,7 +43,7 @@ public class EtiquetasController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [Authorize(Roles = "AdminGeneral,AdminPrincipal")]
+    [Authorize(Roles = Roles.AdminGeneral)]
     public async Task<IActionResult> Update(int id, [FromBody] EtiquetaActualizarDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -53,7 +53,7 @@ public class EtiquetasController : ControllerBase
     }
 
     [HttpPatch("{id}/desactivar")]
-    [Authorize(Roles = "AdminGeneral,AdminPrincipal")]
+    [Authorize(Roles = Roles.AdminGeneral)]
     public async Task<IActionResult> Desactivar(int id)
     {
         var (exito, error) = await _service.DesactivarAsync(id);
@@ -61,7 +61,7 @@ public class EtiquetasController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "AdminGeneral,AdminPrincipal")]
+    [Authorize(Roles = Roles.AdminGeneral)]
     public async Task<IActionResult> Delete(int id)
     {
         var (exito, error) = await _service.EliminarAsync(id);
