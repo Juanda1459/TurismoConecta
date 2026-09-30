@@ -170,9 +170,9 @@
                 // Redirigir al dashboard según el rol del usuario
                 var destino = respuesta.Rol switch
                 {
-                    "AdminGeneral" or "AdminPrincipal" => "/admin/dashboard",
-                    "AdminMunicipio"                   => "/municipio/dashboard",
-                    "AdminComercio" or "AdminEstablecimiento" => "/comercio/dashboard",
+                    Roles.AdminGeneral => "/admin/dashboard",
+                    Roles.AdminMunicipio => "/municipio/dashboard",
+                    Roles.GeneralOEstablecimiento => "/comercio/dashboard",
                     _                                  => "/"   // Turista → portal principal
                 };
                 NavManager.NavigateTo(destino, forceLoad: true);

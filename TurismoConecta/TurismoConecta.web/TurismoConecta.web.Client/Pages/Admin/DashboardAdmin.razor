@@ -531,10 +531,10 @@
     {
         return nombreRol switch
         {
-            "AdminGeneral" or "AdminPrincipal" => "Superadministrador global",
-            "AdminMunicipio" => "Gestor municipal asignado",
-            "AdminComercio" or "AdminEstablecimiento" => "Prestador y comercio local",
-            "Turista" or "Usuario" => "Viajero y explorador",
+            Roles.AdminGeneral => "Superadministrador global",
+            Roles.AdminMunicipio=> "Gestor municipal asignado",
+            Roles.AdminEstablecimiento => "Prestador y comercio local",
+            Roles.Usuario=> "Viajero y explorador",
             _ => "Usuario de la plataforma"
         };
     }

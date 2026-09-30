@@ -661,10 +661,9 @@
 
         var destino = rol switch
         {
-            "AdminGeneral"   => "/admin/dashboard",
-            "AdminPrincipal" => "/admin/dashboard",
-            "AdminMunicipio" => "/municipio/dashboard",
-            "AdminComercio"  => "/comercio/dashboard",
+            Roles.AdminGeneral   => "/admin/dashboard",
+            Roles.AdminMunicipio => "/municipio/dashboard",
+            Roles.GeneralOEstablecimiento => "/comercio/dashboard",
             _                => "/perfil"
         };
 
