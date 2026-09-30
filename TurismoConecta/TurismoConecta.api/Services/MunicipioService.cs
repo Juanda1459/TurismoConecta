@@ -5,6 +5,7 @@ using TurismoConecta.api.DTOs.Municipios;
 using TurismoConecta.api.Models;
 using TurismoConecta.api.Services.Interfaces;
 using TurismoConecta.api.Services.Mappers;
+using TurismoConecta.api.Constants;
 
 namespace TurismoConecta.api.Services
 {
@@ -149,7 +150,7 @@ namespace TurismoConecta.api.Services
             if (admin is null) return (false, "Usuario administrador no encontrado.");
 
             // Verificamos permisos: AdminGeneral o AdminPrincipal puede editar cualquiera; AdminMunicipio solo el asignado
-            bool esAdminGeneral = admin.IdRolNavigation?.Nombre == "AdminGeneral" || admin.IdRolNavigation?.Nombre == "AdminPrincipal" || admin.IdRol == 1;
+            bool esAdminGeneral = admin.IdRolNavigation?.Nombre == Roles.AdminGeneral; 
             bool esAdminDelMunicipio = admin.MunicipioAsignadoId == id;
 
             if (!esAdminGeneral && !esAdminDelMunicipio)

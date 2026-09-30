@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="Pages/Admin/DashboardAdmin.razor.css" />
 </HeadContent>
 
-<AuthorizeView Roles="AdminGeneral,AdminPrincipal">
+<AuthorizeView Roles="@Roles.AdminGeneral">
     <Authorized Context="authContext">
         <div class="dashboard-admin-page">
 

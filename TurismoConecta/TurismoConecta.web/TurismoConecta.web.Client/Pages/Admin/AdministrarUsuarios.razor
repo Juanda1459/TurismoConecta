@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="Pages/Admin/AdministrarUsuarios.razor.css" />
 </HeadContent>
 
-<AuthorizeView Roles="AdminGeneral,AdminPrincipal">
+<AuthorizeView Roles="@Roles.AdminGeneral">
     <Authorized Context="authContext">
         <div class="admin-usuarios-page">
             <header class="topbar-admin">
@@ -337,7 +337,7 @@
                                         </div>
                                     </div>
 
-                                    @if (formEdicion.Rol == "AdminMunicipio")
+                                    @if (formEdicion.Rol == Roles.AdminMunicipio)
                                     {
                                         <div class="form-group-clean">
                                             <label>Municipio Asignado *</label>
@@ -475,7 +475,7 @@
                                         </div>
                                     </div>
 
-                                    @if (formCrear.Rol == "AdminMunicipio")
+                                    @if (formCrear.Rol == Roles.AdminMunicipio)
                                     {
                                         <div class="form-group-clean">
                                             <label>Municipio Asignado *</label>
@@ -724,7 +724,7 @@
         errorModal = null;
         formCrear = new UsuarioAdminCrearRequest
         {
-            Rol = "Turista",
+            Rol = Roles.Usuario,
             Password = ""
         };
         mostrandoModalCrear = true;

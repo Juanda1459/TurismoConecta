@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TurismoConecta.api.DTOs.SitiosTuristicos;
 using TurismoConecta.api.Services.Interfaces;
+using TurismoConecta.api.Constants;
 
 namespace TurismoConecta.api.Controllers
 {
@@ -18,7 +19,7 @@ namespace TurismoConecta.api.Controllers
             => Ok(await _service.ListarDestacadosAsync(ct));
 
         [HttpPost]
-        [Authorize(Roles = "AdminGeneral,AdminMunicipio")]
+        [Authorize(Roles = Roles.AdminGeneral + "," + Roles.AdminMunicipio)]
         public async Task<IActionResult> Crear([FromBody] SitioTuristicoCrearDto dto, CancellationToken ct)
         {
             var idUsuario = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -27,7 +28,7 @@ namespace TurismoConecta.api.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "AdminGeneral,AdminMunicipio")]
+        [Authorize(Roles = Roles.AdminGeneral + "," + Roles.AdminMunicipio)]
         public async Task<IActionResult> Editar(int id, [FromBody] SitioTuristicoEditarDto dto, CancellationToken ct)
         {
             var idUsuario = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -36,7 +37,7 @@ namespace TurismoConecta.api.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "AdminGeneral,AdminMunicipio")]
+        [Authorize(Roles = Roles.AdminGeneral + "," + Roles.AdminMunicipio)]
         public async Task<IActionResult> Eliminar(int id, CancellationToken ct)
         {
             var idUsuario = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);

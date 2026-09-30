@@ -3,6 +3,7 @@ using TurismoConecta.api.Data;
 using TurismoConecta.api.Models;
 using TurismoConecta.api.DTOs.SitiosTuristicos;
 using TurismoConecta.api.Services.Interfaces;
+using TurismoConecta.api.Constants;
 
 namespace TurismoConecta.api.Services
 {
@@ -40,8 +41,8 @@ namespace TurismoConecta.api.Services
                 .FirstOrDefaultAsync(u => u.IdUsuario == idUsuario, ct);
 
             if (usuario is null) return false;
-            if (usuario.IdRolNavigation?.Nombre == "AdminGeneral" || usuario.IdRolNavigation?.Nombre == "AdminPrincipal") return true;
-            return usuario.IdRolNavigation?.Nombre == "AdminMunicipio" && usuario.MunicipioAsignadoId == idMunicipio;
+            if (usuario.IdRolNavigation?.Nombre == Roles.AdminGeneral) return true;
+            return usuario.IdRolNavigation?.Nombre == Roles.AdminMunicipio && usuario.MunicipioAsignadoId == idMunicipio;
         }
 
         public async Task<(bool exito, int id, string? error)> CrearAsync(SitioTuristicoCrearDto dto, int idUsuarioSolicitante, CancellationToken ct = default)

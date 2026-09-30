@@ -53,7 +53,7 @@
                     @(enItinerario ? "✓ En tu itinerario" : "+ Guardar en itinerario")
                 </button>
 
-                <AuthorizeView Roles="AdminGeneral,AdminMunicipio">
+                <AuthorizeView Roles="@Roles.GeneralOMunicipio">
                     <Authorized>
                         <button class="btn-admin-minimal" @onclick='() => Nav.NavigateTo($"/municipios/{Id}/editar")'>
                             Editar

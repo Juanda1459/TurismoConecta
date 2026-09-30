@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="Pages/Municipio/DashboardMunicipio.razor.css" />
 </HeadContent>
 
-<AuthorizeView Roles="AdminMunicipio,AdminGeneral,AdminPrincipal">
+<AuthorizeView Roles="@Roles.GeneralOMunicipio">
     <Authorized Context="authContext">
         <div class="dashboard-muni-page">
 

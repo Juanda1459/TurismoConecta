@@ -7,7 +7,8 @@ using TurismoConecta.api.Data;
 using TurismoConecta.api.DTOs.Auth;
 using TurismoConecta.api.Models;
 using TurismoConecta.api.Services.Interfaces;
- 
+using TurismoConecta.api.Constants;
+
 
 namespace TurismoConecta.api.Services;
 
@@ -31,7 +32,7 @@ public class AuthService : IAuthService
         bool emailExiste = await _db.Usuarios.AnyAsync(u => u.Email == dto.Email);
         if (emailExiste) throw new InvalidOperationException("El email ya está registrado.");
 
-        var rolUsuario = await _db.Rols.FirstOrDefaultAsync(r => r.Nombre == "Usuario")
+        var rolUsuario = await _db.Rols.FirstOrDefaultAsync(r => r.Nombre == Roles.Usuario)
             ?? throw new InvalidOperationException("Rol 'Usuario' no encontrado.");
 
         var nuevoUsuario = new Usuario

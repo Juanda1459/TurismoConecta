@@ -33,7 +33,7 @@ namespace TurismoConecta.api.Controllers
         }
 
         [HttpPatch("{id:int}/estado")]
-        [Authorize(Roles = Roles.AdminGeneral + "," + Roles.AdminMunicipio + "," + Roles.AdminEstablecimiento)]
+        [Authorize(Roles = Roles.AdminGeneral + "," + Roles.AdminMunicipio )]
         public async Task<IActionResult> CambiarEstado(int id, [FromBody] string nuevoEstado)
         {
             var (exito, error) = await _negocioService.CambiarEstadoAsync(id, UsuarioActual, nuevoEstado);
