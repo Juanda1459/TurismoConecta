@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="Pages/Comercio/DashboardComercio.razor.css" />
 </HeadContent>
 
-<AuthorizeView Roles="AdminComercio,AdminGeneral,AdminPrincipal">
+<AuthorizeView Roles="@Roles.GeneralOEstablecimiento">
     <Authorized Context="authContext">
         <div class="dashboard-comercio-page">
 

@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="Pages/Establecimientos/EditarEstablecimiento.razor.css" />
 </HeadContent>
 
-<AuthorizeView Roles="AdminComercio,AdminGeneral,AdminPrincipal">
+<AuthorizeView Roles="@Roles.GeneralOEstablecimiento">
     <Authorized Context="authContext">
         <div class="form-negocio-page">
             <header class="form-negocio-topbar">
@@ -185,7 +185,7 @@
         if (exito)
         {
             var auth = await AuthStateProvider.GetAuthenticationStateAsync();
-            if (auth.User.IsInRole("AdminGeneral") || auth.User.IsInRole("AdminPrincipal"))
+            if (auth.User.IsInRole(Roles.AdminGeneral))
                 Nav.NavigateTo("/admin/dashboard");
             else
                 Nav.NavigateTo("/comercio/dashboard");
@@ -200,7 +200,7 @@
     private async Task Cancelar()
     {
         var auth = await AuthStateProvider.GetAuthenticationStateAsync();
-        if (auth.User.IsInRole("AdminGeneral") || auth.User.IsInRole("AdminPrincipal"))
+        if (auth.User.IsInRole(Roles.AdminGeneral))
             Nav.NavigateTo("/admin/dashboard");
         else
             Nav.NavigateTo("/comercio/dashboard");

@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using TurismoConecta.web.Client.Models;
+using TurismoConecta.web.Client.Constants;
 
 namespace TurismoConecta.web.Client.Services
 {
@@ -36,10 +37,10 @@ namespace TurismoConecta.web.Client.Services
             {
                 return new List<RolInfo>
                 {
-                    new() { Nombre = "Turista", Descripcion = "Viajero y explorador" },
-                    new() { Nombre = "AdminComercio", Descripcion = "Dueño de negocio local" },
-                    new() { Nombre = "AdminMunicipio", Descripcion = "Gestor turístico municipal" },
-                    new() { Nombre = "AdminGeneral", Descripcion = "Superadministrador" }
+                    new() { Nombre = Roles.Usuario, Descripcion = "Viajero y explorador" },
+                    new() { Nombre = Roles.Usuario, Descripcion = "Dueño de negocio local" },
+                    new() { Nombre = Roles.AdminMunicipio, Descripcion = "Gestor turístico municipal" },
+                    new() { Nombre = Roles.AdminGeneral, Descripcion = "Superadministrador" }
                 };
             }
         }

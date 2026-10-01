@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="Pages/Establecimientos/BandejaPendientes.razor.css" />
 </HeadContent>
 
-<AuthorizeView Roles="AdminMunicipio,AdminGeneral,AdminPrincipal">
+<AuthorizeView Roles="@Roles.GeneralOMunicipio">
     <Authorized Context="authContext">
         <div class="panel-comercio-wrap">
             <header class="panel-topbar">
@@ -185,7 +185,7 @@
     private async Task VolverDashboard()
     {
         var auth = await AuthStateProvider.GetAuthenticationStateAsync();
-        if (auth.User.IsInRole("AdminGeneral"))
+        if (auth.User.IsInRole(Roles.AdminGeneral))
             Nav.NavigateTo("/admin/dashboard");
         else
             Nav.NavigateTo("/municipio/dashboard");

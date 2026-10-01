@@ -4,6 +4,7 @@ using TurismoConecta.api.DTOs.Negocios;
 using TurismoConecta.api.Models;
 using TurismoConecta.api.Services.Interfaces;
 using TurismoConecta.api.Services.Mappers;
+using TurismoConecta.api.Constants;
 
 namespace TurismoConecta.api.Services
 {
@@ -79,7 +80,7 @@ namespace TurismoConecta.api.Services
             if (admin is null)
                 return (false, "Usuario administrador no encontrado.");
 
-            bool esSuperAdmin = admin.IdRolNavigation?.Nombre == "AdminGeneral" || admin.IdRolNavigation?.Nombre == "AdminPrincipal";
+            bool esSuperAdmin = admin.IdRolNavigation?.Nombre == Roles.AdminGeneral;
             if (!esSuperAdmin && admin.MunicipioAsignadoId != negocio.IdMunicipio)
                 return (false, "No tienes permiso sobre este municipio.");
 
@@ -112,7 +113,7 @@ namespace TurismoConecta.api.Services
                 .Include(n => n.IdUsuarioNavigation)
                 .Where(n => n.Estado == "Pendiente");
 
-            bool esSuperAdmin = admin.IdRolNavigation?.Nombre == "AdminGeneral" || admin.IdRolNavigation?.Nombre == "AdminPrincipal";
+            bool esSuperAdmin = admin.IdRolNavigation?.Nombre == Roles.AdminGeneral;
             if (!esSuperAdmin)
             {
                 if (admin.MunicipioAsignadoId is null) return new List<NegocioPendienteDto>();

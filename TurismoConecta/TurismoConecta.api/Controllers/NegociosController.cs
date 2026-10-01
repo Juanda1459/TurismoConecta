@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TurismoConecta.api.DTOs.Negocios;
 using TurismoConecta.api.Services.Interfaces;
-
+using TurismoConecta.api.Constants;
 namespace TurismoConecta.api.Controllers
 {
     [ApiController]
@@ -16,7 +16,7 @@ namespace TurismoConecta.api.Controllers
         private int UsuarioActual => int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
         [HttpPost]
-        [Authorize(Roles = "AdminComercio,AdminGeneral,AdminPrincipal")]
+        [Authorize(Roles = Roles.AdminGeneral + "," + Roles.AdminMunicipio + "," + Roles.AdminEstablecimiento)]
         public async Task<IActionResult> Crear([FromBody] NegocioCrearDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -24,7 +24,7 @@ namespace TurismoConecta.api.Controllers
         }
 
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "AdminComercio,AdminGeneral,AdminPrincipal")]
+        [Authorize(Roles = Roles.AdminGeneral + "," + Roles.AdminMunicipio + "," + Roles.AdminEstablecimiento)]
         public async Task<IActionResult> Editar(int id, [FromBody] NegocioEditarDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -33,7 +33,7 @@ namespace TurismoConecta.api.Controllers
         }
 
         [HttpPatch("{id:int}/estado")]
-        [Authorize(Roles = "AdminMunicipio,AdminGeneral,AdminPrincipal")]
+        [Authorize(Roles = Roles.AdminGeneral + "," + Roles.AdminMunicipio )]
         public async Task<IActionResult> CambiarEstado(int id, [FromBody] string nuevoEstado)
         {
             var (exito, error) = await _negocioService.CambiarEstadoAsync(id, UsuarioActual, nuevoEstado);
@@ -43,7 +43,7 @@ namespace TurismoConecta.api.Controllers
 
         // HU-24: bandeja de pendientes del admin municipal y general
         [HttpGet("pendientes")]
-        [Authorize(Roles = "AdminMunicipio,AdminGeneral,AdminPrincipal")]
+        [Authorize(Roles = Roles.AdminGeneral + "," + Roles.AdminMunicipio )]
         public async Task<IActionResult> Pendientes() =>
             Ok(await _negocioService.ListarPendientesAsync(UsuarioActual));
 
@@ -62,7 +62,7 @@ namespace TurismoConecta.api.Controllers
 
 
         [HttpGet("mis-negocios")]
-        [Authorize(Roles = "AdminComercio,AdminGeneral,AdminPrincipal")]
+        [Authorize(Roles = Roles.AdminGeneral + "," + Roles.AdminMunicipio + "," + Roles.AdminEstablecimiento)]
         public async Task<IActionResult> MisNegocios()
         {
             var listado = await _negocioService.ListarMisNegociosAsync(UsuarioActual);
