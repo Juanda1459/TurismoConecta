@@ -1,3 +1,6 @@
+using System.Globalization;
+using System.Text;
+
 namespace TurismoConecta.web.Client.Services;
 
 /// <summary>
@@ -6,6 +9,9 @@ namespace TurismoConecta.web.Client.Services;
 /// </summary>
 public class ApiConfig
 {
+    private const string ImagenPorDefecto =
+        "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=1400&auto=format&fit=crop";
+
     public string BaseUrl { get; }
 
     public ApiConfig(string baseUrl)
@@ -23,5 +29,42 @@ public class ApiConfig
         }
 
         return $"{BaseUrl}/{ruta.TrimStart('/')}";
+    }
+
+    /// <summary>
+    /// Devuelve la foto de portada de un municipio:
+    /// 1) la que tiene guardada en la BD, 2) la foto por nombre, 3) una genérica.
+    /// </summary>
+    public string ImagenMunicipio(string? nombre, string? imagenUrl)
+    {
+        if (!string.IsNullOrWhiteSpace(imagenUrl))
+            return Url(imagenUrl);
+
+        if (string.IsNullOrWhiteSpace(nombre))
+            return ImagenPorDefecto;
+
+        return Url($"images/municipios/{LimpiarNombre(nombre)}ImgPerfil.jpg");
+    }
+
+    /// <summary>
+    /// "Villa de Leyva" → "VillaLeyva", "Ráquira" → "Raquira", "Güicán" → "Guican".
+    /// </summary>
+    private static string LimpiarNombre(string nombre)
+    {
+        var sinDe = nombre.Replace(" de ", "");
+        var descompuesto = sinDe.Normalize(NormalizationForm.FormD);
+
+        var resultado = new StringBuilder(descompuesto.Length);
+        foreach (var caracter in descompuesto)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(caracter) == UnicodeCategory.NonSpacingMark)
+                continue;
+            if (char.IsWhiteSpace(caracter))
+                continue;
+
+            resultado.Append(caracter);
+        }
+
+        return resultado.ToString().Normalize(NormalizationForm.FormC);
     }
 }
