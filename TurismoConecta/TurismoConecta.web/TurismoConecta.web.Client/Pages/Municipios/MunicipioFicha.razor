@@ -5,6 +5,7 @@
 @inject MunicipioApiService ApiService
 @inject NavigationManager Nav
 @inject IJSRuntime JS
+@inject ApiConfig Api; 
 
 <HeadContent>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -657,7 +658,7 @@
         if (string.IsNullOrWhiteSpace(nombre)) return "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=1400&auto=format&fit=crop";
 
         string nombreLimpio = nombre.Replace(" de ", "").Replace("á", "a").Replace("Á", "A").Replace("é", "e").Replace("É", "E").Replace("í", "i").Replace("Í", "I").Replace("ó", "o").Replace("Ó", "O").Replace("ú", "u").Replace("Ú", "U").Replace(" ", "");
-        return $"https://localhost:7078/images/municipios/{nombreLimpio}ImgPerfil.jpg";
+        return Api.Url($"images/municipios/{nombreLimpio}ImgPerfil.jpg");
     }
 
     private string FormatearClimaDiscreto(string clima)

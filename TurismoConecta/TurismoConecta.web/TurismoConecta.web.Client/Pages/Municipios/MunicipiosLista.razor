@@ -6,6 +6,8 @@
 @inject MunicipioApiService ApiService
 @inject NavigationManager Nav
 @implements IDisposable
+@inject ApiConfig Api; 
+
 
 <HeadContent>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -13,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </HeadContent>
 
-<div class="pagina-municipios">
+<div class="pagina-municipios"> 
 
     @* ============ HERO ============ *@
     <section class="hero">
@@ -255,7 +257,7 @@
                                         .Replace("ú", "u").Replace("Ú", "U")
                                         .Replace(" ", "");
 
-            return $"https://localhost:7078/images/municipios/{nombreLimpio}ImgPerfil.jpg";
+                return Api.Url($"images/municipios/{nombreLimpio}ImgPerfil.jpg");
         }
 
         private MunicipioVista CrearVista(MunicipioListadoDto m)

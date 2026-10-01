@@ -9,6 +9,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IJSRuntime JS
 @implements IDisposable
+@inject ApiConfig Api; 
 
 <HeadContent>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -867,16 +868,7 @@
         {
             return $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(string.IsNullOrWhiteSpace(nombre) ? "U" : nombre)}&background=213b31&color=fff";
         }
-        if (fotoUrl.StartsWith("data:image", StringComparison.OrdinalIgnoreCase))
-        {
-            return fotoUrl;
-        }
-        if (fotoUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || fotoUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-        {
-            return fotoUrl;
-        }
-        var ruta = fotoUrl.TrimStart('/');
-        return $"https://localhost:7078/{ruta}";
+        return Api.Url(fotoUrl);
     }
 
     private string ObtenerNombreAdministrador(System.Security.Claims.ClaimsPrincipal user)
@@ -904,11 +896,7 @@
         var nombre = perfilAdmin != null ? $"{perfilAdmin.Nombre} {perfilAdmin.Apellido}" : "Admin";
         if (string.IsNullOrWhiteSpace(fotoUrl))
             return $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(nombre)}&background=213b31&color=fff&size=80";
-        if (fotoUrl.StartsWith("data:image", StringComparison.OrdinalIgnoreCase) ||
-            fotoUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-            fotoUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-            return fotoUrl;
-        return $"https://localhost:7078/{fotoUrl.TrimStart('/')}";
+        return Api.Url(fotoUrl);
     }
 
     private async Task OnFotoSeleccionada(InputFileChangeEventArgs e)
