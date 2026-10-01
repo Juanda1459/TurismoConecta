@@ -83,20 +83,23 @@ builder.Services.AddScoped<IReseñaService, ReseñaService>();
 builder.Services.AddScoped<IFavoritoService, FavoritoService>();
 
 
+
+var origenesPermitidos = builder.Configuration
+    .GetSection("Cors:OrigenesPermitidos")
+    .Get<string[]>() ?? []; 
+
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("BlazorPolicy", policy =>
     {
         policy
-            .WithOrigins(
-                "https://localhost:7001",
-                "https://localhost:5001",
-                "https://turismoconecta.azurewebsites.net",
-                "https://localhost:7248"
-            )
+            .WithOrigins(origenesPermitidos)
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials();
+            .AllowCredentials(); 
+
+  
     });
 });
 

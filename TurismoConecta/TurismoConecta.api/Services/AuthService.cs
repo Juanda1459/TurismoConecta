@@ -8,7 +8,7 @@ using TurismoConecta.api.DTOs.Auth;
 using TurismoConecta.api.Models;
 using TurismoConecta.api.Services.Interfaces;
 using TurismoConecta.api.Constants;
-
+using Microsoft.Extensions.Configuration;
 
 namespace TurismoConecta.api.Services;
 
@@ -18,13 +18,15 @@ public class AuthService : IAuthService
     private readonly AppDbContext _db;
     private readonly JwtService _jwt;
     private readonly IEmailService _emailService;
+    private readonly IConfiguration _configuration;
     private readonly PasswordHasher<Usuario> _hasher = new();
 
-    public AuthService(AppDbContext db, JwtService jwt, IEmailService emailService)
+    public AuthService(AppDbContext db, JwtService jwt, IEmailService emailService, IConfiguration configuration)
     {
         _db = db;
         _jwt = jwt;
         _emailService = emailService;
+        _configuration = configuration;
     } 
 
     public async Task<AuthResponseDto> RegistrarAsync(RegisterRequestDto dto)
@@ -82,7 +84,9 @@ public class AuthService : IAuthService
         usuario.PasswordResetExpira = DateTime.UtcNow.AddMinutes(30);
         await _db.SaveChangesAsync();
 
-        var enlace = $"https://localhost:7248/reset-password?email={Uri.EscapeDataString(dto.Email)}&token={token}";
+        var frontendUrl = _configuration["App:FrontendUrl"]?.TrimEnd('/')
+    ?? throw new InvalidOperationException("Falta 'App:FrontendUrl' en appsettings.json");
+        var enlace = $"{frontendUrl}/reset-password?email={Uri.EscapeDataString(dto.Email)}&token={token}";
         var cuerpo = $@"
         <h3>Recuperación de contraseña - TurismoConecta</h3>
         <p>Haz clic en el siguiente enlace para restablecer tu contraseña. Este enlace expira en 30 minutos.</p>

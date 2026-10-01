@@ -82,7 +82,7 @@ namespace TurismoConecta.api.Controllers
         /// <summary>Sube una imagen de portada para un municipio o establecimiento comercial.</summary>
         [HttpPost("subir-imagen")]
         [Authorize(Roles = Roles.AdminGeneral + "," + Roles.AdminMunicipio + "," + Roles.AdminEstablecimiento)]
-        public async Task<IActionResult> SubirImagen(IFormFile archivo, [FromServices] IWebHostEnvironment env)
+        public async Task<IActionResult> SubirImagen(IFormFile archivo, [FromServices] IWebHostEnvironment env, [FromServices] IConfiguration config)
         {
             if (archivo == null || archivo.Length == 0)
                 return BadRequest(new { mensaje = "No se seleccionó ningún archivo." });
@@ -108,7 +108,9 @@ namespace TurismoConecta.api.Controllers
             }
 
             // Devolvemos la URL pública accesible
-            var urlPublica = $"https://localhost:7078/images/municipios/{fileName}";
+            var apiUrl = config["App:ApiUrl"]?.TrimEnd('/')
+            ?? throw new InvalidOperationException("Falta 'App:ApiUrl' en appsettings.json");
+            var urlPublica = $"{apiUrl}/images/municipios/{fileName}";
             return Ok(new { url = urlPublica });
         }
 
