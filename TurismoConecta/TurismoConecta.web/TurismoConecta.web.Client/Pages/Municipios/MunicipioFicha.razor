@@ -73,6 +73,7 @@
                 <img src="@Api.ImagenMunicipio(ficha.Nombre, ficha.ImagenUrl)"
                      alt="@ficha.Nombre, Boyacá"
                      class="hero-imagen" />
+                onerror="this.onerror=null; this.src='@ApiConfig.ImagenPorDefecto';" />
                 <div class="hero-sombra-suave"></div>
             </div>
 

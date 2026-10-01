@@ -9,7 +9,7 @@ namespace TurismoConecta.web.Client.Services;
 /// </summary>
 public class ApiConfig
 {
-    private const string ImagenPorDefecto =
+    public const string ImagenPorDefecto =
         "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=1400&auto=format&fit=crop";
 
     public string BaseUrl { get; }

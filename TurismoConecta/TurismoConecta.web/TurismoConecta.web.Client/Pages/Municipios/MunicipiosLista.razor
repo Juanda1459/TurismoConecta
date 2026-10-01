@@ -139,8 +139,8 @@
                     <article class="card-municipio" @key="m.Id">
                         <div class="card-img-container">
                             <img src="@m.ImagenUrl" alt="@m.Nombre"
-                                 onerror="this.src='https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=500&auto=format&fit=crop';" />
-
+                                 onerror="this.onerror=null; this.src='@ApiConfig.ImagenPorDefecto';" />
+                                 
                             <div class="card-badges">
                                 @foreach (var etiqueta in m.Etiquetas.Take(2))
                                 {
