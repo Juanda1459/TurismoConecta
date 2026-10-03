@@ -27,7 +27,7 @@ namespace TurismoConecta.api.Services
                 Direccion = dto.Direccion,
                 Latitud = dto.Latitud,
                 Longitud = dto.Longitud,
-                Estado = "Pendiente", // HU-22
+                Estado = EstadosNegocio.Pendiente, // HU-22
                 FechaRegistro = DateTime.Now
             };
 
@@ -62,7 +62,7 @@ namespace TurismoConecta.api.Services
             negocio.Latitud = dto.Latitud;
             negocio.Longitud = dto.Longitud;
 
-            if (cambioSustancial) negocio.Estado = "Pendiente";
+            if (cambioSustancial) negocio.Estado = EstadosNegocio.Pendiente;
 
             await _context.SaveChangesAsync();
             return (true, null);
@@ -70,7 +70,7 @@ namespace TurismoConecta.api.Services
 
         public async Task<(bool exito, string? error)> CambiarEstadoAsync(int idNegocio, int idAdminMunicipio, string nuevoEstado)
         {
-            if (nuevoEstado != "Aprobado" && nuevoEstado != "Rechazado")
+            if (nuevoEstado != EstadosNegocio.Aprobado && nuevoEstado != EstadosNegocio.Rechazado)
                 return (false, "Estado inválido. Use 'Aprobado' o 'Rechazado'.");
 
             var negocio = await _context.Negocios.FindAsync(idNegocio);
@@ -85,7 +85,7 @@ namespace TurismoConecta.api.Services
                 return (false, "No tienes permiso sobre este municipio.");
 
             negocio.Estado = nuevoEstado;
-            if (nuevoEstado == "Aprobado") negocio.FechaAprobacion = DateTime.Now;
+            if (nuevoEstado == EstadosNegocio.Aprobado) negocio.FechaAprobacion = DateTime.Now;
 
             await _context.SaveChangesAsync();
             return (true, null);
@@ -95,7 +95,7 @@ namespace TurismoConecta.api.Services
         {
             var query = _context.Negocios
                 .Include(n => n.GaleriaNegocios)
-                .Where(n => n.IdMunicipio == idMunicipio && n.Estado == "Aprobado"); // HU-25
+                .Where(n => n.IdMunicipio == idMunicipio && n.Estado == EstadosNegocio.Aprobado); // HU-25
 
             if (idCategoria.HasValue)
                 query = query.Where(n => n.IdCategoria == idCategoria); // HU-25: filtro por categoría
@@ -110,8 +110,10 @@ namespace TurismoConecta.api.Services
             if (admin is null) return new List<NegocioPendienteDto>();
 
             IQueryable<Negocio> query = _context.Negocios
-                .Include(n => n.IdUsuarioNavigation)
-                .Where(n => n.Estado == "Pendiente");
+            .Include(n => n.IdUsuarioNavigation)
+            .Include(n => n.IdMunicipioNavigation)
+            .Include(n => n.IdCategoriaNavigation)
+            .Where(n => n.Estado == EstadosNegocio.Pendiente);
 
             bool esSuperAdmin = admin.IdRolNavigation?.Nombre == Roles.AdminGeneral;
             if (!esSuperAdmin)
@@ -120,7 +122,10 @@ namespace TurismoConecta.api.Services
                 query = query.Where(n => n.IdMunicipio == admin.MunicipioAsignadoId);
             }
 
-            var pendientes = await query.OrderBy(n => n.FechaRegistro).ToListAsync();
+            var pendientes = await query
+            .OrderBy(n => n.IdMunicipioNavigation.Nombre)
+            .ThenBy(n => n.FechaRegistro)
+            .ToListAsync();
             return pendientes.Select(NegocioMapper.ToPendienteDto).ToList();
         }
 

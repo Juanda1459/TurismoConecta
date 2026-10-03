@@ -126,29 +126,19 @@ namespace TurismoConecta.web.Client.Services
         {
             try
             {
-                var regDto = new
-                {
-                    nombre = dto.Nombre,
-                    apellido = dto.Apellido,
-                    email = dto.Email,
-                    password = dto.Password,
-                    telefono = dto.Telefono
-                };
+                var respuesta = await _http.PostAsJsonAsync("api/usuarios", dto, ct);
 
-                var respuesta = await _http.PostAsJsonAsync("api/auth/register", regDto, ct);
-                if (!respuesta.IsSuccessStatusCode)
-                {
-                    var err = await respuesta.Content.ReadAsStringAsync(ct);
-                    return (false, err);
-                }
+                if (respuesta.IsSuccessStatusCode)
+                    return (true, null);
 
-                return (true, null);
+                return (false, await ErrorApi.LeerMensajeAsync(respuesta, "No se pudo crear el usuario."));
             }
             catch (Exception ex)
             {
                 return (false, ex.Message);
             }
         }
+
 
         public async Task<PerfilResponse?> ObtenerPerfilAsync(CancellationToken ct = default)
         {

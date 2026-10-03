@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace TurismoConecta.web.Client.Models
 {
@@ -70,14 +70,9 @@ namespace TurismoConecta.web.Client.Models
         public int IdCategoria { get; set; }
         public DateTime? FechaRegistro { get; set; }
         public string NombrePropietario { get; set; } = string.Empty;
-
-        public string NombreCategoria => IdCategoria switch
-        {
-            1 => "Hospedaje",
-            2 => "Gastronomía",
-            3 => "Ecoturismo",
-            4 => "Artesanías",
-            _ => "Comercio"
-        };
+        public int IdMunicipio { get; set; }
+        public string NombreMunicipio { get; set; } = string.Empty;
+        public string NombreCategoria { get; set; } = string.Empty;
     }
 }
+
