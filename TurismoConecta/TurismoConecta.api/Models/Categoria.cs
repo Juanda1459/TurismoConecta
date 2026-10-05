@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace TurismoConecta.api.Models;
@@ -12,6 +12,10 @@ public partial class Categoria
     public string? Descripcion { get; set; }
 
     public string? Icono { get; set; }
+    public bool AplicaNegocio { get; set; }
+    public bool AplicaSitio { get; set; }
 
     public virtual ICollection<Negocio> Negocios { get; set; } = new List<Negocio>();
+
+
 }

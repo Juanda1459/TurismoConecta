@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using TurismoConecta.api.Models;
@@ -74,6 +74,8 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(100)
                 .UseCollation("Modern_Spanish_CI_AI")
                 .HasColumnName("nombre");
+            entity.Property(e => e.AplicaNegocio).HasColumnName("aplicaNegocio");
+            entity.Property(e => e.AplicaSitio).HasColumnName("aplicaSitio");
         });
 
         modelBuilder.Entity<Departamento>(entity =>

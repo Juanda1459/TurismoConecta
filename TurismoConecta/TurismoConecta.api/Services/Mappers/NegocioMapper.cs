@@ -1,4 +1,4 @@
-﻿using TurismoConecta.api.DTOs.Negocios;
+using TurismoConecta.api.DTOs.Negocios;
 using TurismoConecta.api.Models;
 
 namespace TurismoConecta.api.Services.Mappers
@@ -13,6 +13,8 @@ namespace TurismoConecta.api.Services.Mappers
             Estado = n.Estado,
             IdCategoria = n.IdCategoria,
             IdMunicipio = n.IdMunicipio,
+            NombreCategoria = n.IdCategoriaNavigation?.Nombre ?? "Sin categoría",
+            NombreMunicipio = n.IdMunicipioNavigation?.Nombre ?? "Sin municipio",
             Telefono = n.Telefono,
             Horario = n.Horario,
             Direccion = n.Direccion,
@@ -28,7 +30,10 @@ namespace TurismoConecta.api.Services.Mappers
             Nombre = n.Nombre,
             IdCategoria = n.IdCategoria,
             FechaRegistro = n.FechaRegistro,
-            NombrePropietario = n.IdUsuarioNavigation?.Nombre ?? ""
+            NombrePropietario = n.IdUsuarioNavigation?.Nombre ?? "",
+            IdMunicipio = n.IdMunicipio,
+            NombreMunicipio = n.IdMunicipioNavigation?.Nombre ?? "Sin municipio",
+            NombreCategoria = n.IdCategoriaNavigation?.Nombre ?? "Sin categoría"
         };
     }
 }

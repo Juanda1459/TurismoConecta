@@ -34,6 +34,18 @@ namespace TurismoConecta.api.Controllers
             return Ok(roles);
         }
 
+        [HttpPost]
+        [Authorize(Roles = Roles.AdminGeneral)]
+        public async Task<IActionResult> CrearUsuario([FromBody] UsuarioAdminCrearDto dto)
+        {
+            var (exito, error) = await _usuarioService.CrearUsuarioAdminAsync(dto);
+
+            return exito
+                ? StatusCode(StatusCodes.Status201Created)
+                : BadRequest(new { mensaje = error });
+        }
+
+
         [HttpPut("asignar-rol")]
         [Authorize(Roles = Roles.AdminGeneral)]
         public async Task<IActionResult> AsignarRol(AssignRoleRequestDto dto)

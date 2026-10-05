@@ -58,40 +58,73 @@
                 }
                 else
                 {
-                    <div style="background:#fff; border-radius:12px; border:1px solid #e0ebe3; overflow:hidden;">
-                        <table style="width:100%; border-collapse:collapse; text-align:left;">
-                            <thead style="background:#f4f7f5; border-bottom:1px solid #d8e5dc;">
-                                <tr>
-                                    <th style="padding:1rem;">Establecimiento</th>
-                                    <th style="padding:1rem;">Categoría</th>
-                                    <th style="padding:1rem;">Propietario</th>
-                                    <th style="padding:1rem;">Fecha Envío</th>
-                                    <th style="padding:1rem; text-align:right;">Decisión</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var p in pendientes)
-                                {
-                                    <tr style="border-bottom:1px solid #edf3ef;">
-                                        <td style="padding:1rem; font-weight:600;">@p.Nombre</td>
-                                        <td style="padding:1rem;"><span class="badge-cat" style="position:static; background:#e8f5e9; color:#1b4332;">@p.NombreCategoria</span></td>
-                                        <td style="padding:1rem; color:#555;">@p.NombrePropietario</td>
-                                        <td style="padding:1rem; color:#777; font-size:0.85rem;">@(p.FechaRegistro?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
-                                        <td style="padding:1rem; text-align:right;">
-                                            <button style="background:#2d6a4f; color:#fff; border:none; padding:0.45rem 0.9rem; border-radius:6px; cursor:pointer; font-weight:600; margin-right:0.5rem;"
-                                                    @onclick='() => ResolverEstado(p.IdNegocio, "Aprobado")'>
-                                                ✓ Aprobar
-                                            </button>
-                                            <button style="background:#dc2626; color:#fff; border:none; padding:0.45rem 0.9rem; border-radius:6px; cursor:pointer; font-weight:600;"
-                                                    @onclick='() => ResolverEstado(p.IdNegocio, "Rechazado")'>
-                                                ✕ Rechazar
-                                            </button>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                    <!-- Aviso general -->
+                    <div class="resumen-pendientes">
+                        ⚠ <strong>@pendientes.Count</strong> establecimiento@(pendientes.Count == 1 ? "" : "s") por aprobar
+                        en <strong>@grupos.Count</strong> municipio@(grupos.Count == 1 ? "" : "s")
                     </div>
+
+                    <!-- Una tarjeta por municipio -->
+                    <div class="grid-municipios">
+                        @foreach (var grupo in grupos)
+                        {
+                            var estaAbierto = municipioAbierto == grupo.Key;
+                            <button type="button"
+                                    class="tarjeta-municipio @(estaAbierto ? "abierta" : "")"
+                                    @onclick="() => AlternarMunicipio(grupo.Key)">
+                                <span class="tarjeta-nombre">📍 @grupo.Key</span>
+                                <span class="tarjeta-contador">@grupo.Count() por aprobar</span>
+                                <span class="tarjeta-flecha">@(estaAbierto ? "▲" : "▼")</span>
+                            </button>
+                        }
+                    </div>
+
+                    <!-- Lista del municipio seleccionado -->
+                    @if (municipioAbierto is not null)
+                    {
+                        var listaMunicipio = grupos.First(g => g.Key == municipioAbierto).ToList();
+
+                        <h2 class="titulo-grupo">Pendientes en @municipioAbierto</h2>
+
+                        <div style="background:#fff; border-radius:12px; border:1px solid #e0ebe3; overflow:hidden;">
+                            <table style="width:100%; border-collapse:collapse; text-align:left;">
+                                <thead style="background:#f4f7f5; border-bottom:1px solid #d8e5dc;">
+                                    <tr>
+                                        <th style="padding:1rem;">Establecimiento</th>
+                                        <th style="padding:1rem;">Categoría</th>
+                                        <th style="padding:1rem;">Propietario</th>
+                                        <th style="padding:1rem;">Fecha Envío</th>
+                                        <th style="padding:1rem; text-align:right;">Decisión</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var p in listaMunicipio)
+                                    {
+                                        <tr style="border-bottom:1px solid #edf3ef;">
+                                            <td style="padding:1rem; font-weight:600;">@p.Nombre</td>
+                                            <td style="padding:1rem;"><span class="badge-cat" style="position:static; background:#e8f5e9; color:#1b4332;">@p.NombreCategoria</span></td>
+                                            <td style="padding:1rem; color:#555;">@p.NombrePropietario</td>
+                                            <td style="padding:1rem; color:#777; font-size:0.85rem;">@(p.FechaRegistro?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                                            <td style="padding:1rem; text-align:right;">
+                                                <button style="background:#2d6a4f; color:#fff; border:none; padding:0.45rem 0.9rem; border-radius:6px; cursor:pointer; font-weight:600; margin-right:0.5rem;"
+                                                        @onclick='() => ResolverEstado(p.IdNegocio, "Aprobado")'>
+                                                    ✓ Aprobar
+                                                </button>
+                                                <button style="background:#dc2626; color:#fff; border:none; padding:0.45rem 0.9rem; border-radius:6px; cursor:pointer; font-weight:600;"
+                                                        @onclick='() => ResolverEstado(p.IdNegocio, "Rechazado")'>
+                                                    ✕ Rechazar
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="ayuda-grupo">Selecciona un municipio para revisar sus solicitudes.</p>
+                    }
                 }
             </main>
         </div>
@@ -114,6 +147,11 @@
 
 @code {
     private List<NegocioPendienteAprobacionDto> pendientes = new();
+    // Pendientes agrupados: cada grupo = un municipio con sus negocios
+    private List<IGrouping<string, NegocioPendienteAprobacionDto>> grupos = new();
+
+    // Nombre del municipio cuya tarjeta está desplegada (null = ninguna)
+    private string? municipioAbierto;
     private bool cargando = true;
     private string? mensajeAlerta;
     private string? tituloAlerta;
@@ -129,8 +167,27 @@
     {
         cargando = true;
         pendientes = await NegocioService.ListarPendientesAsync();
+
+        // Agrupar por municipio; primero el que tiene más pendientes
+        grupos = pendientes
+            .GroupBy(p => p.NombreMunicipio)
+            .OrderByDescending(g => g.Count())
+            .ThenBy(g => g.Key)
+            .ToList();
+
+        // Si el municipio abierto ya no tiene pendientes (se aprobó el último), se cierra
+        if (municipioAbierto is not null && grupos.All(g => g.Key != municipioAbierto))
+            municipioAbierto = null;
+
+        // Si solo hay un municipio (caso AdminMunicipio), se abre directamente
+        if (grupos.Count == 1)
+            municipioAbierto = grupos[0].Key;
+
         cargando = false;
     }
+
+    private void AlternarMunicipio(string nombreMunicipio) =>
+        municipioAbierto = municipioAbierto == nombreMunicipio ? null : nombreMunicipio;
 
     private async Task ResolverEstado(int idNegocio, string nuevoEstado)
     {
