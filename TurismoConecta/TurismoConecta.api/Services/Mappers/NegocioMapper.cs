@@ -13,6 +13,8 @@ namespace TurismoConecta.api.Services.Mappers
             Estado = n.Estado,
             IdCategoria = n.IdCategoria,
             IdMunicipio = n.IdMunicipio,
+            NombreCategoria = n.IdCategoriaNavigation?.Nombre ?? "Sin categoría",
+            NombreMunicipio = n.IdMunicipioNavigation?.Nombre ?? "Sin municipio",
             Telefono = n.Telefono,
             Horario = n.Horario,
             Direccion = n.Direccion,

@@ -95,7 +95,10 @@ namespace TurismoConecta.api.Services
         {
             var query = _context.Negocios
                 .Include(n => n.GaleriaNegocios)
-                .Where(n => n.IdMunicipio == idMunicipio && n.Estado == EstadosNegocio.Aprobado); // HU-25
+                .Include(n => n.IdCategoriaNavigation)
+                .Include(n => n.IdMunicipioNavigation)
+                .Where(n => n.IdMunicipio == idMunicipio && n.Estado == EstadosNegocio.Aprobado); 
+
 
             if (idCategoria.HasValue)
                 query = query.Where(n => n.IdCategoria == idCategoria); // HU-25: filtro por categoría
@@ -133,6 +136,8 @@ namespace TurismoConecta.api.Services
         {
             var n = await _context.Negocios
                 .Include(x => x.GaleriaNegocios)
+                .Include(x => x.IdCategoriaNavigation)
+                .Include(x => x.IdMunicipioNavigation)
                 .FirstOrDefaultAsync(x => x.IdNegocio == idNegocio);
             if (n is null) return null;
 
@@ -148,6 +153,8 @@ namespace TurismoConecta.api.Services
         {
             var negocios = await _context.Negocios
                 .Include(n => n.GaleriaNegocios)
+                .Include(n => n.IdCategoriaNavigation)
+                .Include(n => n.IdMunicipioNavigation)
                 .Where(n => n.IdUsuario == idUsuario)
                 .OrderByDescending(n => n.FechaRegistro)
                 .ToListAsync();

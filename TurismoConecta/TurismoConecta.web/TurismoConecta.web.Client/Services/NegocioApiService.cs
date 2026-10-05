@@ -145,5 +145,17 @@ namespace TurismoConecta.web.Client.Services
                 return (false, null, ex.Message);
             }
         }
+
+        public async Task<List<CategoriaDto>> ListarCategoriasAsync(CancellationToken ct = default)
+        {
+            try
+            {
+                return await _http.GetFromJsonAsync<List<CategoriaDto>>("api/categorias/negocios", ct) ?? new();
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+            {
+                return new();
+            }
+        }
     }
 }

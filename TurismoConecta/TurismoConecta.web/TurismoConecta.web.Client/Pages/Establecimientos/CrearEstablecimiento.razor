@@ -83,12 +83,13 @@
                             <div class="form-grupo">
                                 <label>Categoría *</label>
                                 <select class="input-editorial" @bind="dto.IdCategoria">
-                                    <option value="1">Hospedaje & Hotelería</option>
-                                    <option value="2">Gastronomía & Cafés</option>
-                                    <option value="3">Ecoturismo, Parques & Aventura</option>
-                                    <option value="4">Artesanías & Cultura Local</option>
-                                    <option value="5">Comercio Local / Otros</option>
+                                    <option value="0">-- Selecciona la categoría --</option>
+                                    @foreach (var c in categorias)
+                                    {
+                                        <option value="@c.IdCategoria">@c.Nombre</option>
+                                    }
                                 </select>
+                                <ValidationMessage For="() => dto.IdCategoria" class="val-error" />
                             </div>
                         </div>
 
@@ -186,6 +187,7 @@
 @code {
     private FormNegocioDto dto = new();
     private List<MunicipioListadoDto> listaMunicipios = new();
+    private List<CategoriaDto> categorias = new();
     private bool guardando = false;
     private bool subiendoFoto = false;
     private string? mensajeError;
@@ -199,6 +201,9 @@
         {
             listaMunicipios = resultadoMun.Items;
         }
+
+        // Cargamos las categorías reales desde la API (solo las que aplican a negocios)
+        categorias = await NegocioService.ListarCategoriasAsync();
     }
 
     private async Task OnSubirFoto(InputFileChangeEventArgs e)

@@ -21,14 +21,7 @@ namespace TurismoConecta.web.Client.Models
 
         public string Portada => Galeria.FirstOrDefault() ?? "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=800&auto=format&fit=crop";
 
-        public string NombreCategoria => IdCategoria switch
-        {
-            1 => "Hospedaje & Hotelería",
-            2 => "Gastronomía & Cafés",
-            3 => "Ecoturismo & Aventura",
-            4 => "Artesanías & Cultura",
-            _ => "Comercio Local"
-        };
+        public string NombreCategoria { get; set; } = string.Empty;
     }
 
     public class FormNegocioDto
@@ -42,7 +35,7 @@ namespace TurismoConecta.web.Client.Models
 
         [Required(ErrorMessage = "Debes seleccionar una categoría")]
         [Range(1, int.MaxValue, ErrorMessage = "Selecciona una categoría válida")]
-        public int IdCategoria { get; set; } = 1;
+        public int IdCategoria { get; set; } = 0;
 
         [Required(ErrorMessage = "Debes seleccionar un municipio")]
         [Range(1, int.MaxValue, ErrorMessage = "Selecciona un municipio")]
@@ -73,6 +66,14 @@ namespace TurismoConecta.web.Client.Models
         public int IdMunicipio { get; set; }
         public string NombreMunicipio { get; set; } = string.Empty;
         public string NombreCategoria { get; set; } = string.Empty;
+    }
+
+
+    public class CategoriaDto
+    {
+        public int IdCategoria { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public string? Icono { get; set; }
     }
 }
 

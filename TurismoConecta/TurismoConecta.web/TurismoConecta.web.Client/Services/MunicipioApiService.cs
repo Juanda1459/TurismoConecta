@@ -224,13 +224,6 @@ namespace TurismoConecta.web.Client.Services
         public string? WhatsApp => Telefono?.Replace(" ", "").Replace("+", "");
         public string? BookingUrl { get; set; }
 
-        public string NombreCategoria => IdCategoria switch
-        {
-            1 => "Hospedaje & Hotelería",
-            2 => "Gastronomía & Cafés",
-            3 => "Ecoturismo, Parques & Aventura",
-            4 => "Artesanías & Cultura Local",
-            _ => "Comercio Local"
-        };
+        public string NombreCategoria { get; set; } = string.Empty;
     }
 }
