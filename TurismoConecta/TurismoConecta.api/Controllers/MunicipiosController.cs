@@ -34,6 +34,14 @@ namespace TurismoConecta.api.Controllers
         [AllowAnonymous]
         [ProducesResponseType(typeof(MunicipioFichaDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+
+        /// <summary>Todos los municipios activos con coordenadas (mapa y buscador de inicio).</summary>
+        [HttpGet("mapa")]
+        [ProducesResponseType(typeof(List<MunicipioMapaDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Mapa(CancellationToken ct = default) =>
+    Ok(await _municipioService.ListarParaMapaAsync(ct));
+
+
         public async Task<IActionResult> Ficha(int id, CancellationToken ct = default)
         {
             var ficha = await _municipioService.ObtenerFichaAsync(id, ct);

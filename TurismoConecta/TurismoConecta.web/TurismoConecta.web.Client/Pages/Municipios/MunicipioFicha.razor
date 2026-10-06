@@ -38,16 +38,32 @@
         <div class="selva-error">
             <h2>Destino no encontrado</h2>
             <p>No pudimos cargar la información de este lugar.</p>
-            <button class="btn-enlace" @onclick="Volver">Regresar al catálogo</button>
+            <button class="btn-enlace" @onclick="Volver">@(VieneDeInicio ? "Volver al inicio" : "Regresar al catálogo")</button>
         </div>
     }
     else
     {
         <!-- BARRA DE NAVEGACIÓN DISCRETA -->
         <header class="selva-nav">
-            <button class="nav-back-link" @onclick="Volver">
-                <span class="nav-back-arrow">←</span> Catálogo de Pueblos
-            </button>
+            <nav class="nav-migas" aria-label="Ruta de navegación">
+                <button class="nav-back-link" @onclick="Volver">
+                    <span class="nav-back-arrow">←</span>
+                    @(VieneDeInicio ? "Inicio" : "Catálogo de Pueblos")
+                </button>
+
+                <span class="nav-migas-separador" aria-hidden="true">·</span>
+
+                @if (VieneDeInicio)
+                {
+                    <a href="/municipios" class="nav-migas-enlace">Catálogo de Pueblos</a>
+                }
+                else
+                {
+                    <a href="/" class="nav-migas-enlace">
+                        <i class="ph ph-house" aria-hidden="true"></i> Inicio
+                    </a>
+                }
+            </nav>
 
             <div class="nav-actions">
                 <button class="btn-itinerario-minimal @(enItinerario ? "guardado" : "")" @onclick="ToggleItinerario">
@@ -538,6 +554,10 @@
 
 @code {
     [Parameter] public int Id { get; set; }
+    [SupplyParameterFromQuery(Name = "desde")]
+    public string? Desde { get; set; }
+
+    private bool VieneDeInicio => string.Equals(Desde, "inicio", StringComparison.OrdinalIgnoreCase);
     private MunicipioFichaDto? ficha;
     private List<NegocioResumenDto>? negociosLocales;
     private bool cargando = true;
@@ -645,7 +665,7 @@
         cargandoNegocios = false;
     }
 
-    private void Volver() => Nav.NavigateTo("/municipios");
+    private void Volver() => Nav.NavigateTo(VieneDeInicio ? "/#donde-ir" : "/municipios");
 
     private void ToggleItinerario() => enItinerario = !enItinerario;
 

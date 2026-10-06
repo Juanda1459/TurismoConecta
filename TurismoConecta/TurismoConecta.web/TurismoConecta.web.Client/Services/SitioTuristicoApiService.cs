@@ -1,17 +1,53 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
+using TurismoConecta.web.Client.Models;
 
 namespace TurismoConecta.web.Client.Services
 {
+    /// <summary>
+    /// Habla con api/sitios-turisticos y api/categorias/sitios.
+    /// Lo usa Inicio.razor para pintar las cards de "Maravillas de Boyacá".
+    /// </summary>
     public class SitioTuristicoApiService
     {
         private readonly HttpClient _http;
         public SitioTuristicoApiService(HttpClient http) => _http = http;
 
-        public async Task<List<SitioTuristicoDto>> ListarAsync(CancellationToken ct = default)
+        // ── LECTURA (pública) ──────────────────────────────
+
+        public async Task<List<SitioTuristicoDto>> ListarAsync(
+            bool soloDestacados = false,
+            int? idCategoria = null,
+            CancellationToken ct = default)
         {
-            try { return await _http.GetFromJsonAsync<List<SitioTuristicoDto>>("api/sitios-turisticos", ct) ?? new(); }
-            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException) { return new(); }
+            var url = $"api/sitios-turisticos?soloDestacados={soloDestacados.ToString().ToLower()}";
+            if (idCategoria.HasValue)
+                url += $"&idCategoria={idCategoria.Value}";
+
+            try
+            {
+                return await _http.GetFromJsonAsync<List<SitioTuristicoDto>>(url, ct) ?? new();
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+            {
+                Console.WriteLine($"[SitioTuristicoApiService] No se pudieron cargar los sitios: {ex.Message}");
+                return new();
+            }
         }
+
+        public async Task<List<CategoriaDto>> ListarCategoriasAsync(CancellationToken ct = default)
+        {
+            try
+            {
+                return await _http.GetFromJsonAsync<List<CategoriaDto>>("api/categorias/sitios", ct) ?? new();
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+            {
+                Console.WriteLine($"[SitioTuristicoApiService] No se pudieron cargar las categorías: {ex.Message}");
+                return new();
+            }
+        }
+
+        // ── ESCRITURA (solo administradores) ───────────────
 
         public async Task<(bool exito, int id, string? error)> CrearAsync(object dto, CancellationToken ct = default)
         {
@@ -37,14 +73,28 @@ namespace TurismoConecta.web.Client.Services
         }
     }
 
+    /// <summary>
+    /// Copia exacta del SitioTuristicoDto de la API.
+    /// Si un nombre no coincide, ese dato llega vacío SIN dar error.
+    /// </summary>
     public class SitioTuristicoDto
     {
         public int IdSitioTuristico { get; set; }
         public string Nombre { get; set; } = "";
         public string? Descripcion { get; set; }
         public string? ImagenUrl { get; set; }
+
         public int IdMunicipio { get; set; }
         public string NombreMunicipio { get; set; } = "";
+        public string? Clima { get; set; }
+
+        public int? Altitud { get; set; }
+        public bool Destacado { get; set; }
+
+        public int? IdCategoria { get; set; }
+        public string? NombreCategoria { get; set; }
+        public string? IconoCategoria { get; set; }
+
         public double? Calificacion { get; set; }
     }
 }

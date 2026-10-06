@@ -1352,3 +1352,34 @@
     .btn-contacto-mapa,
     .btn-booking-oficial { width: 100%; justify-content: center; }
 }
+
+
+
+/* ---------- MIGAS DE PAN (volver a inicio / catálogo) ---------- */
+.nav-migas {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-migas-separador {
+    color: var(--txt-secundario);
+}
+
+.nav-migas-enlace {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--txt-secundario);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+    .nav-migas-enlace:hover {
+        color: var(--txt-principal);
+    }
