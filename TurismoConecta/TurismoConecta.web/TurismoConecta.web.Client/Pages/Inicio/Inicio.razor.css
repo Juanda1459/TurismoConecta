@@ -1461,3 +1461,31 @@ a.destino-cta {
         font-size: 0.75rem;
         color: #6b6450;
     }
+
+
+/* ---------- BOTÓN "IR A <MUNICIPIO>" EN EL MENSAJE DEL BUSCADOR ---------- */
+.mensaje-busqueda {
+    flex-wrap: wrap;
+}
+
+.mensaje-busqueda-ir {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    padding: 6px 14px;
+    border: 1.5px solid #000;
+    border-radius: 999px;
+    background: #fff;
+    color: #000;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+    .mensaje-busqueda-ir:hover {
+        background: #F2E6C9;
+        transform: translateX(2px);
+    }

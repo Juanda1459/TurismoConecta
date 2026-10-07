@@ -38,48 +38,34 @@
             <a href="#recomendaciones">Recomendaciones</a>
         </nav>
 
+        @* ◆ CAMBIO 1 (ya lo tenías aplicado): íconos de la barra superior *@
         <div class="inicio-actions">
             <button type="button"
                     class="nav-button"
                     aria-label="Buscar"
+                    title="Buscar"
                     @onclick="MostrarBuscador">
-                <span>🔎</span>
+                <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
             </button>
 
             <AuthorizeView>
                 <Authorized>
-                    <button type="button"
-                            class="nav-button nav-power"
-                            aria-label="Mi Panel"
-                            @onclick="IrAlDashboard"
-                            title="Ir a mi panel">
-                        <span>👤</span>
+                    <button type="button" class="nav-button" aria-label="Mi panel" title="Ir a mi panel" @onclick="IrAlDashboard">
+                        <i class="ph ph-squares-four" aria-hidden="true"></i>
                     </button>
-                    <a href="/perfil"
-                       class="nav-button"
-                       aria-label="Mi cuenta"
-                       title="Mi cuenta">
-                        <span>🔓</span>
+                    <a href="/perfil" class="nav-button" aria-label="Mi cuenta" title="Mi cuenta">
+                        <i class="ph ph-user-circle" aria-hidden="true"></i>
                     </a>
-                    <button type="button"
-                            class="nav-button"
-                            style="color: #ff9b9b; border-color: rgba(220, 53, 69, 0.4);"
-                            aria-label="Cerrar sesión"
-                            @onclick="CerrarSesion"
-                            title="Cerrar sesión">
-                        <span style="font-size: 0.8rem;">✕</span>
+                    <button type="button" class="nav-button" aria-label="Cerrar sesión" title="Cerrar sesión" @onclick="CerrarSesion">
+                        <i class="ph ph-sign-out" aria-hidden="true"></i>
                     </button>
                 </Authorized>
                 <NotAuthorized>
-                    <a href="/login"
-                       class="nav-button"
-                       aria-label="Iniciar sesión">
-                        <span>👤</span>
+                    <a href="/login" class="nav-button" aria-label="Iniciar sesión" title="Iniciar sesión">
+                        <i class="ph ph-user" aria-hidden="true"></i>
                     </a>
-                    <a href="/register"
-                       class="nav-button nav-power"
-                       aria-label="Registrarse">
-                        <span>🔓</span>
+                    <a href="/register" class="nav-button" aria-label="Registrarse" title="Registrarse">
+                        <i class="ph ph-user-plus" aria-hidden="true"></i>
                     </a>
                 </NotAuthorized>
             </AuthorizeView>
@@ -131,7 +117,10 @@
                           @onsubmit="() => BuscarAsync(desplazar: false)"
                           @onsubmit:preventDefault>
 
-                        <span class="hero-buscador-icono">⌕</span>
+                        @* ◆ CAMBIO 2: lupa del buscador (antes ⌕) *@
+                        <span class="hero-buscador-icono">
+                            <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+                        </span>
 
                         <input @bind="textoBusqueda"
                                @bind:event="oninput"
@@ -145,11 +134,12 @@
 
                         @if (!string.IsNullOrEmpty(textoBusqueda))
                         {
+                            @*  *@
                             <button type="button"
                                     class="hero-buscador-limpiar"
                                     aria-label="Limpiar búsqueda"
                                     @onclick="LimpiarBusqueda">
-                                ✕
+                                <i class="ph ph-x" aria-hidden="true"></i>
                             </button>
                         }
 
@@ -186,7 +176,18 @@
 
                 @if (!string.IsNullOrEmpty(mensajeBusqueda))
                 {
-                    <p class="mensaje-busqueda" role="status">@mensajeBusqueda</p>
+                    <p class="mensaje-busqueda" role="status">
+                        <i class="ph-fill ph-map-pin" aria-hidden="true"></i>
+                        <span>@mensajeBusqueda</span>
+
+                        @if (municipioEncontrado is not null)
+                        {
+                            <a href="@UrlMunicipio(municipioEncontrado.IdMunicipio)" class="mensaje-busqueda-ir">
+                                Ir a @municipioEncontrado.Nombre
+                                <i class="ph ph-arrow-right" aria-hidden="true"></i>
+                            </a>
+                        }
+                    </p>
                 }
 
                 <div class="hero-enlaces">
@@ -347,7 +348,10 @@
 
                                         @if (!string.IsNullOrWhiteSpace(item.Clima))
                                         {
-                                            <span class="destino-clima-tag">🌡️ @item.Clima</span>
+                                            @* ◆ CAMBIO 5: termómetro (antes 🌡️) *@
+                                            <span class="destino-clima-tag">
+                                                <i class="ph ph-thermometer-simple" aria-hidden="true"></i> @item.Clima
+                                            </span>
                                         }
 
                                         <span class="destino-number">@NumeroTarjeta(i)</span>
@@ -362,10 +366,18 @@
                                             <h2>@item.Nombre</h2>
                                             @if (item.Calificacion.HasValue)
                                             {
-                                                <span class="destino-rating">★ @item.Calificacion.Value.ToString("0.0")</span>
+                                                @* ◆ CAMBIO 6: estrella (antes ★) *@
+                                                <span class="destino-rating">
+                                                    <i class="ph-fill ph-star" aria-hidden="true"></i> @item.Calificacion.Value.ToString("0.0")
+                                                </span>
                                             }
                                         </div>
-                                        <span class="destino-category">@TextoUbicacion(item)</span>
+
+                                        @* ◆ CAMBIO 7: pin de ubicación (antes 📍 dentro del texto) *@
+                                        <span class="destino-category">
+                                            <i class="ph-fill ph-map-pin" aria-hidden="true"></i> @TextoUbicacion(item)
+                                        </span>
+
                                         <p class="destino-descripcion">@item.Descripcion</p>
 
                                         <a href="@UrlMunicipio(item.IdMunicipio)"
@@ -382,11 +394,21 @@
 
                 <div class="destinos-footer">
                     <div class="controles-maravillas">
+                        @* ◆ CAMBIO 8: play / pausa (antes ▶ y ⏸) *@
                         <button type="button"
                                 class="btn-control-maravilla"
                                 @onclick="() => carruselPausado = !carruselPausado"
                                 title="@(carruselPausado ? "Reanudar rotación" : "Pausar rotación")">
-                            @(carruselPausado ? "▶ Reanudar rotación" : "⏸ Pausar rotación")
+                            @if (carruselPausado)
+                            {
+                                <i class="ph-fill ph-play" aria-hidden="true"></i>
+                                <span>Reanudar rotación</span>
+                            }
+                            else
+                            {
+                                <i class="ph-fill ph-pause" aria-hidden="true"></i>
+                                <span>Pausar rotación</span>
+                            }
                         </button>
                     </div>
                     <p>Haz clic en una tarjeta para ver los detalles del destino</p>
@@ -442,15 +464,28 @@
                                 class="gusto-card"
                                 @onclick="() => FiltrarPorEtiqueta(etiqueta.IdEtiqueta)">
 
-                            <span class="gusto-icono">
-                                @(string.IsNullOrWhiteSpace(etiqueta.Icono)
-                                    ? "✦"
-                                    : etiqueta.Icono)
+                            @* ◆ CAMBIO 9: ícono de la etiqueta en negro (Phosphor o emoji en silueta) *@
+                            <span class="gusto-icono" aria-hidden="true">
+                                @if (EsClasePhosphor(etiqueta.Icono))
+                                {
+                                    <i class="@etiqueta.Icono"></i>
+                                }
+                                else if (!string.IsNullOrWhiteSpace(etiqueta.Icono))
+                                {
+                                    <span class="icono-silueta">@etiqueta.Icono</span>
+                                }
+                                else
+                                {
+                                    <i class="ph ph-sparkle"></i>
+                                }
                             </span>
 
                             <strong>@etiqueta.Nombre</strong>
 
-                            <span class="gusto-flecha">↗</span>
+                            @* ◆ CAMBIO 10: flecha (antes ↗) *@
+                            <span class="gusto-flecha" aria-hidden="true">
+                                <i class="ph ph-arrow-up-right"></i>
+                            </span>
                         </button>
                     }
                 </div>
@@ -540,25 +575,26 @@
         </section>
     </main>
 
+    @* *@
     <section class="valores-section">
         <div class="valores-grid">
             <div class="valor-card">
-                <span class="valor-icono">🗺️</span>
+                <span class="valor-icono"><i class="ph ph-map-trifold" aria-hidden="true"></i></span>
                 <h3>Catálogo completo</h3>
                 <p>Información verificada de los municipios: historia, clima, fechas y actividades.</p>
             </div>
             <div class="valor-card">
-                <span class="valor-icono">🧭</span>
+                <span class="valor-icono"><i class="ph ph-compass" aria-hidden="true"></i></span>
                 <h3>Itinerarios a tu medida</h3>
                 <p>Arma tu recorrido entre varios pueblos y compártelo con quien quieras viajar contigo.</p>
             </div>
             <div class="valor-card">
-                <span class="valor-icono">🏨</span>
+                <span class="valor-icono"><i class="ph ph-buildings" aria-hidden="true"></i></span>
                 <h3>Negocios verificados</h3>
                 <p>Hoteles, restaurantes y artesanos aprobados por la administración de cada municipio.</p>
             </div>
             <div class="valor-card">
-                <span class="valor-icono">⭐</span>
+                <span class="valor-icono"><i class="ph ph-star" aria-hidden="true"></i></span>
                 <h3>Reseñas reales</h3>
                 <p>Opiniones de otros viajeros para que decidas con información de primera mano.</p>
             </div>
@@ -600,12 +636,13 @@
                  @onclick:stopPropagation
                  @onkeydown="TeclaEnModal">
 
+                @* *@
                 <button type="button"
                         class="sitio-modal-cerrar"
                         aria-label="Cerrar"
                         @ref="botonCerrarModal"
                         @onclick="CerrarDetalleSitio">
-                    ✕
+                    <i class="ph ph-x" aria-hidden="true"></i>
                 </button>
 
                 <div class="sitio-modal-imagen">
@@ -624,20 +661,24 @@
 
                 <div class="sitio-modal-cuerpo">
                     <h2 id="sitio-modal-titulo">@sitioSeleccionado.Nombre</h2>
-                    <p class="sitio-modal-ubicacion">📍 @sitioSeleccionado.NombreMunicipio, Boyacá</p>
+
+                    @*  *@
+                    <p class="sitio-modal-ubicacion">
+                        <i class="ph-fill ph-map-pin" aria-hidden="true"></i> @sitioSeleccionado.NombreMunicipio, Boyacá
+                    </p>
 
                     <ul class="sitio-modal-datos">
                         @if (sitioSeleccionado.Altitud.HasValue)
                         {
-                            <li>⛰️ @sitioSeleccionado.Altitud.Value.ToString("N0") msnm</li>
+                            <li><i class="ph ph-mountains" aria-hidden="true"></i> @sitioSeleccionado.Altitud.Value.ToString("N0") msnm</li>
                         }
                         @if (!string.IsNullOrWhiteSpace(sitioSeleccionado.Clima))
                         {
-                            <li>🌡️ @sitioSeleccionado.Clima</li>
+                            <li><i class="ph ph-thermometer-simple" aria-hidden="true"></i> @sitioSeleccionado.Clima</li>
                         }
                         @if (sitioSeleccionado.Calificacion.HasValue)
                         {
-                            <li>★ @sitioSeleccionado.Calificacion.Value.ToString("0.0")</li>
+                            <li><i class="ph-fill ph-star" aria-hidden="true"></i> @sitioSeleccionado.Calificacion.Value.ToString("0.0")</li>
                         }
                     </ul>
 
@@ -650,8 +691,9 @@
                         <a href="@UrlMunicipio(sitioSeleccionado.IdMunicipio)" class="sitio-btn-primario">
                             Conocer @sitioSeleccionado.NombreMunicipio →
                         </a>
+                        @* *@
                         <button type="button" class="sitio-btn-secundario" @onclick="VerSitioEnMapa">
-                            📍 Ver en el mapa
+                            <i class="ph ph-map-trifold" aria-hidden="true"></i> Ver en el mapa
                         </button>
                     </div>
                 </div>
@@ -713,6 +755,7 @@
     private List<ResultadoBusqueda> sugerencias = new();
     private bool mostrarSugerencias;
     private int sugerenciaActiva = -1;
+    private MunicipioListadoDto? municipioEncontrado;
 
     /// <summary>Un resultado del buscador: un municipio o un sitio (con su municipio).</summary>
     private sealed record ResultadoBusqueda(
@@ -733,12 +776,19 @@
     private string NumeroTarjeta(int indice) =>
         ((indice % sitiosFiltrados.Count) + 1).ToString("00");
 
+    // ◆ CAMBIO 15a: sin 📍 (el ícono ahora va en el HTML, CAMBIO 7)
     private static string TextoUbicacion(SitioTuristicoDto sitio) =>
         sitio.Altitud.HasValue
-            ? $"📍 {sitio.NombreMunicipio} • {sitio.Altitud.Value:N0} msnm"
-            : $"📍 {sitio.NombreMunicipio}";
+            ? $"{sitio.NombreMunicipio} • {sitio.Altitud.Value:N0} msnm"
+            : sitio.NombreMunicipio;
 
     private static string UrlMunicipio(int idMunicipio) => $"/municipios/{idMunicipio}?desde=inicio";
+
+    // ◆ CAMBIO 15b: nuevo ayudante para los íconos de las etiquetas (CAMBIO 9)
+    /// <summary>true si el ícono guardado es una clase de Phosphor ("ph ph-…", "ph-fill ph-…").</summary>
+    private static bool EsClasePhosphor(string? icono) =>
+        !string.IsNullOrWhiteSpace(icono) &&
+        icono.TrimStart().StartsWith("ph", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>"Ráquira " → "raquira": minúsculas, sin tildes y sin espacios en los extremos.</summary>
     private static string Normalizar(string? texto)
@@ -1004,6 +1054,7 @@
         if (resultados.Count == 0)
         {
             mostrarSugerencias = false;
+            municipioEncontrado = null;
             mensajeBusqueda = $"No encontramos nada para \"{textoBusqueda.Trim()}\". Prueba con un pueblo o un sitio, como \"Ráquira\" o \"Catedral\".";
             await ActualizarMapaConFiltro(new());
             return;
@@ -1023,10 +1074,12 @@
         sugerencias = new();
         mostrarSugerencias = false;
         sugerenciaActiva = -1;
+        mostrarBuscador = false;
+        municipioEncontrado = resultado.Municipio;
 
         mensajeBusqueda = resultado.Sitio is null
-            ? $"📍 {resultado.Municipio.Nombre}: abre el marcador del mapa para ver el municipio."
-            : $"📍 {resultado.Sitio.Nombre} está en {resultado.Municipio.Nombre}.";
+            ? $"{resultado.Municipio.Nombre} está marcado en el mapa."
+            : $"{resultado.Sitio.Nombre} está en {resultado.Municipio.Nombre}.";
 
         await ActualizarMapaConFiltro(new List<MunicipioListadoDto> { resultado.Municipio });
         await EnfocarEnMapa(resultado.Municipio, resultado.Sitio?.Nombre, desplazar);
@@ -1039,6 +1092,7 @@
         mostrarSugerencias = false;
         sugerenciaActiva = -1;
         mensajeBusqueda = null;
+        municipioEncontrado = null;
 
         await ActualizarMapaConFiltro(todosMunicipios);
 

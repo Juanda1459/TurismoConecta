@@ -4,8 +4,8 @@ window.TurismoConectaMapa = {
     marcadores: [],
     referenciaDotNet: null,
     mapaInicializado: false,
-    enfocado: false,           // true mientras hay una búsqueda activa: pausa el zoom por scroll
-    _manejadorScroll: null,    // guarda el listener de scroll para poder quitarlo
+    enfocado: false,
+    _manejadorScroll: null,
 
     // ─────────────────────────────────────────────
     // CREACIÓN DEL MAPA
@@ -61,10 +61,41 @@ window.TurismoConectaMapa = {
     },
 
     // ─────────────────────────────────────────────
-    // MARCADORES Y POPUPS
+    // NAVEGACIÓN A LA FICHA (sin depender de C#)
     // ─────────────────────────────────────────────
 
-    /** Evita que un nombre con < > & " ' rompa el HTML del popup. */
+    /** URL de la ficha del municipio, marcando que venimos de inicio. */
+    urlMunicipio: function (idMunicipio) {
+        return `/municipios/${Number(idMunicipio)}?desde=inicio`;
+    },
+
+    /**
+     * Navega a la ficha usando el enrutador de Blazor (sin recargar la página).
+     * Si Blazor no está disponible, hace una navegación normal del navegador.
+     */
+    irAMunicipio: function (evento, url) {
+        if (evento) {
+            evento.preventDefault();
+            evento.stopPropagation();
+        }
+
+        try {
+            if (window.Blazor && typeof window.Blazor.navigateTo === "function") {
+                window.Blazor.navigateTo(url);
+            } else {
+                window.location.href = url;
+            }
+        } catch (error) {
+            console.warn("Blazor.navigateTo falló, se usa navegación normal:", error);
+            window.location.href = url;
+        }
+
+        return false;
+    },
+
+    // ─────────────────────────────────────────────
+    // MARCADORES Y POPUPS
+    // ─────────────────────────────────────────────
     escaparHtml: function (texto) {
         return String(texto ?? "")
             .replace(/&/g, "&amp;")
@@ -74,8 +105,8 @@ window.TurismoConectaMapa = {
             .replace(/'/g, "&#39;");
     },
 
-    /** HTML del popup: nombre, subtítulo opcional y botón al municipio. */
     crearContenidoPopup: function (id, nombre, subtitulo) {
+        const url = this.urlMunicipio(id);
         const lineaSubtitulo = subtitulo
             ? `<span class="popup-subtitulo">${this.escaparHtml(subtitulo)}</span>`
             : "";
@@ -84,14 +115,19 @@ window.TurismoConectaMapa = {
             <div class="popup-municipio">
                 <strong>${this.escaparHtml(nombre)}</strong>
                 ${lineaSubtitulo}
-                <button type="button"
-                        onclick="window.TurismoConectaMapa.abrirMunicipio(${Number(id)})">
+                <a href="${url}"
+                   class="popup-ir"
+                   onclick="return window.TurismoConectaMapa.irAMunicipio(event, '${url}')">
                     Ver municipio →
-                </button>
+                </a>
             </div>`;
     },
 
     mostrarMunicipios: function () {
+        if (!this.mapa) {
+            return;
+        }
+
         this.marcadores.forEach((marcador) => this.mapa.removeLayer(marcador));
         this.marcadores = [];
 
@@ -110,7 +146,6 @@ window.TurismoConectaMapa = {
         });
     },
 
-    /** Reemplaza los marcadores por la lista que manda Blazor. */
     actualizarMarcadores: function (municipios) {
         if (!this.mapa) {
             return;
@@ -122,12 +157,6 @@ window.TurismoConectaMapa = {
     // ─────────────────────────────────────────────
     // BÚSQUEDA TIPO "MAPS"
     // ─────────────────────────────────────────────
-
-    /**
-     * Vuela hasta un municipio y abre su popup.
-     * datos = { id, nombre, latitud, longitud, subtitulo }
-     * desplazar = true → primero hace scroll hasta el mapa.
-     */
     enfocarMunicipio: function (datos, desplazar) {
         if (!this.mapa || !datos) {
             return;
@@ -147,6 +176,9 @@ window.TurismoConectaMapa = {
         const marcador = this.marcadores.find((m) => m.idMunicipio === datos.id);
 
         const abrirPopup = () => {
+            if (!this.mapa) {
+                return;
+            }
             if (marcador) {
                 marcador.setPopupContent(contenido).openPopup();
             } else {
@@ -155,6 +187,7 @@ window.TurismoConectaMapa = {
             this.actualizarZona(datos.nombre);
         };
 
+        this.mapa.stop();
         this.mapa.closePopup();
 
         const yaEstaAhi = this.mapa.getZoom() === 12 &&
@@ -168,32 +201,41 @@ window.TurismoConectaMapa = {
         this.mapa.flyTo(destino, 12, { animate: true, duration: 1.6 });
     },
 
-    /** Quita el enfoque de búsqueda y vuelve a la vista de Boyacá. */
     restablecerVista: function () {
         this.enfocado = false;
         if (!this.mapa) {
             return;
         }
+        this.mapa.stop();
         this.mapa.closePopup();
         this.mapa.flyTo([5.65, -73.30], 8.5, { animate: true, duration: 1.5 });
         this.actualizarZona("Boyacá");
     },
 
     // ─────────────────────────────────────────────
-    // LIMPIEZA
+    // LIMPIEZA AL SALIR DE LA PÁGINA
     // ─────────────────────────────────────────────
     destruir: function () {
         if (this._manejadorScroll) {
             window.removeEventListener("scroll", this._manejadorScroll);
             this._manejadorScroll = null;
         }
+
         if (this.mapa) {
-            this.mapa.remove();
+            try {
+                this.mapa.stop();
+                this.mapa.off();
+                this.mapa.remove();
+            } catch (error) {
+                console.warn("No se pudo destruir el mapa limpiamente:", error);
+            }
         }
+
         this.mapa = null;
         this.marcadores = [];
         this.mapaInicializado = false;
         this.enfocado = false;
+        this.referenciaDotNet = null;
     },
 
     // ─────────────────────────────────────────────
@@ -247,18 +289,22 @@ window.TurismoConectaMapa = {
     },
 
     // ─────────────────────────────────────────────
-    // PUENTE HACIA C#
+    // PUENTE HACIA C# (solo para el título de zona)
     // ─────────────────────────────────────────────
     actualizarZona: function (zona) {
-        if (this.referenciaDotNet) {
-            this.referenciaDotNet.invokeMethodAsync("ActualizarZonaMapa", zona);
+        if (!this.referenciaDotNet) {
+            return;
         }
+        this.referenciaDotNet
+            .invokeMethodAsync("ActualizarZonaMapa", zona)
+            .catch(function (error) {
+                console.warn("No se pudo actualizar la zona del mapa:", error);
+            });
     },
 
+    /** Se conserva por compatibilidad: ahora navega sin pasar por C#. */
     abrirMunicipio: function (idMunicipio) {
-        if (this.referenciaDotNet) {
-            this.referenciaDotNet.invokeMethodAsync("AbrirMunicipioDesdeMapa", idMunicipio);
-        }
+        this.irAMunicipio(null, this.urlMunicipio(idMunicipio));
     },
 
     acercarABoyaca: function () {

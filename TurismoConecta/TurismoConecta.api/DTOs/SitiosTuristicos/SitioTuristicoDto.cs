@@ -15,6 +15,7 @@ namespace TurismoConecta.api.DTOs.SitiosTuristicos
         // Datos del sitio
         public int? Altitud { get; set; }
         public bool Destacado { get; set; }
+        public bool Activo { get; set; }
 
         // Categoría
         public int? IdCategoria { get; set; }

@@ -1,9 +1,10 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using TurismoConecta.api.Data;
-using TurismoConecta.api.Models;
-using TurismoConecta.api.DTOs.SitiosTuristicos;
-using TurismoConecta.api.Services.Interfaces;
 using TurismoConecta.api.Constants;
+using TurismoConecta.api.Data;
+using TurismoConecta.api.DTOs.SitiosTuristicos;
+using TurismoConecta.api.Models;
+using TurismoConecta.api.Services.Interfaces;
 
 namespace TurismoConecta.api.Services
 {
@@ -17,7 +18,35 @@ namespace TurismoConecta.api.Services
         }
 
         // ─────────────────────────────────────────────
-        // LISTAR (público: lo usa la página de inicio)
+        // PROYECCIÓN COMPARTIDA: entidad → DTO
+        // La usan el listado público y el panel de gestión.
+        // ─────────────────────────────────────────────
+        private static readonly Expression<Func<SitioTuristico, SitioTuristicoDto>> ProyeccionDto = s => new SitioTuristicoDto
+        {
+            IdSitioTuristico = s.IdSitioTuristico,
+            Nombre = s.Nombre,
+            Descripcion = s.Descripcion,
+            ImagenUrl = s.ImagenUrl,
+
+            IdMunicipio = s.IdMunicipio,
+            NombreMunicipio = s.IdMunicipioNavigation.Nombre,
+            Clima = s.IdMunicipioNavigation.Clima,
+
+            Altitud = s.Altitud,
+            Destacado = s.Destacado,
+            Activo = s.Activo,
+
+            IdCategoria = s.IdCategoria,
+            NombreCategoria = s.IdCategoriaNavigation != null ? s.IdCategoriaNavigation.Nombre : null,
+            IconoCategoria = s.IdCategoriaNavigation != null ? s.IdCategoriaNavigation.Icono : null,
+
+            Calificacion = s.IdMunicipioNavigation.Reseñas
+                                 .Where(r => r.Moderada)
+                                 .Average(r => (double?)r.Calificacion)
+        };
+
+        // ─────────────────────────────────────────────
+        // LISTADO PÚBLICO (página de inicio)
         // ─────────────────────────────────────────────
         public async Task<List<SitioTuristicoDto>> ListarAsync(bool soloDestacados, int? idCategoria, CancellationToken ct = default)
         {
@@ -34,29 +63,51 @@ namespace TurismoConecta.api.Services
             return await query
                 .OrderBy(s => s.IdCategoriaNavigation!.Nombre)
                 .ThenBy(s => s.Nombre)
-                .Select(s => new SitioTuristicoDto
-                {
-                    IdSitioTuristico = s.IdSitioTuristico,
-                    Nombre = s.Nombre,
-                    Descripcion = s.Descripcion,
-                    ImagenUrl = s.ImagenUrl,
-
-                    IdMunicipio = s.IdMunicipio,
-                    NombreMunicipio = s.IdMunicipioNavigation.Nombre,
-                    Clima = s.IdMunicipioNavigation.Clima,
-
-                    Altitud = s.Altitud,
-                    Destacado = s.Destacado,
-
-                    IdCategoria = s.IdCategoria,
-                    NombreCategoria = s.IdCategoriaNavigation != null ? s.IdCategoriaNavigation.Nombre : null,
-                    IconoCategoria = s.IdCategoriaNavigation != null ? s.IdCategoriaNavigation.Icono : null,
-
-                    Calificacion = s.IdMunicipioNavigation.Reseñas
-                                         .Where(r => r.Moderada)
-                                         .Average(r => (double?)r.Calificacion)
-                })
+                .Select(ProyeccionDto)
                 .ToListAsync(ct);
+        }
+
+        // ─────────────────────────────────────────────
+        // PANEL DE GESTIÓN
+        // ─────────────────────────────────────────────
+        public async Task<PanelSitiosDto?> ObtenerPanelAsync(int idUsuario, CancellationToken ct = default)
+        {
+            var usuario = await _context.Usuarios
+                .AsNoTracking()
+                .Include(u => u.IdRolNavigation)
+                .Include(u => u.MunicipioAsignado)
+                .FirstOrDefaultAsync(u => u.IdUsuario == idUsuario, ct);
+
+            if (usuario is null) return null;
+
+            var rol = usuario.IdRolNavigation?.Nombre;
+            var esGeneral = rol == Roles.AdminGeneral;
+            var esMunicipal = rol == Roles.AdminMunicipio;
+
+            if (!esGeneral && !esMunicipal) return null;
+
+            // Admin Municipal sin municipio asignado: panel vacío (la pantalla muestra un aviso)
+            if (esMunicipal && usuario.MunicipioAsignadoId is null)
+                return new PanelSitiosDto { EsAdminGeneral = false };
+
+            var query = _context.SitiosTuristicos.AsNoTracking();   // SIN filtrar Activo: el admin ve también los ocultos
+
+            if (esMunicipal)
+                query = query.Where(s => s.IdMunicipio == usuario.MunicipioAsignadoId);
+
+            var sitios = await query
+                .OrderBy(s => s.IdMunicipioNavigation.Nombre)
+                .ThenBy(s => s.Nombre)
+                .Select(ProyeccionDto)
+                .ToListAsync(ct);
+
+            return new PanelSitiosDto
+            {
+                EsAdminGeneral = esGeneral,
+                IdMunicipioAsignado = usuario.MunicipioAsignadoId,
+                NombreMunicipioAsignado = usuario.MunicipioAsignado?.Nombre,
+                Sitios = sitios
+            };
         }
 
         // ─────────────────────────────────────────────
@@ -136,17 +187,17 @@ namespace TurismoConecta.api.Services
         }
 
         // ─────────────────────────────────────────────
-        // ELIMINAR (borrado lógico)
+        // OCULTAR / PUBLICAR (borrado lógico reversible)
         // ─────────────────────────────────────────────
-        public async Task<(bool exito, string? error)> EliminarAsync(int id, int idUsuarioSolicitante, CancellationToken ct = default)
+        public async Task<(bool exito, string? error)> CambiarEstadoAsync(int id, bool activo, int idUsuarioSolicitante, CancellationToken ct = default)
         {
             var sitio = await _context.SitiosTuristicos.FindAsync(new object?[] { id }, ct);
             if (sitio is null) return (false, "Sitio turístico no encontrado.");
 
             if (!await PuedeGestionarMunicipioAsync(idUsuarioSolicitante, sitio.IdMunicipio, ct))
-                return (false, "No tienes permiso para eliminar este sitio turístico.");
+                return (false, "No tienes permiso para modificar este sitio turístico.");
 
-            sitio.Activo = false;
+            sitio.Activo = activo;
             await _context.SaveChangesAsync(ct);
             return (true, null);
         }
