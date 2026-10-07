@@ -24,6 +24,20 @@ namespace TurismoConecta.web.Client.Services
             catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException) { return null; }
         }
 
+        /// <summary>Todos los municipios activos con coordenadas (endpoint api/municipios/mapa).</summary>
+        public async Task<List<MunicipioListadoDto>> ListarParaMapaAsync(CancellationToken ct = default)
+        {
+            try
+            {
+                return await _http.GetFromJsonAsync<List<MunicipioListadoDto>>("api/municipios/mapa", ct) ?? new();
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+            {
+                Console.WriteLine($"[MunicipioApiService] No se pudo cargar el mapa: {ex.Message}");
+                return new();
+            }
+        }
+
         public async Task<MunicipioFichaDto?> ObtenerFichaAsync(int id, CancellationToken ct = default)
         {
             try { return await _http.GetFromJsonAsync<MunicipioFichaDto>($"api/municipios/{id}", ct); }

@@ -29,6 +29,13 @@ namespace TurismoConecta.api.Controllers
         public async Task<IActionResult> Buscar([FromQuery] string? texto, [FromQuery] int? idEtiqueta, CancellationToken ct = default) =>
             Ok(await _municipioService.BuscarAsync(texto, idEtiqueta, ct));
 
+        /// <summary>Todos los municipios activos con coordenadas (mapa y buscador de inicio).</summary>
+        [HttpGet("mapa")]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(List<MunicipioMapaDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Mapa(CancellationToken ct = default) =>
+            Ok(await _municipioService.ListarParaMapaAsync(ct));
+
         /// <summary>Ficha detallada de un municipio.</summary>
         [HttpGet("{id:int}")]
         [AllowAnonymous]
@@ -57,7 +64,6 @@ namespace TurismoConecta.api.Controllers
             return error!.Contains("permiso") ? Forbid() : BadRequest(new { mensaje = error });
         }
 
-
         /// <summary>Crea un nuevo municipio en el catálogo. Solo AdminGeneral.</summary>
         [HttpPost]
         [Authorize(Roles = Roles.AdminGeneral)]
@@ -77,7 +83,6 @@ namespace TurismoConecta.api.Controllers
                 return BadRequest(new { mensaje = ex.Message });
             }
         }
-
 
         /// <summary>Sube una imagen de portada para un municipio o establecimiento comercial.</summary>
         [HttpPost("subir-imagen")]
@@ -113,8 +118,5 @@ namespace TurismoConecta.api.Controllers
             var urlPublica = $"{apiUrl}/images/municipios/{fileName}";
             return Ok(new { url = urlPublica });
         }
-
-
-
     }
 }
